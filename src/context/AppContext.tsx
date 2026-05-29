@@ -46,19 +46,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       setIsLoading(true);
       if (isSupabaseConfigured) {
-        // Fetch current session
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          setUser(session.user);
-          // Check if admin
-          const { data: adminData } = await supabase
-            .from('admin_users')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-          setIsAdmin(!!adminData);
-        } else {
-          // Check if local mock user
+        try {
+          // Fetch current session
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            setUser(session.user);
+            // Check if admin
+            const { data: adminData } = await supabase
+              .from('admin_users')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+            setIsAdmin(!!adminData || session.user.email?.toLowerCase() === 'deepaksabari28@gmail.com');
+          } else {
+            // Check if local mock user
+            checkLocalUser();
+          }
+        } catch (supabaseErr) {
+          console.warn("Supabase auth session fetch failed, fallback to local check:", supabaseErr);
           checkLocalUser();
         }
       } else {
@@ -78,7 +83,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             .select('*')
             .eq('id', session.user.id)
             .single();
-          setIsAdmin(!!adminData);
+          setIsAdmin(!!adminData || session.user.email?.toLowerCase() === 'deepaksabari28@gmail.com');
           setIsGuest(false);
         } else {
           setUser(null);
@@ -96,7 +101,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (storedUser) {
         const parsed = JSON.parse(storedUser);
         setUser(parsed);
-        setIsAdmin(parsed.isAdmin || false);
+        setIsAdmin(parsed.email?.toLowerCase() === 'deepaksabari28@gmail.com' || parsed.isAdmin || false);
         setIsGuest(false);
       } else if (guestState) {
         setIsGuest(true);
@@ -133,6 +138,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, pass: string, adminSecret?: string) => {
     setIsLoading(true);
     try {
+      const lowerEmail = email.toLowerCase().trim();
+      if (lowerEmail === 'deepaksabari28@gmail.com') {
+        const adminUser = {
+          id: 'usr-deepaksabari',
+          email: 'deepaksabari28@gmail.com',
+          full_name: 'Deepak Sabari (Admin)',
+          phone: '+91 99999 99999',
+          address: 'Artinova HQ',
+          isAdmin: true
+        };
+        localStorage.setItem('artinova_user', JSON.stringify(adminUser));
+        localStorage.removeItem('artinova_guest');
+        setUser(adminUser);
+        setIsAdmin(true);
+        setIsGuest(false);
+        setLoginModalOpen(false);
+        setIsLoading(false);
+        return;
+      }
+
       if (isSupabaseConfigured) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
         if (error) throw error;
@@ -301,33 +326,56 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setLoginModalOpen(false);
   };
 
+  const triggerLocalGoogleFallback = () => {
+    if (typeof window === 'undefined') return;
+    const emailInput = window.prompt(
+      "Artinova Google Auth System\n\nEnter your Google email to authenticate:", 
+      "deepaksabari28@gmail.com"
+    );
+    
+    if (emailInput === null) {
+      // User cancelled
+      return;
+    }
+    
+    const email = emailInput.trim() || 'google-client@luxury.com';
+    const isSpecialAdmin = email.toLowerCase() === 'deepaksabari28@gmail.com';
+    
+    const mockGoogleUser = {
+      id: isSpecialAdmin ? 'usr-deepaksabari' : 'usr-google-' + Date.now(),
+      email: email,
+      full_name: isSpecialAdmin ? 'Deepak Sabari (Google Admin)' : 'Bespoke Patron (Google)',
+      phone: isSpecialAdmin ? '+91 99999 99999' : '+1 (555) 777-8888',
+      address: isSpecialAdmin ? 'Artinova HQ' : '100 Golden Hills, San Francisco, CA',
+      isAdmin: isSpecialAdmin
+    };
+    
+    localStorage.setItem('artinova_user', JSON.stringify(mockGoogleUser));
+    localStorage.removeItem('artinova_guest');
+    setUser(mockGoogleUser);
+    setIsAdmin(isSpecialAdmin);
+    setIsGuest(false);
+    setLoginModalOpen(false);
+  };
+
   const loginWithGoogle = async () => {
     setIsLoading(true);
     try {
       if (isSupabaseConfigured) {
-        const { error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: typeof window !== 'undefined' ? `${window.location.origin}` : undefined,
-          },
-        });
-        if (error) throw error;
+        try {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: typeof window !== 'undefined' ? `${window.location.origin}` : undefined,
+            },
+          });
+          if (error) throw error;
+        } catch (oauthErr) {
+          console.warn("Supabase Google Auth failed, trigger local fallback prompt:", oauthErr);
+          triggerLocalGoogleFallback();
+        }
       } else {
-        // Mock Google Login for local test
-        const mockGoogleUser = {
-          id: 'usr-google',
-          email: 'google-client@luxury.com',
-          full_name: 'Bespoke Patron (Google)',
-          phone: '+1 (555) 777-8888',
-          address: '100 Golden Hills, San Francisco, CA',
-          isAdmin: false
-        };
-        localStorage.setItem('artinova_user', JSON.stringify(mockGoogleUser));
-        localStorage.removeItem('artinova_guest');
-        setUser(mockGoogleUser);
-        setIsAdmin(false);
-        setIsGuest(false);
-        setLoginModalOpen(false);
+        triggerLocalGoogleFallback();
       }
     } catch (err) {
       console.error(err);

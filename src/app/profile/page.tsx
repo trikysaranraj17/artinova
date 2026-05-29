@@ -50,42 +50,62 @@ export default function ProfilePage() {
 
   // Load orders
   useEffect(() => {
-    async function loadOrders() {
+    let interval: NodeJS.Timeout | null = null;
+
+    async function loadOrders(showLoading = true) {
       if (user) {
-        setOrdersLoading(true);
+        if (showLoading) setOrdersLoading(true);
         try {
           const userOrders = await getOrders(user.id);
           setOrders(userOrders);
         } catch (err) {
           console.error(err);
         } finally {
-          setOrdersLoading(false);
+          if (showLoading) setOrdersLoading(false);
         }
       }
     }
+
     if (activeView === 'orders') {
-      loadOrders();
+      loadOrders(true);
+      interval = setInterval(() => {
+        loadOrders(false);
+      }, 2000);
     }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [user, activeView]);
 
   // Load wishlist items
   useEffect(() => {
-    async function loadWishlist() {
+    let interval: NodeJS.Timeout | null = null;
+
+    async function loadWishlist(showLoading = true) {
       if (user) {
-        setWishlistLoading(true);
+        if (showLoading) setWishlistLoading(true);
         try {
           const items = await getWishlist(user.id);
           setWishlistItems(items);
         } catch (err) {
           console.error(err);
         } finally {
-          setWishlistLoading(false);
+          if (showLoading) setWishlistLoading(false);
         }
       }
     }
+
     if (activeView === 'wishlist') {
-      loadWishlist();
+      loadWishlist(true);
+      interval = setInterval(() => {
+        loadWishlist(false);
+      }, 2000);
     }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [user, activeView]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {

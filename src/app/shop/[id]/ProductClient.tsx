@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { Product, getProducts } from '../../../lib/db';
+import { Product, getProducts, getProductById } from '../../../lib/db';
 import { useApp } from '../../../context/AppContext';
 import { Heart, ShoppingCart, ArrowLeft, ShieldCheck, Sparkles, Box } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -12,9 +12,10 @@ import { motion } from 'framer-motion';
 // Dynamically load the 3D component with SSR disabled
 const Product3DPreview = dynamic(() => import('../../../components/Product3DPreview'), { ssr: false });
 
-export default function ProductClient({ product }: { product: Product }) {
+export default function ProductClient({ product: initialProduct }: { product: Product }) {
   const { addItemToCart, toggleItemWishlist, wishlist } = useApp();
-  const [activeImage, setActiveImage] = useState(product.images[0] || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800');
+  const [product, setProduct] = useState<Product>(initialProduct);
+  const [activeImage, setActiveImage] = useState(initialProduct.images[0] || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800');
   const [qty, setQty] = useState(1);
   const [show3D, setShow3D] = useState(false);
   const [related, setRelated] = useState<Product[]>([]);
@@ -24,19 +25,34 @@ export default function ProductClient({ product }: { product: Product }) {
 
   const isWishlisted = wishlist.some((item) => item.id === product.id);
 
-  // Load related products
+  // Load related products & dynamic product details
   useEffect(() => {
     async function load() {
-      const all = await getProducts();
-      const filtered = all.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 3);
-      setRelated(filtered);
+      try {
+        const latest = await getProductById(initialProduct.id);
+        if (latest) {
+          setProduct(latest);
+        }
+        const all = await getProducts();
+        const filtered = all.filter((p) => p.id !== initialProduct.id && p.category === initialProduct.category).slice(0, 3);
+        setRelated(filtered);
+      } catch (err) {
+        console.error('Error fetching dynamic product details:', err);
+      }
     }
     load();
     // Reset image and state when product changes
-    setActiveImage(product.images[0] || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800');
+    setActiveImage(initialProduct.images[0] || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800');
     setShow3D(false);
     setQty(1);
-  }, [product]);
+
+    // Sync product in real-time every 2 seconds
+    const interval = setInterval(() => {
+      load();
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [initialProduct]);
 
   // Handle Zoom Hover Move
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {

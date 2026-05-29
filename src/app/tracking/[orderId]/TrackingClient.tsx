@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Order, OrderItem, TrackingUpdate, getTrackingUpdates } from '../../../lib/db';
+import { Order, OrderItem, TrackingUpdate, getTrackingUpdates, getOrderById } from '../../../lib/db';
 import { ArrowLeft, Clock, Calendar, MapPin, Truck, ChevronRight, PackageCheck, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -23,13 +23,18 @@ interface Props {
 }
 
 export default function TrackingClient({ order, items, initialUpdates }: Props) {
+  const [currentOrder, setCurrentOrder] = useState<Order>(order);
   const [updates, setUpdates] = useState<TrackingUpdate[]>(initialUpdates);
-  const activeIndex = STEPS.indexOf(order.status);
+  const activeIndex = STEPS.indexOf(currentOrder.status);
 
-  // Poll for tracking updates in background (in case admin updates status)
+  // Poll for order details and tracking updates in background
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
+        const freshOrder = await getOrderById(order.id);
+        if (freshOrder) {
+          setCurrentOrder(freshOrder);
+        }
         const fresh = await getTrackingUpdates(order.id);
         if (fresh.length !== updates.length) {
           setUpdates(fresh);
@@ -37,7 +42,7 @@ export default function TrackingClient({ order, items, initialUpdates }: Props) 
       } catch (err) {
         console.error('Polling tracking updates error:', err);
       }
-    }, 8000);
+    }, 2000);
     return () => clearInterval(interval);
   }, [order.id, updates.length]);
 
@@ -58,7 +63,7 @@ export default function TrackingClient({ order, items, initialUpdates }: Props) 
           <div className="flex flex-col gap-1 min-w-0">
             <span className="font-mono text-[9px] uppercase tracking-widest text-soft-ivory/30">Order Reference</span>
             <h1 className="font-cinzel text-lg md:text-xl font-bold text-champagne-gold truncate max-w-md">
-              {order.id}
+              {currentOrder.id}
             </h1>
             <div className="flex flex-wrap items-center gap-4 text-xs font-poppins text-soft-ivory/60 mt-1">
               <span className="flex items-center gap-1.5">
@@ -67,7 +72,7 @@ export default function TrackingClient({ order, items, initialUpdates }: Props) 
               </span>
               <span className="flex items-center gap-1.5">
                 <Calendar size={12} className="text-royal-gold/60" />
-                Est. Delivery: {new Date(order.delivery_estimate).toLocaleDateString()}
+                Est. Delivery: {new Date(currentOrder.delivery_estimate).toLocaleDateString()}
               </span>
             </div>
           </div>
@@ -75,14 +80,14 @@ export default function TrackingClient({ order, items, initialUpdates }: Props) 
           <div className="flex flex-col md:items-end text-left md:text-right gap-1.5">
             <span className="font-poppins text-[10px] text-soft-ivory/40 uppercase tracking-widest">Total Commission</span>
             <span className="font-poppins text-xl font-extrabold text-royal-gold">
-              ${order.total_amount.toFixed(2)}
+              ${currentOrder.total_amount.toFixed(2)}
             </span>
             <span className={`px-2 py-0.5 rounded text-[8px] uppercase tracking-wider font-semibold border ${
-              order.status === 'Delivered'
+              currentOrder.status === 'Delivered'
                 ? 'bg-emerald-950/40 text-emerald-300 border-emerald-500/20'
                 : 'bg-royal-gold/10 text-royal-gold border-royal-gold/20'
             }`}>
-              {order.status}
+              {currentOrder.status}
             </span>
           </div>
         </div>
@@ -269,11 +274,11 @@ export default function TrackingClient({ order, items, initialUpdates }: Props) 
               </h3>
               
               <div className="flex flex-col gap-2 font-poppins text-xs text-soft-ivory/70 leading-relaxed">
-                <span className="font-semibold text-soft-ivory">{order.shipping_name}</span>
-                <span>Phone: {order.shipping_phone}</span>
-                <span>Email: {order.shipping_email}</span>
+                <span className="font-semibold text-soft-ivory">{currentOrder.shipping_name}</span>
+                <span>Phone: {currentOrder.shipping_phone}</span>
+                <span>Email: {currentOrder.shipping_email}</span>
                 <span className="border-t border-champagne-gold/5 pt-2 mt-1">
-                  {order.shipping_address}
+                  {currentOrder.shipping_address}
                 </span>
               </div>
             </div>

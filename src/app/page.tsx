@@ -39,6 +39,11 @@ export default function HomePage() {
     };
     window.addEventListener('focus', handleFocus);
 
+    // Dynamic background polling interval (2 seconds)
+    const interval = setInterval(() => {
+      loadData(false);
+    }, 2000);
+
     // Cinematic loading timer
     const timer = setTimeout(() => {
       setLoaderVisible(false);
@@ -46,6 +51,7 @@ export default function HomePage() {
     return () => {
       clearTimeout(timer);
       window.removeEventListener('focus', handleFocus);
+      clearInterval(interval);
     };
   }, []);
 

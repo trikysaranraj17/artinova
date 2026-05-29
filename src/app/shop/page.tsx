@@ -52,7 +52,15 @@ function ShopContent() {
       load(false);
     };
     window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+
+    const interval = setInterval(() => {
+      load(false);
+    }, 2000);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(interval);
+    };
   }, []);
 
   // Compute unique categories

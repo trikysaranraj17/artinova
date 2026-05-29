@@ -51,12 +51,12 @@ export default function Navbar() {
             : 'top-10 py-5 bg-transparent border-b border-transparent px-6 md:px-12'
         }`}
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
           
           {/* A. Left: Brand Logo & Title */}
-          <div className="flex w-1/3 justify-start items-center">
-            <NextLink href="/" className="flex items-center gap-3.5 group select-none">
-              <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
+          <div className="flex-1 flex justify-start items-center">
+            <NextLink href="/" className="flex items-center gap-3 group select-none">
+              <div className="relative w-9 h-9 flex items-center justify-center shrink-0">
                 <svg viewBox="0 0 100 100" className="w-full h-full text-[var(--color-royal-gold)] filter drop-shadow-[0_0_10px_rgba(212,175,55,0.4)] transition-transform duration-500 group-hover:scale-105">
                   {/* Left wing */}
                   <path d="M 40,50 C 25,48 10,40 10,25 C 10,20 20,18 28,26 C 33,31 38,40 40,47" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
@@ -71,26 +71,26 @@ export default function Navbar() {
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="font-cinzel text-lg md:text-xl font-bold tracking-[0.2em] text-gold-gradient leading-none">
+                <span className="font-cinzel text-base md:text-lg font-bold tracking-[0.2em] text-gold-gradient leading-none">
                   ARTINOVA
                 </span>
-                <span className="font-poppins text-[8px] uppercase tracking-[0.3em] text-[var(--color-royal-gold)]/60 -mt-0.5">
+                <span className="font-poppins text-[7.5px] uppercase tracking-[0.3em] text-[var(--color-royal-gold)]/60 -mt-0.5">
                   Customized Gift
                 </span>
               </div>
             </NextLink>
           </div>
 
-          {/* B. Center: Desktop Links (Perfect alignment) */}
-          <div className="hidden lg:flex items-center justify-center gap-10 w-1/3">
+          {/* B. Center: Desktop Links (Perfect center alignment) */}
+          <div className="hidden lg:flex items-center justify-center gap-4 xl:gap-8 shrink-0">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <NextLink
                   key={link.name}
                   href={link.href}
-                  className={`font-poppins text-[10px] uppercase tracking-[0.25em] font-semibold relative transition-colors ${
-                    isActive ? 'text-[var(--color-royal-gold)]' : 'text-[var(--color-soft-ivory)]/60 hover:text-[var(--color-royal-gold)]'
+                  className={`font-poppins text-[9px] xl:text-[9.5px] uppercase tracking-[0.15em] xl:tracking-[0.25em] font-semibold relative transition-colors ${
+                    isActive ? 'text-[var(--color-royal-gold)] font-bold' : 'text-[var(--color-soft-ivory)]/60 hover:text-[var(--color-royal-gold)]'
                   }`}
                 >
                   {link.name}
@@ -107,17 +107,17 @@ export default function Navbar() {
           </div>
 
           {/* C. Right: User Registry Controls & Dedicated Admin Access */}
-          <div className="flex items-center gap-6 w-1/3 justify-end shrink-0 z-[2200]">
+          <div className="flex-1 flex items-center justify-end gap-2 xl:gap-3.5 shrink-0 z-[2200]">
             
             {/* Wishlist */}
             <NextLink
               href="/shop?tab=wishlist"
-              className="p-2 text-[var(--color-soft-ivory)]/70 hover:text-[var(--color-royal-gold)] transition-colors relative shrink-0"
+              className="p-1.5 text-[var(--color-soft-ivory)]/70 hover:text-[var(--color-royal-gold)] transition-colors relative shrink-0"
               title="My Wishlist"
             >
-              <Heart size={15} />
+              <Heart size={14} />
               {wishlistCount > 0 && (
-                <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--color-royal-gold)] text-[8px] text-matte-black font-bold flex items-center justify-center">
+                <span className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-[var(--color-royal-gold)] text-[7px] text-matte-black font-bold flex items-center justify-center">
                   {wishlistCount}
                 </span>
               )}
@@ -126,12 +126,12 @@ export default function Navbar() {
             {/* Cart */}
             <NextLink
               href="/cart"
-              className="p-2 text-[var(--color-soft-ivory)]/70 hover:text-[var(--color-royal-gold)] transition-colors relative shrink-0"
+              className="p-1.5 text-[var(--color-soft-ivory)]/70 hover:text-[var(--color-royal-gold)] transition-colors relative shrink-0"
               title="My Cart"
             >
-              <ShoppingCart size={15} />
+              <ShoppingCart size={14} />
               {cartCount > 0 && (
-                <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[var(--color-royal-gold)] text-[8px] text-matte-black font-bold flex items-center justify-center animate-pulse">
+                <span className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-[var(--color-royal-gold)] text-[7px] text-matte-black font-bold flex items-center justify-center animate-pulse">
                   {cartCount}
                 </span>
               )}
@@ -141,37 +141,37 @@ export default function Navbar() {
             {user && !isAdmin && (
               <NextLink
                 href="/profile"
-                className="p-2 text-[var(--color-soft-ivory)]/70 hover:text-[var(--color-royal-gold)] transition-colors shrink-0"
+                className="p-1.5 text-[var(--color-soft-ivory)]/70 hover:text-[var(--color-royal-gold)] transition-colors shrink-0"
                 title="My Account Profile"
               >
-                <User size={15} />
+                <User size={14} />
               </NextLink>
             )}
 
             {/* Admin Portal Button */}
             <NextLink
               href="/admin-secure-dashboard"
-              className="hidden sm:flex items-center gap-1.5 border border-[var(--color-royal-gold)]/50 hover:border-[var(--color-royal-gold)] bg-[var(--color-royal-gold)]/5 hover:bg-[var(--color-royal-gold)]/15 py-1.5 px-3.5 rounded text-[9px] font-poppins font-bold uppercase tracking-wider text-[var(--color-royal-gold)] transition-all duration-300 shrink-0 shadow-[0_0_10px_rgba(212,175,55,0.05)] hover:shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+              className="hidden sm:flex items-center gap-1 xl:gap-1.5 border border-[var(--color-royal-gold)]/40 hover:border-[var(--color-royal-gold)] bg-[var(--color-royal-gold)]/5 hover:bg-[var(--color-royal-gold)]/15 py-1 px-2 xl:px-3 rounded text-[8px] xl:text-[8.5px] font-poppins font-bold uppercase tracking-wider text-[var(--color-royal-gold)] transition-all duration-300 shrink-0 shadow-[0_0_8px_rgba(212,175,55,0.03)]"
               title="Admin Portal Dashboard"
             >
-              <Shield size={10} /> Admin Portal
+              <Shield size={9} /> Admin Portal
             </NextLink>
 
             {/* User Info / Sign Out Actions */}
             {user ? (
-              <div className="flex items-center border-l border-[var(--color-champagne-gold)]/10 pl-3 shrink-0">
+              <div className="flex items-center border-l border-[var(--color-champagne-gold)]/10 pl-2 shrink-0">
                 <button
                   onClick={logout}
-                  className="p-2 text-[var(--color-soft-ivory)]/40 hover:text-red-400 transition-colors"
+                  className="p-1.5 text-[var(--color-soft-ivory)]/40 hover:text-red-400 transition-colors"
                   title="Sign Out"
                 >
-                  <LogOut size={14} />
+                  <LogOut size={13} />
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => setLoginModalOpen(true)}
-                className="font-poppins text-[9px] uppercase tracking-[0.2em] border border-[var(--color-royal-gold)]/40 px-4 py-1.5 rounded hover:bg-[var(--color-royal-gold)] hover:text-matte-black transition-all duration-300 shrink-0 font-bold"
+                className="font-poppins text-[8px] xl:text-[8.5px] uppercase tracking-[0.15em] xl:tracking-[0.2em] border border-[var(--color-royal-gold)]/40 px-2 xl:px-3 py-1 rounded hover:bg-[var(--color-royal-gold)] hover:text-matte-black transition-all duration-300 shrink-0 font-bold"
               >
                 Sign In
               </button>

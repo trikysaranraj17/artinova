@@ -57,9 +57,11 @@ export default function AdminDashboardPage() {
   const [statusComment, setStatusComment] = useState('');
 
   useEffect(() => {
-    async function loadData() {
+    let interval: NodeJS.Timeout | null = null;
+
+    async function loadData(showLoading = true) {
       if (isAdmin) {
-        setLoading(true);
+        if (showLoading) setLoading(true);
         try {
           const prods = await getProducts();
           const ords = await getOrders();
@@ -68,11 +70,27 @@ export default function AdminDashboardPage() {
         } catch (err) {
           console.error(err);
         } finally {
-          setLoading(false);
+          if (showLoading) setLoading(false);
         }
       }
     }
-    loadData();
+    loadData(true);
+
+    const handleFocus = () => {
+      loadData(false);
+    };
+    window.addEventListener('focus', handleFocus);
+
+    if (isAdmin) {
+      interval = setInterval(() => {
+        loadData(false);
+      }, 2000);
+    }
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      if (interval) clearInterval(interval);
+    };
   }, [isAdmin]);
 
   // Load order items on expand

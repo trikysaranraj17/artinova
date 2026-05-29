@@ -16,18 +16,30 @@ export default function TrackingPortalPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function load() {
+    let interval: NodeJS.Timeout | null = null;
+
+    async function load(showLoading = true) {
       if (user) {
-        setLoading(true);
+        if (showLoading) setLoading(true);
         const data = await getOrders(user.id);
         setUserOrders(data);
-        setLoading(false);
+        if (showLoading) setLoading(false);
       } else {
         setUserOrders([]);
-        setLoading(false);
+        if (showLoading) setLoading(false);
       }
     }
-    load();
+    load(true);
+
+    if (user) {
+      interval = setInterval(() => {
+        load(false);
+      }, 2000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [user]);
 
   const handleLookup = (e: React.FormEvent) => {
