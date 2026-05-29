@@ -1,12 +1,35 @@
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
+import NextLink from 'next/link';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
+
+interface GoldParticle {
+  id: number;
+  left: string;
+  bottom: string;
+  size: string;
+  delay: string;
+  duration: string;
+}
 
 export default function Footer() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [particles, setParticles] = useState<GoldParticle[]>([]);
+
+  // Generate random gold particle layouts once on the client to avoid server hydration mismatches
+  useEffect(() => {
+    const list = Array.from({ length: 25 }).map((_, i) => ({
+      id: i,
+      left: `${Math.random() * 95 + 2.5}%`,
+      bottom: `${Math.random() * 55 + 5}%`,
+      size: `${2.5 + Math.random() * 3.5}px`,
+      delay: `${Math.random() * 4.5}s`,
+      duration: `${4.5 + Math.random() * 3.5}s`,
+    }));
+    setParticles(list);
+  }, []);
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,136 +41,147 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative bg-luxury-charcoal border-t border-champagne-gold/10 pt-20 pb-10 overflow-hidden">
-      {/* Decorative ambient glowing circles */}
-      <div className="absolute -bottom-48 -left-48 w-96 h-96 rounded-full bg-deep-bronze/10 blur-[100px] pointer-events-none" />
-      <div className="absolute -top-48 -right-48 w-96 h-96 rounded-full bg-burgundy-glow/15 blur-[120px] pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 relative z-10">
+    <footer className="relative bg-[#0a0a0a] pt-40 pb-16 border-t border-[var(--color-royal-gold)]/20 overflow-hidden select-none">
+      
+      {/* 1. DECORATIVE AMBIENT GLOWS & WAVE LAYERS */}
+      <div className="absolute inset-0 overflow-hidden z-0 pointer-events-none">
+        {/* Large bottom glow leak */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-t from-[rgba(125,60,152,0.35)] to-transparent blur-[80px] z-1" />
         
-        {/* Brand block */}
-        <div className="flex flex-col gap-6 md:col-span-1">
-          <div className="flex flex-col">
-            <span className="font-cinzel text-2xl font-bold tracking-[0.25em] text-gold-gradient">
+        {/* Wave overlays */}
+        <div className="wave-layer wave-layer-1 absolute bottom-[-15%] left-[-50%] w-[200%] h-[400px] bg-gradient-to-t from-[#2A0A2F] to-transparent rounded-[50%] filter blur-[30px] opacity-75 z-2" />
+        <div className="wave-layer wave-layer-2 absolute bottom-[-25%] left-[-30%] w-[150%] h-[350px] bg-gradient-to-t from-[#5B2C83] to-transparent rounded-[50%] filter blur-[40px] opacity-65 z-3" />
+        <div className="wave-layer wave-layer-3 absolute bottom-[-35%] left-[-60%] w-[250%] h-[300px] bg-gradient-to-t from-[#7D3C98] to-transparent rounded-[50%] filter blur-[50px] opacity-55 z-4" />
+
+        {/* Floating Gold Particles */}
+        {particles.map((p) => (
+          <div
+            key={p.id}
+            className="gold-particle"
+            style={{
+              left: p.left,
+              bottom: p.bottom,
+              width: p.size,
+              height: p.size,
+              animationDelay: p.delay,
+              animationDuration: p.duration,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* 2. FOOTER MAIN CONTENT */}
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-16 relative z-10 text-center md:text-left">
+        
+        {/* Brand Information Column */}
+        <div className="flex flex-col items-center md:items-start gap-6">
+          <div className="flex flex-col items-center md:items-start">
+            <span className="font-playfair text-3xl font-black tracking-[0.25em] text-purple">
               ARTINOVA
             </span>
-            <span className="font-poppins text-[10px] uppercase tracking-[0.35em] text-royal-gold/70 -mt-0.5">
+            <span className="font-poppins text-[10px] uppercase tracking-[0.35em] text-[var(--color-royal-gold)]/60 -mt-0.5">
               Customized Gift
             </span>
           </div>
-          <p className="font-poppins text-xs text-soft-ivory/50 leading-relaxed">
-            Crafting raw human emotions into timeless physical luxury. Every single piece is individually handcrafted and detailed to royal perfection.
+          <p className="font-poppins text-xs text-[var(--color-pearl-white)]/50 leading-loose max-w-sm">
+            Crafting raw human emotions into liquid glass. Our customized resin masterpieces are designed to bring a touch of sophisticated luxury and timeless adoration to modern spaces.
           </p>
-          <div className="flex items-center gap-4 text-soft-ivory/60">
-            {/* Instagram vector SVG */}
-            <a href="#" className="p-2.5 rounded-full border border-champagne-gold/10 hover:border-royal-gold hover:text-royal-gold transition-all duration-300 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <div className="flex items-center gap-4 text-[var(--color-pearl-white)]/60 mt-2">
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-[var(--color-royal-gold)]/10 hover:border-[var(--color-royal-gold)] hover:text-[var(--color-royal-gold)] hover:shadow-[0_0_10px_rgba(212,175,55,0.3)] transition-all duration-300 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
               </svg>
             </a>
-            {/* Facebook vector SVG */}
-            <a href="#" className="p-2.5 rounded-full border border-champagne-gold/10 hover:border-royal-gold hover:text-royal-gold transition-all duration-300 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-[var(--color-royal-gold)]/10 hover:border-[var(--color-royal-gold)] hover:text-[var(--color-royal-gold)] hover:shadow-[0_0_10px_rgba(212,175,55,0.3)] transition-all duration-300 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
               </svg>
             </a>
-            {/* Twitter/X vector SVG */}
-            <a href="#" className="p-2.5 rounded-full border border-champagne-gold/10 hover:border-royal-gold hover:text-royal-gold transition-all duration-300 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-[var(--color-royal-gold)]/10 hover:border-[var(--color-royal-gold)] hover:text-[var(--color-royal-gold)] hover:shadow-[0_0_10px_rgba(212,175,55,0.3)] transition-all duration-300 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
               </svg>
             </a>
           </div>
         </div>
 
-        {/* Quick Links */}
-        <div className="flex flex-col gap-6">
-          <h4 className="font-cinzel text-sm uppercase tracking-[0.2em] text-champagne-gold font-semibold">
-            Collections
+        {/* Explore Links Column */}
+        <div className="flex flex-col items-center gap-6">
+          <h4 className="font-poppins text-xs uppercase tracking-[0.3em] text-[var(--color-gold)] font-bold">
+            Explore
           </h4>
-          <div className="flex flex-col gap-3.5">
-            <Link href="/shop?category=Royal Box" className="font-poppins text-xs text-soft-ivory/50 hover:text-champagne-gold transition-colors">
-              Royal Keepsake Boxes
-            </Link>
-            <Link href="/shop?category=Crystal Craft" className="font-poppins text-xs text-soft-ivory/50 hover:text-champagne-gold transition-colors">
-              Crystal Glass Trinkets
-            </Link>
-            <Link href="/shop?category=Glass Art" className="font-poppins text-xs text-soft-ivory/50 hover:text-champagne-gold transition-colors">
-              Gilded Glassware
-            </Link>
-            <Link href="/shop?category=Personalized" className="font-poppins text-xs text-soft-ivory/50 hover:text-champagne-gold transition-colors">
-              Custom Couple Albums
-            </Link>
+          <div className="flex flex-col items-center gap-3.5">
+            <NextLink href="/" className="font-poppins text-xs text-[var(--color-pearl-white)]/60 hover:text-[var(--color-gold)] transition-colors tracking-widest uppercase">
+              Home
+            </NextLink>
+            <NextLink href="/shop" className="font-poppins text-xs text-[var(--color-pearl-white)]/60 hover:text-[var(--color-gold)] transition-colors tracking-widest uppercase">
+              Collections
+            </NextLink>
+            <NextLink href="/tracking" className="font-poppins text-xs text-[var(--color-pearl-white)]/60 hover:text-[var(--color-gold)] transition-colors tracking-widest uppercase">
+              Track Order
+            </NextLink>
+            <NextLink href="/contact" className="font-poppins text-xs text-[var(--color-pearl-white)]/60 hover:text-[var(--color-gold)] transition-colors tracking-widest uppercase">
+              Contact
+            </NextLink>
           </div>
         </div>
 
-        {/* Customer Support */}
-        <div className="flex flex-col gap-6">
-          <h4 className="font-cinzel text-sm uppercase tracking-[0.2em] text-champagne-gold font-semibold">
-            Support
+        {/* Contact details Column */}
+        <div className="flex flex-col items-center md:items-start gap-6">
+          <h4 className="font-poppins text-xs uppercase tracking-[0.3em] text-[var(--color-gold)] font-bold self-center md:self-start">
+            Contact Us
           </h4>
-          <div className="flex flex-col gap-3.5">
-            <Link href="/tracking" className="font-poppins text-xs text-soft-ivory/50 hover:text-champagne-gold transition-colors">
-              Track Order Status
-            </Link>
-            <Link href="/shop" className="font-poppins text-xs text-soft-ivory/50 hover:text-champagne-gold transition-colors">
-              Browse Boutique
-            </Link>
-            <Link href="/#about" className="font-poppins text-xs text-soft-ivory/50 hover:text-champagne-gold transition-colors">
-              The Artisan Story
-            </Link>
-            <Link href="/#why-choose-us" className="font-poppins text-xs text-soft-ivory/50 hover:text-champagne-gold transition-colors">
-              Quality Assurance
-            </Link>
+          <div className="flex flex-col items-center md:items-start gap-4 text-[var(--color-pearl-white)]/60 font-poppins text-xs tracking-wide">
+            <div className="flex items-center gap-3">
+              <MapPin size={14} className="text-[var(--color-gold)] shrink-0" />
+              <span>Chennai, Tamil Nadu, India</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Phone size={14} className="text-[var(--color-gold)] shrink-0" />
+              <span>+91 98407 06312</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Mail size={14} className="text-[var(--color-gold)] shrink-0" />
+              <span>deepaksabari28@gmail.com</span>
+            </div>
+            
+            {/* Embedded Mini Newsletter Signup */}
+            <form onSubmit={handleSubscribe} className="relative mt-4 w-full max-w-xs">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Subscribe newsletter..."
+                required
+                className="w-full bg-[#0f1424]/60 border border-[var(--color-royal-gold)]/20 py-2.5 pl-4 pr-12 text-xs font-poppins rounded focus:outline-none focus:border-[var(--color-royal-gold)]/60 text-white transition-colors"
+              />
+              <button
+                type="submit"
+                className="absolute right-1 top-1 bottom-1 px-3 text-[var(--color-royal-gold)] hover:text-white transition-colors"
+              >
+                <Send size={12} />
+              </button>
+            </form>
+            {subscribed && (
+              <span className="font-poppins text-[9px] text-[var(--color-royal-gold)] animate-pulse mt-1">
+                Newsletter subscription received.
+              </span>
+            )}
           </div>
-        </div>
-
-        {/* Newsletter / Contacts */}
-        <div className="flex flex-col gap-6">
-          <h4 className="font-cinzel text-sm uppercase tracking-[0.2em] text-champagne-gold font-semibold">
-            Newsletter
-          </h4>
-          <p className="font-poppins text-xs text-soft-ivory/50 leading-relaxed">
-            Subscribe to receive exclusive access to private collection releases and custom gifting guides.
-          </p>
-          <form onSubmit={handleSubscribe} className="relative mt-2">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your royal email..."
-              required
-              className="w-full bg-matte-black/60 border border-champagne-gold/15 py-3 pl-4 pr-12 text-xs font-poppins rounded focus:outline-none focus:border-royal-gold/60 text-soft-ivory transition-colors"
-            />
-            <button
-              type="submit"
-              className="absolute right-1 top-1 bottom-1 px-3 text-royal-gold hover:text-champagne-gold transition-colors"
-            >
-              <Send size={14} />
-            </button>
-          </form>
-          {subscribed && (
-            <span className="font-poppins text-[10px] text-royal-gold animate-pulse">
-              Invitation sent to your inbox.
-            </span>
-          )}
         </div>
 
       </div>
 
-      {/* Gilded Line and copyrights */}
-      <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-champagne-gold/5 flex flex-col md:flex-row items-center justify-between gap-6">
-        {/* Animated line decorator */}
-        <div className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-royal-gold/20 to-transparent -translate-y-8" />
-        
-        <span className="font-poppins text-[10px] text-soft-ivory/30 uppercase tracking-widest text-center md:text-left">
-          © {new Date().getFullYear()} ARTINOVA Customized Gift. All rights reserved.
+      {/* 3. SUBFOOTER COPYRIGHT */}
+      <div className="max-w-7xl mx-auto px-6 mt-20 pt-8 border-t border-[var(--color-pearl-white)]/5 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+        <span className="font-poppins text-[9px] text-[var(--color-pearl-white)]/30 uppercase tracking-widest text-center md:text-left">
+          © {new Date().getFullYear()} ARTINOVA CUSTOMIZED GIFT. THE PINNACLE OF LUXURY.
         </span>
-        <div className="flex items-center gap-8 text-[10px] font-poppins uppercase tracking-widest text-soft-ivory/30">
-          <a href="#" className="hover:text-champagne-gold transition-colors">Privacy Policy</a>
-          <a href="#" className="hover:text-champagne-gold transition-colors">Terms of Service</a>
+        <div className="flex items-center gap-6 text-[9px] font-poppins uppercase tracking-widest text-[var(--color-pearl-white)]/30">
+          <a href="#" className="hover:text-[var(--color-gold)] transition-colors">Privacy Policy</a>
+          <a href="#" className="hover:text-[var(--color-gold)] transition-colors">Terms of Service</a>
         </div>
       </div>
     </footer>

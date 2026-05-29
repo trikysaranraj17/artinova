@@ -26,7 +26,7 @@ export default function HomePage() {
         const data = await getProducts();
         setProducts(data);
       } catch (err) {
-        console.error(err);
+        console.warn('Supabase DB connection not initialized yet, fallback loaded.', err);
       } finally {
         setLoading(false);
       }
@@ -73,7 +73,7 @@ export default function HomePage() {
     { url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=600&auto=format&fit=crop&q=80', height: 'h-64' },
     { url: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&auto=format&fit=crop&q=80', height: 'h-80' },
     { url: 'https://images.unsplash.com/photo-1574926053821-79c5e338a933?w=600&auto=format&fit=crop&q=80', height: 'h-96' },
-    { url: 'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=600&auto=format&fit=crop&q=80', height: 'h-72' },
+    { url: 'https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=600&auto=format&fit=crop&q=80', height: 'h-72' },
     { url: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=600&auto=format&fit=crop&q=80', height: 'h-80' },
     { url: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&auto=format&fit=crop&q=80', height: 'h-96' }
   ];
@@ -88,16 +88,15 @@ export default function HomePage() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8, ease: 'easeInOut' }}
-            className="fixed inset-0 bg-[#070708] z-[9999] flex flex-col items-center justify-center"
+            className="fixed inset-0 bg-[#0a0a0a] z-[9999] flex flex-col items-center justify-center select-none"
           >
             <div className="flex flex-col items-center max-w-sm px-6 text-center gap-4">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 1, ease: 'easeOut' }}
-                className="w-20 h-20 text-royal-gold filter drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]"
+                className="w-20 h-20 text-[var(--color-royal-gold)] filter drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]"
               >
-                {/* Embedded dynamic vector logo representation */}
                 <svg viewBox="0 0 100 100" className="w-full h-full">
                   <path d="M 40,50 C 25,48 10,40 10,25 C 10,20 20,18 28,26 C 33,31 38,40 40,47 M 60,50 C 75,48 90,40 90,25 C 90,20 80,18 72,26 C 67,31 62,40 60,47" fill="none" stroke="currentColor" strokeWidth="2.5" />
                   <rect x="42" y="52" width="16" height="16" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2.5" />
@@ -110,21 +109,21 @@ export default function HomePage() {
                 initial={{ letterSpacing: '0.1em', opacity: 0 }}
                 animate={{ letterSpacing: '0.25em', opacity: 1 }}
                 transition={{ duration: 1.2, delay: 0.3 }}
-                className="font-cinzel text-2xl font-bold text-gold-gradient mt-4"
+                className="font-playfair text-3xl font-black text-purple mt-4"
               >
                 ARTINOVA
               </motion.h1>
               
-              <div className="w-48 h-[1px] bg-champagne-gold/15 mt-2 relative overflow-hidden">
+              <div className="w-48 h-[1px] bg-[var(--color-royal-gold)]/15 mt-2 relative overflow-hidden">
                 <motion.div
                   initial={{ left: '-100%' }}
                   animate={{ left: '100%' }}
                   transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
-                  className="absolute h-full w-1/2 bg-royal-gold/60"
+                  className="absolute h-full w-1/2 bg-[var(--color-royal-gold)]/60"
                 />
               </div>
               
-              <span className="font-poppins text-[9px] uppercase tracking-[0.3em] text-royal-gold/50 mt-1">
+              <span className="font-poppins text-[9px] uppercase tracking-[0.3em] text-[var(--color-royal-gold)]/50 mt-1">
                 Handcrafting luxury memories
               </span>
             </div>
@@ -132,16 +131,30 @@ export default function HomePage() {
         )}
       </AnimatePresence>
 
-      {/* 2. HERO SECTION */}
+      {/* 2. HERO SECTION WITH LUXURIOUS VIDEO BACKDROP */}
       <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
-        {/* Dynamic 3D Scene Loaded client-side */}
-        <Hero3DCanvas />
+        
+        {/* Background Looping Resin Pour Video */}
+        <video 
+          autoPlay 
+          muted 
+          loop 
+          playsInline 
+          src="https://cdn.shopify.com/videos/c/o/v/6f7c6f0d9c4e4b5f8c1e8b3b3b3b3b3b.mp4" 
+          className="absolute top-0 left-0 w-full h-full object-cover z-[-1] opacity-40 filter contrast-125 brightness-75"
+        />
 
-        {/* Cinematic Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070708] via-transparent to-transparent pointer-events-none" />
+        {/* Dynamic 3D Scene Loaded client-side overlay */}
+        <div className="absolute inset-0 z-0">
+          <Hero3DCanvas />
+        </div>
+
+        {/* Cinematic Radial Vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-[#0a0a0a] pointer-events-none z-1" />
+        <div className="absolute inset-0 bg-radial-gradient-vignette pointer-events-none z-1" style={{ background: 'radial-gradient(circle, transparent 20%, #0a0a0a 100%)' }} />
 
         {/* Hero Copywriting content */}
-        <div className="relative z-10 text-center max-w-4xl px-6 flex flex-col items-center">
+        <div className="relative z-10 text-center max-w-4xl px-6 flex flex-col items-center select-none">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -149,209 +162,220 @@ export default function HomePage() {
             className="flex flex-col items-center"
           >
             {/* Soft gold accent banner */}
-            <span className="font-poppins text-[10px] md:text-xs uppercase tracking-[0.35em] text-royal-gold border border-royal-gold/25 py-2 px-5 rounded-full bg-matte-black/40 backdrop-blur-md mb-6 inline-block font-semibold">
+            <span className="font-poppins text-[10px] md:text-xs uppercase tracking-[0.35em] text-[var(--color-royal-gold)] border border-[var(--color-royal-gold)]/25 py-2.5 px-6 rounded-full bg-black/45 backdrop-blur-md mb-8 inline-block font-bold">
               ARTISAN GIFT BOUTIQUE
             </span>
 
-            {/* Title */}
-            <h1 className="font-cinzel text-4xl md:text-7xl font-extrabold tracking-wider leading-tight text-gold-gradient text-center max-w-3xl">
-              Crafting Emotions <br className="hidden md:inline" /> Into Luxury Gifts
+            {/* Title - 3D Shimmer luxury text */}
+            <h1 className="font-playfair text-4xl md:text-7xl font-black tracking-wider leading-tight text-center max-w-4xl select-none uppercase">
+              <span className="text-3d-luxury-gold block mb-2">ARTINOVA</span>
+              <span className="text-3d-luxury-gold font-serif italic text-3xl md:text-5xl tracking-[0.3em] opacity-90 block">RESIN ARTISTRY</span>
             </h1>
 
             {/* Subtitle description */}
-            <p className="font-poppins text-sm md:text-base text-soft-ivory/60 max-w-lg mt-6 leading-relaxed">
-              Bespoke collections tailored for royalty, weddings, and milestones. Individually molded, hand-polished, and custom-packaged.
+            <p className="font-poppins text-xs md:text-sm text-[var(--color-pearl-white)]/70 max-w-lg mt-8 leading-relaxed">
+              Handcrafted resin masterpieces that redefine the boundaries of modern elegance. Bespoke collections tailored for royalty, weddings, and premium commissions.
             </p>
 
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row items-center gap-5 mt-10 w-full sm:w-auto">
+            {/* Actions (Custom buttons from reference site styles) */}
+            <div className="flex flex-col sm:flex-row items-center gap-6 mt-12 w-full sm:w-auto z-20">
               <Link
                 href="/shop"
-                className="w-full sm:w-auto font-poppins text-xs font-semibold uppercase tracking-[0.2em] bg-royal-gold text-matte-black px-10 py-4 rounded hover:bg-champagne-gold hover:shadow-[0_0_15px_rgba(214,175,55,0.4)] transition-all duration-300"
+                className="btn-solid-purple w-full sm:w-auto text-center"
               >
-                Shop Now
+                Collections
               </Link>
               <Link
-                href="#about"
-                className="w-full sm:w-auto font-poppins text-xs font-semibold uppercase tracking-[0.2em] border border-champagne-gold/20 px-9 py-4 rounded hover:bg-champagne-gold/5 text-soft-ivory hover:border-royal-gold transition-all duration-300"
+                href="/contact"
+                className="btn-gold w-full sm:w-auto text-center"
               >
-                Explore Collection
+                Customization Art
               </Link>
             </div>
           </motion.div>
         </div>
 
         {/* Animated mouse scroll hint */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none opacity-40 hover:opacity-100 transition-opacity">
-          <span className="font-poppins text-[9px] uppercase tracking-[0.25em] text-soft-ivory">Scroll</span>
-          <div className="w-[18px] h-[30px] border border-soft-ivory/50 rounded-full flex justify-center pt-1.5">
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none opacity-40 hover:opacity-100 transition-opacity z-10">
+          <span className="font-poppins text-[9px] uppercase tracking-[0.25em] text-[var(--color-pearl-white)]">Scroll</span>
+          <div className="w-[18px] h-[30px] border border-[var(--color-pearl-white)]/40 rounded-full flex justify-center pt-1.5">
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ repeat: Infinity, duration: 1.5 }}
-              className="w-1.5 h-1.5 rounded-full bg-royal-gold"
+              className="w-1.5 h-1.5 rounded-full bg-[var(--color-royal-gold)]"
             />
           </div>
         </div>
       </section>
 
-      {/* 3. FEATURED COLLECTIONS SECTION */}
-      <section className="py-28 px-6 bg-matte-black/90 relative">
-        {/* Glow leak behind card slider */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full bg-deep-bronze/5 blur-[120px] pointer-events-none" />
+      {/* 3. FEATURED MASTERPIECES SECTION */}
+      <section className="py-32 px-6 bg-[#0a0a0a] relative select-none">
+        
+        {/* Glow leaks behind cards */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] rounded-full bg-[rgba(109,40,217,0.06)] blur-[120px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-            <div className="flex flex-col gap-2">
-              <span className="font-poppins text-xs text-royal-gold uppercase tracking-[0.3em] font-semibold">Exquisite Showcases</span>
-              <h2 className="font-cinzel text-3xl md:text-5xl font-bold tracking-wide text-soft-ivory">
-                The Masterpieces
-              </h2>
-            </div>
-            <Link
-              href="/shop"
-              className="group font-poppins text-xs uppercase tracking-widest text-champagne-gold flex items-center gap-2.5 hover:text-royal-gold transition-colors font-semibold"
-            >
-              View Boutique Catalog <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
+          <div className="flex flex-col items-center text-center mb-20">
+            <span className="font-poppins text-xs text-[var(--color-royal-gold)] uppercase tracking-[0.3em] font-bold">Exquisite Showcases</span>
+            <h2 className="font-playfair text-3xl md:text-5xl font-black uppercase tracking-[0.15em] text-white mt-3">
+              <span className="text-gold">Masterpiece</span> <span className="text-purple">Galleries</span>
+            </h2>
+            <div className="w-16 h-[1.5px] bg-[var(--gradient-mixed)] mx-auto mt-5" />
           </div>
 
-          {/* Cards Container */}
+          {/* Cards Container (Luxury card designs with cubic scale tilts and image zoombars) */}
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
               {[1, 2, 3].map((n) => (
-                <div key={n} className="h-96 rounded-lg bg-luxury-charcoal animate-pulse border border-champagne-gold/5" />
+                <div key={n} className="h-[520px] rounded-xl bg-[#0f1424]/40 animate-pulse border border-[var(--color-royal-gold)]/5" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
               {products.slice(0, 3).map((product) => {
                 const isWishlisted = wishlist.some((p) => p.id === product.id);
                 return (
-                  <motion.div
+                  <div
                     key={product.id}
-                    className="glass-card flex flex-col h-full rounded-lg overflow-hidden group perspective-container"
-                    whileHover={{ scale: 1.01 }}
+                    className="luxury-card flex flex-col h-full rounded-xl overflow-hidden group text-center"
                   >
-                    {/* Card Image Container */}
-                    <div className="relative h-72 w-full overflow-hidden">
+                    {/* Card Image Container (Zoom on Hover) */}
+                    <div className="relative h-[360px] w-full overflow-hidden img-zoom-container select-none">
                       <Image
                         src={product.images[0] || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800'}
                         alt={product.title}
                         fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        priority
                       />
-                      {/* Dark overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-matte-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      
+                      {/* Dark shade overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-rich-black)]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                       {/* Quick action buttons */}
-                      <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute top-4 right-4 flex flex-col gap-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
                         <button
-                          onClick={() => toggleItemWishlist(product.id)}
-                          className={`p-2.5 rounded-full border border-champagne-gold/15 backdrop-blur-md transition-colors ${
-                            isWishlisted ? 'bg-royal-gold text-matte-black border-royal-gold' : 'bg-matte-black/80 hover:border-royal-gold text-soft-ivory hover:text-royal-gold'
+                          onClick={(e) => {
+                            e.preventDefault();
+                            toggleItemWishlist(product.id);
+                          }}
+                          className={`p-2.5 rounded-full border border-[var(--color-royal-gold)]/20 backdrop-blur-md transition-colors ${
+                            isWishlisted ? 'bg-[var(--color-royal-gold)] text-matte-black border-[var(--color-royal-gold)]' : 'bg-black/60 text-white hover:text-[var(--color-royal-gold)] hover:border-[var(--color-royal-gold)]'
                           }`}
                         >
                           <Heart size={14} fill={isWishlisted ? 'currentColor' : 'none'} />
                         </button>
                         <Link
                           href={`/shop/${product.id}`}
-                          className="p-2.5 rounded-full border border-champagne-gold/15 bg-matte-black/80 hover:border-royal-gold text-soft-ivory hover:text-royal-gold backdrop-blur-md transition-colors"
+                          className="p-2.5 rounded-full border border-[var(--color-royal-gold)]/20 bg-black/60 text-white hover:text-[var(--color-royal-gold)] hover:border-[var(--color-royal-gold)] backdrop-blur-md transition-colors"
                         >
                           <Eye size={14} />
                         </Link>
                       </div>
 
                       {/* Category Badge */}
-                      <span className="absolute bottom-4 left-4 bg-matte-black/60 border border-champagne-gold/15 px-3 py-1 text-[9px] uppercase tracking-widest text-royal-gold rounded backdrop-blur-sm">
+                      <span className="absolute bottom-4 left-4 bg-[#0a0a0a]/75 border border-[var(--color-royal-gold)]/20 px-3 py-1 text-[8px] uppercase tracking-widest text-[var(--color-royal-gold)] rounded backdrop-blur-sm">
                         {product.category}
                       </span>
                     </div>
 
-                    {/* Content details */}
-                    <div className="p-6 flex flex-col flex-grow bg-luxury-charcoal/40">
-                      <div className="flex items-start justify-between gap-4 mb-2">
-                        <h3 className="font-cinzel text-lg font-bold group-hover:text-champagne-gold transition-colors">
-                          {product.title}
-                        </h3>
-                        <span className="font-poppins text-sm font-semibold text-royal-gold shrink-0">
-                          ${product.price.toFixed(2)}
-                        </span>
-                      </div>
-                      <p className="font-poppins text-[11px] text-soft-ivory/50 leading-relaxed flex-grow">
-                        {product.description.length > 110 ? `${product.description.substring(0, 105)}...` : product.description}
+                    {/* Content Details */}
+                    <div className="p-8 flex flex-col flex-grow bg-[#0f1424]/40 border-t border-[var(--color-royal-gold)]/5">
+                      <h3 className="font-playfair text-lg font-bold uppercase tracking-widest mb-3 group-hover:text-[var(--color-gold)] transition-colors">
+                        {product.title}
+                      </h3>
+                      <span className="font-poppins text-xs font-bold text-[var(--color-royal-gold)] mb-4 block">
+                        ${product.price.toFixed(2)}
+                      </span>
+                      <p className="font-poppins text-[10px] text-[var(--color-pearl-white)]/50 leading-relaxed flex-grow max-w-xs mx-auto mb-6">
+                        {product.description.length > 105 ? `${product.description.substring(0, 100)}...` : product.description}
                       </p>
                       
                       <button
                         onClick={() => addItemToCart(product.id, 1)}
-                        className="w-full mt-6 py-3 border border-royal-gold/30 hover:border-royal-gold hover:bg-royal-gold hover:text-matte-black transition-all duration-300 font-poppins text-[10px] uppercase tracking-[0.2em] font-semibold"
+                        className="w-full mt-auto py-3 bg-transparent text-[var(--color-pearl-white)] border border-[var(--color-royal-violet)] hover:border-[var(--color-royal-gold)] font-poppins text-[9px] uppercase tracking-[0.25em] font-bold transition-all duration-500 relative overflow-hidden group hover:text-black z-10 before:content-[''] before:absolute before:top-0 before:left-0 before:w-0 before:h-full before:bg-gradient-to-r before:from-[var(--color-amethyst-purple)] before:to-[var(--color-wave-teal)] before:transition-all before:duration-500 hover:before:w-full before:z-[-1]"
                       >
                         Add to Cart
                       </button>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
           )}
+
+          {/* Catalog Link */}
+          <div className="text-center mt-16">
+            <Link
+              href="/shop"
+              className="group font-poppins text-[10px] uppercase tracking-[0.25em] text-[var(--color-gold)] inline-flex items-center gap-3 hover:text-white transition-colors font-bold"
+            >
+              Discover Collections <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* 4. ABOUT BRAND STORYTELLING SECTION */}
-      <section id="about" className="py-28 px-6 bg-luxury-charcoal/50 relative overflow-hidden">
-        {/* Soft glowing ambient backgrounds */}
-        <div className="absolute top-20 right-10 w-96 h-96 rounded-full bg-burgundy-glow/10 blur-[120px] pointer-events-none" />
+      <section id="about" className="py-32 px-6 bg-[#0f1424]/30 relative overflow-hidden select-none">
+        
+        {/* Glowing backdrop leaks */}
+        <div className="absolute top-20 right-10 w-96 h-96 rounded-full bg-[rgba(75,29,109,0.05)] blur-[120px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           
           {/* Text block */}
-          <div className="flex flex-col gap-6">
-            <span className="font-poppins text-xs text-royal-gold uppercase tracking-[0.3em] font-semibold">The Artisan Legacy</span>
-            <h2 className="font-cinzel text-3xl md:text-5xl font-bold tracking-wide text-soft-ivory">
+          <div className="flex flex-col gap-6 text-center lg:text-left items-center lg:items-start">
+            <span className="font-poppins text-xs text-[var(--color-royal-gold)] uppercase tracking-[0.3em] font-bold">The Artisan Legacy</span>
+            <h2 className="font-playfair text-3xl md:text-5xl font-black uppercase tracking-wide text-white">
               Artisans of the Soul
             </h2>
-            <div className="w-16 h-[1px] bg-royal-gold/60 my-2" />
-            <p className="font-playfair italic text-lg text-champagne-gold/90 leading-relaxed">
+            <div className="w-16 h-[1.5px] bg-[var(--gradient-mixed)] mt-1" />
+            <p className="font-playfair italic text-lg text-[var(--color-gold)]/90 leading-relaxed max-w-lg">
               &ldquo;A gift is not a mere object. It is a bridge between two minds, an emblem of silent adoration, cast in gold.&rdquo;
             </p>
-            <p className="font-poppins text-xs md:text-sm text-soft-ivory/60 leading-relaxed">
+            <p className="font-poppins text-xs md:text-sm text-[var(--color-pearl-white)]/60 leading-loose max-w-xl">
               At ARTINOVA, we refuse the modern standard of mechanical production. We believe in the slow, meticulous crafting of individual statements. Our materials are imported premium grain wood, crystals, and solid brass, layered with real leaf plating and micro-shined to reflect ambient lighting.
             </p>
-            <p className="font-poppins text-xs md:text-sm text-soft-ivory/60 leading-relaxed">
+            <p className="font-poppins text-xs md:text-sm text-[var(--color-pearl-white)]/60 leading-loose max-w-xl">
               Every detail is tailored to your emotional message. When a box is opened, it is not simply opened—it is unveiled.
             </p>
             <div className="mt-4">
               <Link
                 href="/shop"
-                className="font-poppins text-xs uppercase tracking-widest text-royal-gold hover:text-champagne-gold flex items-center gap-2 font-semibold"
+                className="font-poppins text-[10px] uppercase tracking-[0.25em] text-[var(--color-royal-gold)] hover:text-white inline-flex items-center gap-2.5 font-bold"
               >
                 Discover The Craft <ArrowRight size={14} />
               </Link>
             </div>
           </div>
 
-          {/* Layered Image transitions and parallax showcase */}
-          <div className="relative flex justify-center items-center">
+          {/* Layered Showcase Image Parallax Effect */}
+          <div className="relative flex justify-center items-center select-none">
             {/* Background geometric design */}
-            <div className="absolute w-[80%] h-[80%] border border-royal-gold/10 rounded-full scale-105 pointer-events-none" />
+            <div className="absolute w-[80%] h-[80%] border border-[var(--color-royal-gold)]/10 rounded-full scale-105 pointer-events-none" />
             
             {/* Primary Image */}
-            <div className="relative w-[320px] h-[400px] md:w-[380px] md:h-[480px] rounded overflow-hidden shadow-2xl border border-champagne-gold/10 z-10 transform -rotate-2">
+            <div className="relative w-[300px] h-[380px] md:w-[380px] md:h-[480px] rounded-xl overflow-hidden shadow-2xl border border-[var(--color-royal-gold)]/15 z-10 transform -rotate-2 select-none">
               <Image
                 src="https://images.unsplash.com/photo-1544816155-12df9643f363?w=800"
                 alt="Handcrafting process"
                 fill
                 className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
             
             {/* Secondary Floating Image */}
-            <div className="absolute bottom-[-40px] left-[-20px] md:left-[20px] w-[180px] h-[220px] md:w-[220px] md:h-[260px] rounded overflow-hidden shadow-2xl border border-royal-gold/20 z-20 transform translate-x-[-10px] translate-y-[20px] rotate-3 hidden sm:block">
+            <div className="absolute bottom-[-30px] left-[-10px] md:left-[20px] w-[180px] h-[220px] md:w-[220px] md:h-[260px] rounded-xl overflow-hidden shadow-2xl border border-[var(--color-royal-gold)]/20 z-20 transform translate-x-[-10px] translate-y-[20px] rotate-3 hidden sm:block select-none">
               <Image
                 src="https://images.unsplash.com/photo-1513151233558-d860c5398176?w=500"
                 alt="Keepsake detail"
                 fill
                 className="object-cover"
+                sizes="220px"
               />
             </div>
           </div>
@@ -360,74 +384,75 @@ export default function HomePage() {
       </section>
 
       {/* 5. WHY CHOOSE US SECTION */}
-      <section id="why-choose-us" className="py-28 px-6 bg-matte-black">
+      <section id="why-choose-us" className="py-32 px-6 bg-[#0a0a0a] relative select-none">
         <div className="max-w-7xl mx-auto">
+          
           {/* Header */}
           <div className="text-center flex flex-col items-center gap-4 mb-20">
-            <span className="font-poppins text-xs text-royal-gold uppercase tracking-[0.3em] font-semibold">Quality Commitment</span>
-            <h2 className="font-cinzel text-3xl md:text-5xl font-bold tracking-wide text-soft-ivory">
+            <span className="font-poppins text-xs text-[var(--color-royal-gold)] uppercase tracking-[0.3em] font-bold">Quality Commitment</span>
+            <h2 className="font-playfair text-3xl md:text-5xl font-black uppercase tracking-wide text-white mt-2">
               The Standard of Royalty
             </h2>
-            <p className="font-poppins text-xs md:text-sm text-soft-ivory/50 max-w-md leading-relaxed mt-2">
+            <p className="font-poppins text-xs md:text-sm text-[var(--color-pearl-white)]/50 max-w-md leading-relaxed mt-2 uppercase tracking-wider">
               Why patrons around the globe trust ARTINOVA with their most critical personal statements.
             </p>
           </div>
 
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          {/* Cards Grid with custom hover effects */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             
             {/* Card 1 */}
-            <div className="glass-card p-8 rounded-lg flex flex-col items-center text-center gap-4">
-              <div className="p-4 rounded-full border border-champagne-gold/15 text-royal-gold">
+            <div className="glass-card p-8 rounded-xl flex flex-col items-center text-center gap-4 border border-[var(--color-royal-gold)]/10 hover:border-[var(--color-royal-gold)]/30">
+              <div className="p-4 rounded-full border border-[var(--color-royal-gold)]/15 text-[var(--color-royal-gold)] bg-[#0f1424]/40">
                 <Heart size={20} />
               </div>
-              <h3 className="font-cinzel text-md font-bold text-champagne-gold">Handmade with Love</h3>
-              <p className="font-poppins text-[10px] text-soft-ivory/50 leading-relaxed">
-                Individually cut, aligned, and finished. No mass assembly templates.
+              <h3 className="font-playfair text-md font-bold text-white uppercase tracking-wider">Handmade</h3>
+              <p className="font-poppins text-[10px] text-[var(--color-pearl-white)]/50 leading-loose">
+                Individually molded, layered, and finished. No automated assembly lines.
               </p>
             </div>
 
             {/* Card 2 */}
-            <div className="glass-card p-8 rounded-lg flex flex-col items-center text-center gap-4">
-              <div className="p-4 rounded-full border border-champagne-gold/15 text-royal-gold">
+            <div className="glass-card p-8 rounded-xl flex flex-col items-center text-center gap-4 border border-[var(--color-royal-gold)]/10 hover:border-[var(--color-royal-gold)]/30">
+              <div className="p-4 rounded-full border border-[var(--color-royal-gold)]/15 text-[var(--color-royal-gold)] bg-[#0f1424]/40">
                 <Award size={20} />
               </div>
-              <h3 className="font-cinzel text-md font-bold text-champagne-gold">Premium Materials</h3>
-              <p className="font-poppins text-[10px] text-soft-ivory/50 leading-relaxed">
-                Rich Honduran mahogany, luxury velvet linings, and authentic leaf gilding.
+              <h3 className="font-playfair text-md font-bold text-white uppercase tracking-wider">Materials</h3>
+              <p className="font-poppins text-[10px] text-[var(--color-pearl-white)]/50 leading-loose">
+                Premium wood bases, fine velvet linings, and authentic leaf gilding.
               </p>
             </div>
 
             {/* Card 3 */}
-            <div className="glass-card p-8 rounded-lg flex flex-col items-center text-center gap-4">
-              <div className="p-4 rounded-full border border-champagne-gold/15 text-royal-gold">
+            <div className="glass-card p-8 rounded-xl flex flex-col items-center text-center gap-4 border border-[var(--color-royal-gold)]/10 hover:border-[var(--color-royal-gold)]/30">
+              <div className="p-4 rounded-full border border-[var(--color-royal-gold)]/15 text-[var(--color-royal-gold)] bg-[#0f1424]/40">
                 <Sparkles size={20} />
               </div>
-              <h3 className="font-cinzel text-md font-bold text-champagne-gold">Personalization</h3>
-              <p className="font-poppins text-[10px] text-soft-ivory/50 leading-relaxed">
-                Custom wing engravings and monogram options detailed to order specification.
+              <h3 className="font-playfair text-md font-bold text-white uppercase tracking-wider">Personalized</h3>
+              <p className="font-poppins text-[10px] text-[var(--color-pearl-white)]/50 leading-loose">
+                Custom monograms and engravings detailed specifically to order.
               </p>
             </div>
 
             {/* Card 4 */}
-            <div className="glass-card p-8 rounded-lg flex flex-col items-center text-center gap-4">
-              <div className="p-4 rounded-full border border-champagne-gold/15 text-royal-gold">
+            <div className="glass-card p-8 rounded-xl flex flex-col items-center text-center gap-4 border border-[var(--color-royal-gold)]/10 hover:border-[var(--color-royal-gold)]/30">
+              <div className="p-4 rounded-full border border-[var(--color-royal-gold)]/15 text-[var(--color-royal-gold)] bg-[#0f1424]/40">
                 <Truck size={20} />
               </div>
-              <h3 className="font-cinzel text-md font-bold text-champagne-gold">Fast Delivery</h3>
-              <p className="font-poppins text-[10px] text-soft-ivory/50 leading-relaxed">
-                Priority packing and tracked logistics ensuring safe courier handling.
+              <h3 className="font-playfair text-md font-bold text-white uppercase tracking-wider">Logistics</h3>
+              <p className="font-poppins text-[10px] text-[var(--color-pearl-white)]/50 leading-loose">
+                Fully protected gift boxing and priority courier tracking.
               </p>
             </div>
 
             {/* Card 5 */}
-            <div className="glass-card p-8 rounded-lg flex flex-col items-center text-center gap-4">
-              <div className="p-4 rounded-full border border-champagne-gold/15 text-royal-gold">
+            <div className="glass-card p-8 rounded-xl flex flex-col items-center text-center gap-4 border border-[var(--color-royal-gold)]/10 hover:border-[var(--color-royal-gold)]/30">
+              <div className="p-4 rounded-full border border-[var(--color-royal-gold)]/15 text-[var(--color-royal-gold)] bg-[#0f1424]/40">
                 <Gift size={20} />
               </div>
-              <h3 className="font-cinzel text-md font-bold text-champagne-gold">Elegant Packaging</h3>
-              <p className="font-poppins text-[10px] text-soft-ivory/50 leading-relaxed">
-                Every box arrives sealed in a protective textured gift wrap with custom ribbon bindings.
+              <h3 className="font-playfair text-md font-bold text-white uppercase tracking-wider">Packaging</h3>
+              <p className="font-poppins text-[10px] text-[var(--color-pearl-white)]/50 leading-loose">
+                Arrives wrapped in premium textured papers with satin ribbon bows.
               </p>
             </div>
 
@@ -436,13 +461,14 @@ export default function HomePage() {
       </section>
 
       {/* 6. TESTIMONIALS SECTION */}
-      <section className="py-28 px-6 bg-luxury-charcoal/30 relative overflow-hidden">
-        {/* Glow leaks */}
-        <div className="absolute top-1/2 left-10 w-96 h-96 rounded-full bg-deep-bronze/10 blur-[100px] pointer-events-none" />
+      <section className="py-32 px-6 bg-[#0f1424]/20 relative overflow-hidden select-none">
+        
+        {/* Ambient bottom glow leak */}
+        <div className="absolute top-1/2 left-10 w-96 h-96 rounded-full bg-[rgba(125,60,152,0.05)] blur-[100px] pointer-events-none" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <span className="font-poppins text-xs text-royal-gold uppercase tracking-[0.3em] font-semibold">Elite Appreciations</span>
-          <h2 className="font-cinzel text-3xl md:text-5xl font-bold tracking-wide text-soft-ivory mt-2 mb-16">
+          <span className="font-poppins text-xs text-[var(--color-royal-gold)] uppercase tracking-[0.3em] font-bold">Elite Appreciations</span>
+          <h2 className="font-playfair text-3xl md:text-5xl font-black uppercase tracking-wide text-white mt-3 mb-16">
             Patron Testimonials
           </h2>
 
@@ -457,16 +483,16 @@ export default function HomePage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.6 }}
-                    className="glass-panel p-10 rounded-lg flex flex-col gap-6 border border-champagne-gold/10"
+                    className="glass-panel p-10 rounded-xl flex flex-col gap-6 border border-[var(--color-royal-gold)]/10"
                   >
-                    <p className="font-playfair text-md md:text-xl italic text-champagne-gold/90 leading-relaxed">
+                    <p className="font-playfair text-md md:text-xl italic text-[var(--color-gold)]/90 leading-relaxed">
                       &ldquo;{t.text}&rdquo;
                     </p>
                     <div className="flex flex-col">
-                      <span className="font-cinzel text-sm font-semibold tracking-wider text-royal-gold">
+                      <span className="font-playfair text-sm font-bold tracking-wider text-[var(--color-royal-gold)] uppercase">
                         {t.name}
                       </span>
-                      <span className="font-poppins text-[10px] text-soft-ivory/40 uppercase tracking-widest mt-1">
+                      <span className="font-poppins text-[9px] text-[var(--color-pearl-white)]/40 uppercase tracking-widest mt-1">
                         {t.role}
                       </span>
                     </div>
@@ -483,8 +509,9 @@ export default function HomePage() {
                 key={idx}
                 onClick={() => setCurrentTestimonial(idx)}
                 className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  idx === currentTestimonial ? 'bg-royal-gold w-6' : 'bg-soft-ivory/20'
+                  idx === currentTestimonial ? 'bg-[var(--color-royal-gold)] w-6' : 'bg-[var(--color-pearl-white)]/20'
                 }`}
+                aria-label={`Go to slide ${idx + 1}`}
               />
             ))}
           </div>
@@ -492,36 +519,39 @@ export default function HomePage() {
       </section>
 
       {/* 7. INSTAGRAM GALLERY SECTION */}
-      <section className="py-28 px-6 bg-matte-black/90">
+      <section className="py-32 px-6 bg-[#0a0a0a] relative select-none">
         <div className="max-w-7xl mx-auto">
+          
           {/* Header */}
           <div className="flex flex-col items-center text-center gap-4 mb-20">
-            <span className="font-poppins text-xs text-royal-gold uppercase tracking-[0.3em] font-semibold">Visual Aesthetics</span>
-            <h2 className="font-cinzel text-3xl md:text-5xl font-bold tracking-wide text-soft-ivory">
+            <span className="font-poppins text-xs text-[var(--color-royal-gold)] uppercase tracking-[0.3em] font-bold">Visual Aesthetics</span>
+            <h2 className="font-playfair text-3xl md:text-5xl font-black uppercase tracking-wide text-white">
               The Artisan Gallery
             </h2>
-            <p className="font-poppins text-xs text-soft-ivory/50 uppercase tracking-widest mt-1">
-              Tag <span className="text-royal-gold">@ArtinovaLux</span> on Instagram to join our digital gallery
+            <p className="font-poppins text-xs text-[var(--color-pearl-white)]/50 uppercase tracking-widest mt-1">
+              Tag <span className="text-[var(--color-royal-gold)]">@ArtinovaLux</span> on Instagram to join our digital gallery
             </p>
           </div>
 
-          {/* Masonry Grid */}
+          {/* Masonry Grid with Hover scale zoom-in actions */}
           <div className="columns-1 sm:columns-2 md:columns-3 gap-6 space-y-6">
             {instagramGallery.map((img, idx) => (
               <div
                 key={idx}
-                className="relative overflow-hidden rounded group border border-champagne-gold/5 break-inside-avoid"
+                className="relative overflow-hidden rounded-xl group border border-[var(--color-royal-gold)]/5 break-inside-avoid shadow-lg"
               >
                 <div className={`${img.height} relative w-full`}>
                   <Image
                     src={img.url}
                     alt={`Gallery ${idx + 1}`}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover transition-transform duration-1000 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, 33vw"
                   />
-                  {/* Subtle hover glow outline and dark shade overlay */}
-                  <div className="absolute inset-0 bg-matte-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <span className="font-cinzel text-xs uppercase tracking-[0.25em] text-royal-gold border border-royal-gold/30 py-2 px-6 bg-matte-black/80 rounded backdrop-blur-sm">
+                  
+                  {/* Hover Inspect Panel */}
+                  <div className="absolute inset-0 bg-[#0a0a0a]/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center select-none">
+                    <span className="font-poppins text-[9px] uppercase tracking-[0.25em] text-[var(--color-royal-gold)] border border-[var(--color-royal-gold)]/30 py-2 px-6 bg-black/85 rounded-md backdrop-blur-sm shadow-[0_0_15px_rgba(212,175,55,0.2)]">
                       Inspect
                     </span>
                   </div>
