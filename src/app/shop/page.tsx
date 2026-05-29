@@ -40,13 +40,19 @@ function ShopContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    async function load() {
-      setLoading(true);
+    async function load(showLoading = true) {
+      if (showLoading) setLoading(true);
       const data = await getProducts();
       setProducts(data);
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
-    load();
+    load(true);
+
+    const handleFocus = () => {
+      load(false);
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   // Compute unique categories

@@ -369,7 +369,7 @@ export default function LoginModal() {
               <button
                 type="submit"
                 disabled={formLoading}
-                className="btn-solid-gold w-full text-center py-4 tracking-[0.25em] font-extrabold cursor-pointer transition-premium disabled:opacity-50"
+                className="w-full font-poppins text-xs font-bold uppercase tracking-[0.25em] bg-[var(--color-royal-gold)] text-matte-black py-4 rounded hover:bg-[var(--color-champagne-gold)] hover:shadow-[0_0_15px_rgba(214,175,55,0.45)] transition-all duration-300 disabled:opacity-50 cursor-pointer"
               >
                 {formLoading ? 'SECURE AUTHENTICATION...' : isSignUp ? 'CREATE ACCOUNT' : 'SECURE SIGN IN'}
               </button>
@@ -388,7 +388,7 @@ export default function LoginModal() {
               type="button"
               onClick={handleGoogleSignIn}
               disabled={formLoading}
-              className="btn-purple w-full flex items-center justify-center py-4 mb-6 shadow-[0_0_15px_rgba(109,40,217,0.15)] font-bold cursor-pointer transition-premium disabled:opacity-50"
+              className="w-full h-12 border border-[var(--color-royal-gold)]/30 hover:border-[var(--color-royal-gold)] bg-transparent hover:bg-[var(--color-royal-gold)]/5 rounded flex items-center justify-center font-poppins text-xs font-bold uppercase tracking-widest text-[var(--color-soft-ivory)] hover:text-[var(--color-royal-gold)] transition-all duration-300 mb-6 cursor-pointer"
             >
               <GoogleLogo />
               Google Authorization

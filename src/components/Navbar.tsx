@@ -1,13 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import NextLink from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useApp } from '../context/AppContext';
 import { ShoppingCart, Heart, User, LogOut, Shield, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// Import next/link for client routing
-import NextLink from 'next/link';
 
 export default function Navbar() {
   const { user, isAdmin, cart, wishlist, setLoginModalOpen, logout } = useApp();
@@ -41,15 +39,15 @@ export default function Navbar() {
   return (
     <>
       {/* 1. TOP ANNOUNCEMENT BANNER */}
-      <div className="bg-[var(--gradient-mixed)] text-[var(--color-pearl-white)] text-center py-2.5 text-[8px] md:text-[10px] font-extrabold tracking-[0.25em] uppercase fixed top-0 left-0 w-full z-[2100] select-none animate-[fadeInDown_1s_ease_forwards]">
-        Ultra-Luxury Resin Masterpieces | Pan-India Shipping
+      <div className="bg-gradient-to-r from-[#121214] via-[#3d2a1c] to-[#121214] border-b border-[var(--color-royal-gold)]/10 text-[var(--color-champagne-gold)] text-center py-2.5 text-[8px] md:text-[10px] font-extrabold tracking-[0.25em] uppercase fixed top-0 left-0 w-full z-[2100] select-none animate-[fadeInDown_1s_ease_forwards]">
+        Exclusive Handcrafted Luxury Gifts | Free Shipping Pan-India
       </div>
 
       {/* 2. SYMMETRICAL HEADER BAR */}
       <header 
         className={`fixed left-0 right-0 z-50 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           scrolled 
-            ? 'top-0 py-3.5 bg-[#050505]/95 border-b border-[var(--color-royal-gold)]/20 backdrop-blur-md px-6 md:px-12' 
+            ? 'top-0 py-3.5 bg-[#070708]/95 border-b border-[var(--color-royal-gold)]/20 backdrop-blur-md px-6 md:px-12' 
             : 'top-10 py-5 bg-transparent border-b border-transparent px-6 md:px-12'
         }`}
       >
@@ -73,7 +71,7 @@ export default function Navbar() {
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className="font-playfair text-lg md:text-xl font-black tracking-[0.2em] text-gold text-purple">
+                <span className="font-cinzel text-lg md:text-xl font-bold tracking-[0.2em] text-gold-gradient leading-none">
                   ARTINOVA
                 </span>
                 <span className="font-poppins text-[8px] uppercase tracking-[0.3em] text-[var(--color-royal-gold)]/60 -mt-0.5">
@@ -92,7 +90,7 @@ export default function Navbar() {
                   key={link.name}
                   href={link.href}
                   className={`font-poppins text-[10px] uppercase tracking-[0.25em] font-semibold relative transition-colors ${
-                    isActive ? 'text-[var(--color-gold)] glow-text' : 'text-[var(--color-pearl-white)]/60 hover:text-[var(--color-gold)] hover:glow-text'
+                    isActive ? 'text-[var(--color-royal-gold)]' : 'text-[var(--color-soft-ivory)]/60 hover:text-[var(--color-royal-gold)]'
                   }`}
                 >
                   {link.name}
@@ -114,7 +112,7 @@ export default function Navbar() {
             {/* Wishlist */}
             <NextLink
               href="/shop?tab=wishlist"
-              className="p-2 text-[var(--color-pearl-white)]/70 hover:text-[var(--color-gold)] transition-colors relative shrink-0"
+              className="p-2 text-[var(--color-soft-ivory)]/70 hover:text-[var(--color-royal-gold)] transition-colors relative shrink-0"
               title="My Wishlist"
             >
               <Heart size={15} />
@@ -128,7 +126,7 @@ export default function Navbar() {
             {/* Cart */}
             <NextLink
               href="/cart"
-              className="p-2 text-[var(--color-pearl-white)]/70 hover:text-[var(--color-gold)] transition-colors relative shrink-0"
+              className="p-2 text-[var(--color-soft-ivory)]/70 hover:text-[var(--color-royal-gold)] transition-colors relative shrink-0"
               title="My Cart"
             >
               <ShoppingCart size={15} />
@@ -143,7 +141,7 @@ export default function Navbar() {
             {user && !isAdmin && (
               <NextLink
                 href="/profile"
-                className="p-2 text-[var(--color-pearl-white)]/70 hover:text-[var(--color-gold)] transition-colors shrink-0"
+                className="p-2 text-[var(--color-soft-ivory)]/70 hover:text-[var(--color-royal-gold)] transition-colors shrink-0"
                 title="My Account Profile"
               >
                 <User size={15} />
@@ -153,7 +151,7 @@ export default function Navbar() {
             {/* Admin Portal Button */}
             <NextLink
               href="/admin-secure-dashboard"
-              className="hidden sm:flex items-center gap-1.5 border border-[var(--color-royal-gold)]/50 hover:border-[var(--color-royal-gold)] bg-[var(--color-royal-gold)]/5 hover:bg-[var(--color-royal-gold)]/15 py-1.5 px-3.5 rounded text-[9px] font-poppins font-bold uppercase tracking-wider text-[var(--color-royal-gold)] transition-all duration-300 shrink-0 shadow-[0_0_10px_rgba(109,40,217,0.1)] hover:shadow-[0_0_15px_rgba(109,40,217,0.3)]"
+              className="hidden sm:flex items-center gap-1.5 border border-[var(--color-royal-gold)]/50 hover:border-[var(--color-royal-gold)] bg-[var(--color-royal-gold)]/5 hover:bg-[var(--color-royal-gold)]/15 py-1.5 px-3.5 rounded text-[9px] font-poppins font-bold uppercase tracking-wider text-[var(--color-royal-gold)] transition-all duration-300 shrink-0 shadow-[0_0_10px_rgba(212,175,55,0.05)] hover:shadow-[0_0_15px_rgba(212,175,55,0.2)]"
               title="Admin Portal Dashboard"
             >
               <Shield size={10} /> Admin Portal
@@ -164,7 +162,7 @@ export default function Navbar() {
               <div className="flex items-center border-l border-[var(--color-champagne-gold)]/10 pl-3 shrink-0">
                 <button
                   onClick={logout}
-                  className="p-2 text-[var(--color-pearl-white)]/40 hover:text-red-400 transition-colors"
+                  className="p-2 text-[var(--color-soft-ivory)]/40 hover:text-red-400 transition-colors"
                   title="Sign Out"
                 >
                   <LogOut size={14} />
@@ -182,7 +180,7 @@ export default function Navbar() {
             {/* Mobile Burger (Toggler) */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-[var(--color-gold)] hover:text-[var(--color-pearl-white)] transition-colors shrink-0"
+              className="lg:hidden p-2 text-[var(--color-royal-gold)] hover:text-[var(--color-soft-ivory)] transition-colors shrink-0"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -209,7 +207,7 @@ export default function Navbar() {
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`font-poppins text-xs uppercase tracking-widest ${
-                    pathname === link.href ? 'text-[var(--color-gold)] font-bold glow-text' : 'text-[var(--color-pearl-white)]/70'
+                    pathname === link.href ? 'text-[var(--color-royal-gold)] font-bold' : 'text-[var(--color-soft-ivory)]/70'
                   }`}
                 >
                   {link.name}
@@ -217,13 +215,13 @@ export default function Navbar() {
               ))}
             </div>
 
-            <div className="h-[1px] bg-[var(--color-pearl-white)]/10 my-1" />
+            <div className="h-[1px] bg-[var(--color-soft-ivory)]/10 my-1" />
 
             <div className="flex items-center justify-between">
               <NextLink
                 href="/shop?tab=wishlist"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 text-[var(--color-pearl-white)]/70 hover:text-[var(--color-gold)]"
+                className="flex items-center gap-2 text-[var(--color-soft-ivory)]/70 hover:text-[var(--color-royal-gold)]"
               >
                 <Heart size={15} />
                 <span className="font-poppins text-[9px] uppercase tracking-wider">Wishlist ({wishlistCount})</span>
@@ -232,7 +230,7 @@ export default function Navbar() {
               <NextLink
                 href="/cart"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 text-[var(--color-pearl-white)]/70 hover:text-[var(--color-gold)]"
+                className="flex items-center gap-2 text-[var(--color-soft-ivory)]/70 hover:text-[var(--color-royal-gold)]"
               >
                 <ShoppingCart size={15} />
                 <span className="font-poppins text-[9px] uppercase tracking-wider">Cart ({cartCount})</span>
@@ -242,7 +240,7 @@ export default function Navbar() {
                 <NextLink
                   href="/profile"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 text-[var(--color-pearl-white)]/70 hover:text-[var(--color-gold)]"
+                  className="flex items-center gap-2 text-[var(--color-soft-ivory)]/70 hover:text-[var(--color-royal-gold)]"
                 >
                   <User size={15} />
                   <span className="font-poppins text-[9px] uppercase tracking-wider">Profile</span>
@@ -253,16 +251,16 @@ export default function Navbar() {
             <NextLink
               href="/admin-secure-dashboard"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full flex items-center justify-center gap-2 border border-[var(--color-royal-gold)]/50 bg-[var(--color-royal-gold)]/5 py-3 rounded text-[9px] font-poppins font-bold uppercase tracking-wider text-[var(--color-royal-gold)] shadow-[0_0_10px_rgba(109,40,217,0.1)]"
+              className="w-full flex items-center justify-center gap-2 border border-[var(--color-royal-gold)]/50 bg-[var(--color-royal-gold)]/5 py-3 rounded text-[9px] font-poppins font-bold uppercase tracking-wider text-[var(--color-royal-gold)]"
             >
               <Shield size={11} /> Admin Portal
             </NextLink>
 
-            <div className="h-[1px] bg-[var(--color-pearl-white)]/10 my-1" />
+            <div className="h-[1px] bg-[var(--color-soft-ivory)]/10 my-1" />
 
             {user ? (
-              <div className="flex items-center justify-between bg-[#0e1424]/90 p-4 rounded border border-[var(--color-royal-gold)]/10">
-                <span className="font-poppins text-xs text-[var(--color-gold)] max-w-[150px] truncate">
+              <div className="flex items-center justify-between bg-[#121214]/90 p-4 rounded border border-[var(--color-royal-gold)]/10">
+                <span className="font-poppins text-xs text-[var(--color-royal-gold)] max-w-[150px] truncate">
                   {user.full_name || user.email}
                 </span>
                 <button
