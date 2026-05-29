@@ -23,10 +23,10 @@ const STEPS = [
 ];
 
 export default function AdminDashboardPage() {
-  const { user, isAdmin, setLoginModalOpen } = useApp();
+  const { user, isAdmin, setLoginModalOpen, loginWithGoogle, logout } = useApp();
   
   // Dashboard sections tabs
-  const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'orders' | 'customers'>('analytics');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'orders'>('analytics');
   
   // Data states
   const [products, setProducts] = useState<Product[]>([]);
@@ -213,25 +213,103 @@ export default function AdminDashboardPage() {
   // Auth gate
   if (!isAdmin) {
     return (
-      <div className="min-h-screen py-20 px-6 bg-ambient-glow flex items-center justify-center">
-        <div className="w-full max-w-md glass-card p-8 rounded-lg border border-red-500/20 text-center flex flex-col items-center gap-6">
-          <div className="p-4 rounded-full bg-red-950/40 border border-red-500/30 text-red-400">
-            <ShieldAlert size={36} />
+      <div className="min-h-screen bg-[#070913] text-[#fafafa] flex flex-col relative overflow-hidden font-poppins select-none">
+        {/* Top Header */}
+        <header className="w-full py-4 px-6 md:px-12 flex items-center justify-between border-b border-royal-gold/15 bg-[#090b1a]/85 backdrop-blur-md z-50 shrink-0">
+          {/* Left: Brand */}
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 text-royal-gold shrink-0">
+              <svg viewBox="0 0 100 100" className="w-full h-full text-royal-gold filter drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]">
+                <path d="M 40,50 C 25,48 10,40 10,25 C 10,20 20,18 28,26 C 33,31 38,40 40,47" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                <path d="M 42,52 C 28,48 15,44 14,33 C 14,29 22,28 29,33 C 34,37 39,45 42,50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M 60,50 C 75,48 90,40 90,25 C 90,20 80,18 72,26 C 67,31 62,40 60,47" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                <path d="M 58,52 C 72,48 85,44 86,33 C 86,29 78,28 71,33 C 66,37 61,45 58,50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <rect x="42" y="52" width="16" height="16" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2.5" />
+                <path d="M 40,52 L 60,52 M 50,52 L 50,68" stroke="currentColor" strokeWidth="2" />
+                <polygon points="50,38 52,43 57,45 52,47 50,52 48,47 43,45 48,43" fill="currentColor" />
+              </svg>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-cinzel text-sm font-bold tracking-[0.2em] text-gold-gradient leading-none">
+                ARTINOVA
+              </span>
+              <span className="font-poppins text-[8px] uppercase tracking-[0.3em] text-royal-gold/60 mt-0.5">
+                Admin Portal
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col gap-2">
-            <h1 className="font-cinzel text-xl font-bold tracking-widest text-red-200">
-              ACCESS DENIED
-            </h1>
-            <p className="font-poppins text-xs text-soft-ivory/50 leading-relaxed">
-              This registry is reserved exclusively for authenticated ARTINOVA administrative keys.
+
+          {/* Center: Administration Mode Pill */}
+          <div className="hidden sm:block border border-royal-gold/40 bg-royal-gold/5 px-4 py-1.5 rounded-full text-[9px] uppercase tracking-[0.2em] text-royal-gold font-bold font-poppins">
+            ADMINISTRATION MODE
+          </div>
+
+          {/* Right: Tamil & DarkMode */}
+          <div className="flex items-center gap-4">
+            <button className="border border-royal-gold/40 bg-royal-gold/5 px-3 py-1 rounded text-[9px] font-poppins font-bold uppercase tracking-wider text-royal-gold">
+              TAMIL
+            </button>
+            <button className="text-soft-ivory/60 hover:text-royal-gold transition-colors">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        {/* Main centered box */}
+        <div className="flex-1 flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#090b16] to-[#04050a] relative">
+          {/* Toast Notification */}
+          <div className="absolute top-8 right-8 flex items-center gap-2.5 bg-[#0b2b1b] border border-emerald-500/20 text-emerald-200 px-4 py-3 rounded shadow-lg z-50 text-xs font-poppins">
+            <div className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-300">✓</div>
+            <span>System ready for verification.</span>
+          </div>
+
+          {/* Card */}
+          <div className="w-full max-w-sm bg-[#0a0c1a]/95 border border-royal-gold/15 rounded-2xl p-8 flex flex-col items-center text-center shadow-[0_15px_40px_rgba(0,0,0,0.5)] relative overflow-hidden">
+            <div className="absolute -top-24 -left-24 w-48 h-48 bg-royal-gold/5 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Gold Lock Icon */}
+            <div className="w-20 h-20 rounded-full bg-[#11142a]/80 border border-royal-gold/20 flex items-center justify-center text-royal-gold shadow-[0_0_20px_rgba(212,175,55,0.05)] mb-6">
+              <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+
+            <h2 className="font-cinzel text-2xl font-bold tracking-wider text-soft-ivory mb-2">
+              Admin Portal
+            </h2>
+            <p className="font-poppins text-xs text-soft-ivory/50 mb-8 max-w-[240px]">
+              Sign in with your admin credentials.
             </p>
+
+            {/* Google Sign In Button */}
+            <button
+              onClick={loginWithGoogle}
+              className="w-full bg-[#fafafa] text-[#070708] py-3.5 px-6 rounded-lg font-poppins text-xs font-bold uppercase tracking-wider hover:bg-champagne-gold hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" className="shrink-0">
+                <path
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853"
+                />
+                <path
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  fill="#FBBC05"
+                />
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  fill="#EA4335"
+                />
+              </svg>
+              Sign in with Google
+            </button>
           </div>
-          <button
-            onClick={() => setLoginModalOpen(true)}
-            className="w-full font-poppins text-xs uppercase tracking-wider bg-royal-gold text-matte-black py-3.5 rounded font-semibold hover:bg-champagne-gold transition-colors"
-          >
-            Authenticate Admin Credentials
-          </button>
         </div>
       </div>
     );
@@ -245,141 +323,241 @@ export default function AdminDashboardPage() {
   const customersCount = new Set(orders.map(o => o.shipping_email.toLowerCase())).size;
 
   return (
-    <div className="min-h-screen py-16 px-6 bg-ambient-glow relative">
+    <div className="min-h-screen bg-[#070913] text-[#fafafa] flex flex-col relative overflow-hidden font-poppins">
       
-      {/* Zoomed Screenshot Overlay Modal */}
-      <AnimatePresence>
-        {activeScreenshot && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-matte-black/95 backdrop-blur-md">
-            <div className="absolute inset-0" onClick={() => setActiveScreenshot(null)} />
-            <div className="relative max-w-2xl max-h-[85vh] z-10 flex flex-col items-center gap-4">
-              <button
-                onClick={() => setActiveScreenshot(null)}
-                className="absolute top-[-40px] right-0 p-2 rounded-full border border-champagne-gold/20 text-soft-ivory hover:text-royal-gold"
-              >
-                <X size={18} />
-              </button>
-              <img
-                src={activeScreenshot}
-                alt="GPay Verification Receipt"
-                className="object-contain rounded border border-champagne-gold/10 max-h-[75vh]"
-              />
-              <span className="font-poppins text-[10px] text-royal-gold uppercase tracking-widest bg-matte-black/60 px-3 py-1 rounded">
-                Inspecting verification token receipt
-              </span>
-            </div>
+      {/* Top Header */}
+      <header className="w-full py-4 px-6 md:px-12 flex items-center justify-between border-b border-royal-gold/15 bg-[#090b1a]/85 backdrop-blur-md z-50 shrink-0 select-none">
+        {/* Left: Brand */}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 text-royal-gold shrink-0">
+            <svg viewBox="0 0 100 100" className="w-full h-full text-royal-gold filter drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]">
+              <path d="M 40,50 C 25,48 10,40 10,25 C 10,20 20,18 28,26 C 33,31 38,40 40,47" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M 42,52 C 28,48 15,44 14,33 C 14,29 22,28 29,33 C 34,37 39,45 42,50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path d="M 60,50 C 75,48 90,40 90,25 C 90,20 80,18 72,26 C 67,31 62,40 60,47" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M 58,52 C 72,48 85,44 86,33 C 86,29 78,28 71,33 C 66,37 61,45 58,50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <rect x="42" y="52" width="16" height="16" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2.5" />
+              <path d="M 40,52 L 60,52 M 50,52 L 50,68" stroke="currentColor" strokeWidth="2" />
+              <polygon points="50,38 52,43 57,45 52,47 50,52 48,47 43,45 48,43" fill="currentColor" />
+            </svg>
           </div>
-        )}
-      </AnimatePresence>
+          <div className="flex flex-col">
+            <span className="font-cinzel text-sm font-bold tracking-[0.2em] text-gold-gradient leading-none">
+              ARTINOVA
+            </span>
+            <span className="font-poppins text-[8px] uppercase tracking-[0.3em] text-royal-gold/60 mt-0.5">
+              Admin Portal
+            </span>
+          </div>
+        </div>
 
-      <div className="max-w-7xl mx-auto">
+        {/* Center: Administration Mode Pill */}
+        <div className="hidden sm:block border border-royal-gold/40 bg-royal-gold/5 px-4 py-1.5 rounded-full text-[9px] uppercase tracking-[0.2em] text-royal-gold font-bold font-poppins">
+          ADMINISTRATION MODE
+        </div>
+
+        {/* Right: Profile Pic, Logout, Tamil, DarkMode */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-full bg-royal-gold/15 border border-royal-gold/30 flex items-center justify-center text-[10px] font-bold text-royal-gold uppercase select-none">
+              {user?.full_name?.charAt(0) || 'D'}
+            </div>
+            <button
+              onClick={logout}
+              className="text-[10px] font-poppins font-bold uppercase tracking-wider text-soft-ivory/60 hover:text-red-400 transition-colors cursor-pointer"
+            >
+              Logout
+            </button>
+          </div>
+          <button className="border border-royal-gold/40 bg-royal-gold/5 px-3 py-1 rounded text-[9px] font-poppins font-bold uppercase tracking-wider text-royal-gold">
+            TAMIL
+          </button>
+          <button className="text-soft-ivory/60 hover:text-royal-gold transition-colors">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      {/* Main Workspace: Sidebar + Content */}
+      <div className="flex-grow flex w-full relative overflow-hidden">
         
-        {/* Title */}
-        <div className="flex flex-col gap-2 mb-12">
-          <span className="font-poppins text-[10px] text-royal-gold uppercase tracking-[0.25em] font-semibold">Security Registry</span>
-          <h1 className="font-cinzel text-3xl md:text-5xl font-bold tracking-wide text-soft-ivory">
-            Admin Panel Dashboard
-          </h1>
-          <div className="w-12 h-[1px] bg-royal-gold/60 mt-1" />
-        </div>
-
-        {/* Dashboard Tabs bar */}
-        <div className="flex border-b border-champagne-gold/10 mb-10 overflow-x-auto gap-8 no-scrollbar">
-          <button
-            onClick={() => setActiveTab('analytics')}
-            className={`pb-4 font-poppins text-xs uppercase tracking-[0.2em] font-semibold shrink-0 relative ${
-              activeTab === 'analytics' ? 'text-champagne-gold' : 'text-soft-ivory/40 hover:text-soft-ivory/80'
-            }`}
-          >
-            Boutique Analytics
-            {activeTab === 'analytics' && (
-              <motion.div layoutId="adminActiveTab" className="absolute bottom-0 left-0 w-full h-[2px] bg-royal-gold" />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('products')}
-            className={`pb-4 font-poppins text-xs uppercase tracking-[0.2em] font-semibold shrink-0 relative ${
-              activeTab === 'products' ? 'text-champagne-gold' : 'text-soft-ivory/40 hover:text-soft-ivory/80'
-            }`}
-          >
-            Product Catalog ({productsCount})
-            {activeTab === 'products' && (
-              <motion.div layoutId="adminActiveTab" className="absolute bottom-0 left-0 w-full h-[2px] bg-royal-gold" />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('orders')}
-            className={`pb-4 font-poppins text-xs uppercase tracking-[0.2em] font-semibold shrink-0 relative ${
-              activeTab === 'orders' ? 'text-champagne-gold' : 'text-soft-ivory/40 hover:text-soft-ivory/80'
-            }`}
-          >
-            Customer Orders ({totalOrdersCount})
-            {activeTab === 'orders' && (
-              <motion.div layoutId="adminActiveTab" className="absolute bottom-0 left-0 w-full h-[2px] bg-royal-gold" />
-            )}
-          </button>
-        </div>
-
-        {/* LOADING INDICATOR */}
-        {loading && activeTab !== 'products' && (
-          <div className="flex justify-center items-center py-24">
-            <Loader2 className="animate-spin text-royal-gold" size={32} />
-          </div>
-        )}
-
-        {/* Tab 1: ANALYTICS PORTAL */}
-        {!loading && activeTab === 'analytics' && (
-          <div className="flex flex-col gap-10">
-            
-            {/* Numeric Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              
-              {/* Card Sales */}
-              <div className="glass-panel p-6 rounded-lg border border-champagne-gold/5 flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <span className="font-poppins text-[10px] text-soft-ivory/40 uppercase tracking-wider">Total Sales Revenue</span>
-                  <span className="font-poppins text-2xl font-bold text-royal-gold">${totalSales.toFixed(2)}</span>
-                </div>
-                <div className="p-3.5 rounded-full border border-champagne-gold/10 text-royal-gold bg-royal-gold/5">
-                  <DollarSign size={20} />
-                </div>
+        {/* Sidebar */}
+        <aside className="w-64 bg-[#090b1a] border-r border-royal-gold/15 p-6 flex flex-col justify-between shrink-0 select-none">
+          <div className="flex flex-col gap-8">
+            <div className="flex items-center gap-3 pb-6 border-b border-royal-gold/10">
+              <div className="w-10 h-10 rounded-full bg-royal-gold/15 border border-royal-gold/35 flex items-center justify-center text-royal-gold text-lg font-bold">
+                {user?.full_name?.charAt(0) || 'D'}
               </div>
-
-              {/* Card Orders */}
-              <div className="glass-panel p-6 rounded-lg border border-champagne-gold/5 flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <span className="font-poppins text-[10px] text-soft-ivory/40 uppercase tracking-wider">Total Commission Orders</span>
-                  <span className="font-poppins text-2xl font-bold text-champagne-gold">{totalOrdersCount}</span>
-                </div>
-                <div className="p-3.5 rounded-full border border-champagne-gold/10 text-champagne-gold bg-champagne-gold/5">
-                  <ShoppingCart size={20} />
-                </div>
+              <div className="flex flex-col min-w-0">
+                <span className="font-poppins text-xs font-bold text-soft-ivory truncate">
+                  {user?.full_name || 'deepaksabari'}
+                </span>
+                <span className="font-poppins text-[10px] text-soft-ivory/40 truncate">
+                  {user?.email || 'deepaksabari28@gmail.com'}
+                </span>
               </div>
-
-              {/* Card Products */}
-              <div className="glass-panel p-6 rounded-lg border border-champagne-gold/5 flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <span className="font-poppins text-[10px] text-soft-ivory/40 uppercase tracking-wider">Active Gift Items</span>
-                  <span className="font-poppins text-2xl font-bold text-champagne-gold">{productsCount}</span>
-                </div>
-                <div className="p-3.5 rounded-full border border-champagne-gold/10 text-champagne-gold bg-champagne-gold/5">
-                  <Package size={20} />
-                </div>
-              </div>
-
-              {/* Card Customers */}
-              <div className="glass-panel p-6 rounded-lg border border-champagne-gold/5 flex items-center justify-between">
-                <div className="flex flex-col gap-1">
-                  <span className="font-poppins text-[10px] text-soft-ivory/40 uppercase tracking-wider">Unique Patrons</span>
-                  <span className="font-poppins text-2xl font-bold text-champagne-gold">{customersCount}</span>
-                </div>
-                <div className="p-3.5 rounded-full border border-champagne-gold/10 text-champagne-gold bg-champagne-gold/5">
-                  <Users size={20} />
-                </div>
-              </div>
-
             </div>
 
+            <nav className="flex flex-col gap-2">
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-lg text-xs font-poppins font-semibold transition-all border cursor-pointer text-left ${
+                  activeTab === 'analytics'
+                    ? 'bg-royal-gold/10 text-royal-gold border-royal-gold/30'
+                    : 'text-soft-ivory/50 hover:bg-royal-gold/5 hover:text-soft-ivory border-transparent'
+                }`}
+              >
+                <span className="w-4 h-4 flex items-center justify-center shrink-0">
+                  <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="7" height="9"></rect>
+                    <rect x="14" y="3" width="7" height="5"></rect>
+                    <rect x="14" y="12" width="7" height="9"></rect>
+                    <rect x="3" y="16" width="7" height="5"></rect>
+                  </svg>
+                </span>
+                Dashboard
+              </button>
+
+              <button
+                onClick={() => setActiveTab('products')}
+                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-lg text-xs font-poppins font-semibold transition-all border cursor-pointer text-left ${
+                  activeTab === 'products'
+                    ? 'bg-royal-gold/10 text-royal-gold border-royal-gold/30'
+                    : 'text-soft-ivory/50 hover:bg-royal-gold/5 hover:text-soft-ivory border-transparent'
+                }`}
+              >
+                <span className="w-4 h-4 flex items-center justify-center shrink-0">
+                  <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  </svg>
+                </span>
+                Manage Products
+              </button>
+
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-lg text-xs font-poppins font-semibold transition-all border cursor-pointer text-left ${
+                  activeTab === 'orders'
+                    ? 'bg-royal-gold/10 text-royal-gold border-royal-gold/30'
+                    : 'text-soft-ivory/50 hover:bg-royal-gold/5 hover:text-soft-ivory border-transparent'
+                }`}
+              >
+                <span className="w-4 h-4 flex items-center justify-center shrink-0">
+                  <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                  </svg>
+                </span>
+                Manage Orders
+              </button>
+
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center gap-3.5 px-4 py-3 rounded-lg text-xs font-poppins font-semibold text-soft-ivory/50 hover:bg-royal-gold/5 hover:text-soft-ivory transition-all border border-transparent"
+              >
+                <span className="w-4 h-4 flex items-center justify-center shrink-0">
+                  <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                </span>
+                Live Website
+              </a>
+            </nav>
+          </div>
+
+          <button
+            onClick={logout}
+            className="w-full flex items-center gap-3.5 px-4 py-3 rounded-lg text-xs font-poppins font-semibold text-red-400 hover:bg-red-500/5 transition-all border border-transparent cursor-pointer text-left"
+          >
+            <span className="w-4 h-4 flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </span>
+            Sign Out
+          </button>
+        </aside>
+
+        {/* Content body container */}
+        <main className="flex-grow p-6 md:p-8 overflow-y-auto">
+          {/* Zoomed Screenshot Overlay Modal */}
+          <AnimatePresence>
+            {activeScreenshot && (
+              <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-matte-black/95 backdrop-blur-md">
+                <div className="absolute inset-0" onClick={() => setActiveScreenshot(null)} />
+                <div className="relative max-w-2xl max-h-[85vh] z-10 flex flex-col items-center gap-4">
+                  <button
+                    onClick={() => setActiveScreenshot(null)}
+                    className="absolute top-[-40px] right-0 p-2 rounded-full border border-champagne-gold/20 text-soft-ivory hover:text-royal-gold"
+                  >
+                    <X size={18} />
+                  </button>
+                  <img
+                    src={activeScreenshot}
+                    alt="GPay Verification Receipt"
+                    className="object-contain rounded border border-champagne-gold/10 max-h-[75vh]"
+                  />
+                  <span className="font-poppins text-[10px] text-royal-gold uppercase tracking-widest bg-matte-black/60 px-3 py-1 rounded">
+                    Inspecting verification token receipt
+                  </span>
+                </div>
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* Header Rounded banner */}
+          <div className="w-full bg-[#0a0c1a] border border-royal-gold/15 p-6 rounded-2xl mb-8 flex flex-col gap-1.5 shadow-[0_4px_25px_rgba(0,0,0,0.15)] relative overflow-hidden select-none">
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-royal-gold/5 rounded-full blur-2xl pointer-events-none" />
+            <h1 className="font-cinzel text-xl md:text-2xl font-extrabold tracking-wider text-soft-ivory uppercase">
+              {activeTab === 'analytics' ? 'Dashboard' : activeTab === 'products' ? 'Manage Products' : 'Manage Orders'}
+            </h1>
+          </div>
+
+          {/* Dashboard view specific Stats Row */}
+          {activeTab === 'analytics' && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 select-none">
+              {/* Card Revenue */}
+              <div className="bg-[#0a0c1a]/95 border border-royal-gold/15 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-lg relative overflow-hidden">
+                <div className="absolute -top-10 -right-10 w-20 h-20 bg-royal-gold/5 rounded-full blur-xl" />
+                <span className="font-poppins text-[10px] text-soft-ivory/50 uppercase tracking-widest mb-1.5">Total Revenue</span>
+                <span className="font-poppins text-xl font-bold text-royal-gold">${totalSales.toFixed(2)}</span>
+              </div>
+              
+              {/* Card Orders */}
+              <div className="bg-[#0a0c1a]/95 border border-royal-gold/15 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-lg relative overflow-hidden">
+                <div className="absolute -top-10 -right-10 w-20 h-20 bg-royal-gold/5 rounded-full blur-xl" />
+                <span className="font-poppins text-[10px] text-soft-ivory/50 uppercase tracking-widest mb-1.5">Total Orders</span>
+                <span className="font-poppins text-xl font-bold text-champagne-gold">{totalOrdersCount}</span>
+              </div>
+              
+              {/* Card Products */}
+              <div className="bg-[#0a0c1a]/95 border border-royal-gold/15 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-lg relative overflow-hidden">
+                <div className="absolute -top-10 -right-10 w-20 h-20 bg-royal-gold/5 rounded-full blur-xl" />
+                <span className="font-poppins text-[10px] text-soft-ivory/50 uppercase tracking-widest mb-1.5">Active Products</span>
+                <span className="font-poppins text-xl font-bold text-champagne-gold">{productsCount}</span>
+              </div>
+            </div>
+          )}
+
+          {/* LOADING INDICATOR */}
+          {loading && activeTab !== 'products' && (
+            <div className="flex justify-center items-center py-24">
+              <Loader2 className="animate-spin text-royal-gold" size={32} />
+            </div>
+          )}
+
+          {/* Tab 1: ANALYTICS PORTAL */}
+          {!loading && activeTab === 'analytics' && (
+            <div className="flex flex-col gap-10">
+            
             {/* Custom Interactive SVG charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               
@@ -815,6 +993,7 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
+        </main>
       </div>
     </div>
   );
