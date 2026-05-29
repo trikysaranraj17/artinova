@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AppProvider } from "../context/AppContext";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import LayoutWrapper from "../components/LayoutWrapper";
 import CustomCursor from "../components/CustomCursor";
 import LenisScroll from "../components/LenisScroll";
-import LoginModal from "../components/LoginModal";
 
 export const metadata: Metadata = {
   title: "ARTINOVA | Luxury Handcrafted Customized Gifts & Keepsakes",
@@ -36,19 +34,10 @@ export default function RootLayout({
           <LenisScroll />
           <CustomCursor />
           
-          {/* Navigation Bar */}
-          <Navbar />
-          
-          {/* Main Viewport Content */}
-          <main className="flex-grow pt-20">
+          {/* Layout switcher wrapper */}
+          <LayoutWrapper>
             {children}
-          </main>
-          
-          {/* Global Components */}
-          <LoginModal />
-          
-          {/* Luxury Footer */}
-          <Footer />
+          </LayoutWrapper>
         </AppProvider>
       </body>
     </html>
