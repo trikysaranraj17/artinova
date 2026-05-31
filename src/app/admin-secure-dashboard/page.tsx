@@ -517,9 +517,8 @@ export default function AdminDashboardPage() {
           </AnimatePresence>
 
           {/* Header Rounded banner */}
-          <div className="w-full bg-[#0a0c1a] border border-royal-gold/15 p-6 rounded-2xl mb-8 flex flex-col gap-1.5 shadow-[0_4px_25px_rgba(0,0,0,0.15)] relative overflow-hidden select-none">
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-royal-gold/5 rounded-full blur-2xl pointer-events-none" />
-            <h1 className="font-cinzel text-xl md:text-2xl font-extrabold tracking-wider text-soft-ivory uppercase">
+          <div className="w-full bg-[#0d1024] border border-champagne-gold/10 px-8 py-6 rounded-2xl mb-8 flex items-center shadow-lg relative overflow-hidden select-none">
+            <h1 className="font-poppins text-3xl font-bold tracking-wide text-soft-ivory">
               {activeTab === 'analytics' ? 'Dashboard' : activeTab === 'products' ? 'Manage Products' : 'Manage Orders'}
             </h1>
           </div>
@@ -528,24 +527,21 @@ export default function AdminDashboardPage() {
           {activeTab === 'analytics' && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 select-none">
               {/* Card Revenue */}
-              <div className="bg-[#0a0c1a]/95 border border-royal-gold/15 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-lg relative overflow-hidden">
-                <div className="absolute -top-10 -right-10 w-20 h-20 bg-royal-gold/5 rounded-full blur-xl" />
-                <span className="font-poppins text-[10px] text-soft-ivory/50 uppercase tracking-widest mb-1.5">Total Revenue</span>
-                <span className="font-poppins text-xl font-bold text-royal-gold">${totalSales.toFixed(2)}</span>
+              <div className="bg-[#0d1024] border border-champagne-gold/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="font-poppins text-xs text-soft-ivory/80 font-medium mb-2">Total Revenue:</span>
+                <span className="font-poppins text-xl font-bold text-soft-ivory">${totalSales.toFixed(2)}</span>
               </div>
               
               {/* Card Orders */}
-              <div className="bg-[#0a0c1a]/95 border border-royal-gold/15 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-lg relative overflow-hidden">
-                <div className="absolute -top-10 -right-10 w-20 h-20 bg-royal-gold/5 rounded-full blur-xl" />
-                <span className="font-poppins text-[10px] text-soft-ivory/50 uppercase tracking-widest mb-1.5">Total Orders</span>
-                <span className="font-poppins text-xl font-bold text-champagne-gold">{totalOrdersCount}</span>
+              <div className="bg-[#0d1024] border border-champagne-gold/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="font-poppins text-xs text-soft-ivory/80 font-medium mb-2">Total Orders:</span>
+                <span className="font-poppins text-xl font-bold text-soft-ivory">{totalOrdersCount}</span>
               </div>
               
               {/* Card Products */}
-              <div className="bg-[#0a0c1a]/95 border border-royal-gold/15 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-lg relative overflow-hidden">
-                <div className="absolute -top-10 -right-10 w-20 h-20 bg-royal-gold/5 rounded-full blur-xl" />
-                <span className="font-poppins text-[10px] text-soft-ivory/50 uppercase tracking-widest mb-1.5">Active Products</span>
-                <span className="font-poppins text-xl font-bold text-champagne-gold">{productsCount}</span>
+              <div className="bg-[#0d1024] border border-champagne-gold/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md">
+                <span className="font-poppins text-xs text-soft-ivory/80 font-medium mb-2">Active Products:</span>
+                <span className="font-poppins text-xl font-bold text-soft-ivory">{productsCount}</span>
               </div>
             </div>
           )}
@@ -565,7 +561,7 @@ export default function AdminDashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               
               {/* Sales Chart */}
-              <div className="luxury-card p-6 rounded-lg border border-champagne-gold/10 reveal">
+              <div className="luxury-card p-6 rounded-lg border border-champagne-gold/10">
                 <div className="flex items-center gap-2 mb-6">
                   <TrendingUp size={16} className="text-royal-gold" />
                   <h4 className="font-cinzel text-xs uppercase tracking-widest text-champagne-gold font-semibold">
@@ -610,7 +606,7 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Category Chart */}
-              <div className="luxury-card p-6 rounded-lg border border-champagne-gold/10 reveal">
+              <div className="luxury-card p-6 rounded-lg border border-champagne-gold/10">
                 <h4 className="font-cinzel text-xs uppercase tracking-widest text-champagne-gold font-semibold mb-8">
                   Categories Volume Share
                 </h4>
@@ -645,7 +641,7 @@ export default function AdminDashboardPage() {
           <div className="flex flex-col gap-8">
             
             {/* Header / Add Toggler */}
-            <div className="flex justify-between items-center reveal">
+            <div className="flex justify-between items-center">
               <h3 className="font-cinzel text-sm uppercase tracking-widest text-champagne-gold font-semibold">
                 Boutique Registry
               </h3>
@@ -791,7 +787,7 @@ export default function AdminDashboardPage() {
             </AnimatePresence>
 
             {/* Products grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 reveal">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {products.map((product) => (
                 <div
                   key={product.id}
@@ -850,7 +846,7 @@ export default function AdminDashboardPage() {
                   return (
                     <div
                       key={order.id}
-                      className={`luxury-card reveal rounded-lg border transition-all ${
+                      className={`luxury-card rounded-lg border transition-all ${
                         isExpanded ? 'border-royal-gold/40 shadow-[0_0_15px_rgba(212,175,55,0.05)]' : 'border-champagne-gold/5'
                       }`}
                     >

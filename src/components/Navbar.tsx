@@ -19,7 +19,6 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Shop', href: '/shop' },
-    { name: 'Track Order', href: '/tracking' },
     { name: 'Contact', href: '/contact' },
   ];
 
@@ -56,8 +55,9 @@ export default function Navbar() {
           {/* A. Left: Brand Logo & Title */}
           <div className="flex-1 flex justify-start items-center">
             <NextLink href="/" className="flex items-center gap-3 group select-none">
-              <div className="relative w-9 h-9 flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 100 100" className="w-full h-full text-[var(--color-royal-gold)] filter drop-shadow-[0_0_10px_rgba(212,175,55,0.4)] transition-transform duration-500 group-hover:scale-105">
+              <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
+                <div className="absolute inset-0 bg-[var(--color-royal-gold)]/20 rounded-full blur-md animate-pulse pointer-events-none" />
+                <svg viewBox="0 0 100 100" className="relative z-10 w-full h-full text-[var(--color-royal-gold)] filter drop-shadow-[0_0_15px_rgba(212,175,55,0.8)] transition-transform duration-500 group-hover:scale-105">
                   {/* Left wing */}
                   <path d="M 40,50 C 25,48 10,40 10,25 C 10,20 20,18 28,26 C 33,31 38,40 40,47" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
                   <path d="M 42,52 C 28,48 15,44 14,33 C 14,29 22,28 29,33 C 34,37 39,45 42,50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />

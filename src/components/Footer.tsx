@@ -34,21 +34,50 @@ export default function Footer() {
         style={{ background: 'radial-gradient(ellipse at top right, rgba(245,230,200,0.1) 0%, transparent 70%)' }}
       />
 
-      {/* Gold Particles */}
-      {[...Array(12)].map((_, i) => (
-        <div
-          key={i}
-          className="gold-particle"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            width: `${Math.random() * 4 + 2}px`,
-            height: `${Math.random() * 4 + 2}px`,
-            animationDelay: `${Math.random() * 5}s`,
-            animationDuration: `${Math.random() * 10 + 5}s`
-          }}
-        />
-      ))}
+      {/* Gift Opening Effect */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 pointer-events-none opacity-20 z-0 select-none">
+        <svg viewBox="0 0 200 200" className="w-full h-full text-[var(--color-royal-gold)]">
+          <style>
+            {`
+              .gift-box { transform-origin: center bottom; animation: shake 2s infinite ease-in-out; }
+              .gift-lid { transform-origin: center; animation: popOpen 4s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+              .gift-sparkle { animation: sparklePop 4s infinite; }
+              @keyframes shake {
+                0%, 100% { transform: rotate(0deg); }
+                25% { transform: rotate(2deg); }
+                75% { transform: rotate(-2deg); }
+              }
+              @keyframes popOpen {
+                0%, 40% { transform: translateY(0) rotate(0deg); opacity: 1; }
+                50% { transform: translateY(-40px) rotate(15deg); opacity: 0; }
+                100% { transform: translateY(-40px) rotate(15deg); opacity: 0; }
+              }
+              @keyframes sparklePop {
+                0%, 45% { opacity: 0; transform: scale(0) translateY(0); }
+                50% { opacity: 1; transform: scale(1.5) translateY(-30px); }
+                60%, 100% { opacity: 0; transform: scale(0) translateY(-50px); }
+              }
+            `}
+          </style>
+          {/* Main Box */}
+          <path className="gift-box" d="M60 100 H140 V160 H60 Z" fill="currentColor" fillOpacity="0.8" />
+          <path className="gift-box" d="M95 100 H105 V160 H95 Z" fill="var(--color-champagne-gold)" />
+          {/* Lid */}
+          <g className="gift-lid">
+            <path d="M50 80 H150 V100 H50 Z" fill="currentColor" />
+            <path d="M95 80 H105 V100 H95 Z" fill="var(--color-champagne-gold)" />
+            {/* Bow */}
+            <path d="M100 80 C80 50, 60 70, 95 80 Z" fill="var(--color-champagne-gold)" />
+            <path d="M100 80 C120 50, 140 70, 105 80 Z" fill="var(--color-champagne-gold)" />
+          </g>
+          {/* Sparkles */}
+          <circle className="gift-sparkle" cx="100" cy="70" r="4" fill="var(--color-soft-ivory)" style={{ animationDelay: '0.1s' }} />
+          <circle className="gift-sparkle" cx="70" cy="50" r="3" fill="var(--color-soft-ivory)" style={{ animationDelay: '0.2s' }} />
+          <circle className="gift-sparkle" cx="130" cy="60" r="5" fill="var(--color-soft-ivory)" style={{ animationDelay: '0.15s' }} />
+        </svg>
+      </div>
+
+
 
       {/* Main Grid Content */}
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-16 relative z-10 text-center md:text-left">
@@ -100,9 +129,6 @@ export default function Footer() {
             </NextLink>
             <NextLink href="/shop" className="font-poppins text-xs text-[var(--color-soft-ivory)]/50 hover:text-[var(--color-royal-gold)] transition-colors uppercase tracking-widest">
               Collections
-            </NextLink>
-            <NextLink href="/tracking" className="font-poppins text-xs text-[var(--color-soft-ivory)]/50 hover:text-[var(--color-royal-gold)] transition-colors uppercase tracking-widest">
-              Track Order
             </NextLink>
             <NextLink href="/contact" className="font-poppins text-xs text-[var(--color-soft-ivory)]/50 hover:text-[var(--color-royal-gold)] transition-colors uppercase tracking-widest">
               Contact

@@ -177,13 +177,17 @@ export default function HomePage() {
               ARTISAN GIFT BOUTIQUE
             </span>
 
-            {/* Title */}
-            <h1 className="font-cinzel text-4xl md:text-7xl font-extrabold tracking-wider leading-tight text-3d-luxury-gold text-center max-w-3xl">
-              Crafting Emotions <br className="hidden md:inline" /> Into Luxury Gifts
+            {/* Title / Brand Name */}
+            <h1 className="font-cinzel text-6xl md:text-8xl font-extrabold tracking-widest text-[var(--color-soft-ivory)] text-center mb-4 filter drop-shadow-lg">
+              ARTINOVA
             </h1>
 
             {/* Subtitle description */}
-            <p className="font-poppins text-sm md:text-base text-[var(--color-soft-ivory)]/60 max-w-lg mt-6 leading-relaxed">
+            <p className="font-cinzel text-xl md:text-2xl text-[var(--color-royal-gold)] max-w-lg mt-2 leading-relaxed tracking-wider">
+              Crafting Emotions Into Luxury Gifts
+            </p>
+
+            <p className="font-poppins text-xs md:text-sm text-[var(--color-soft-ivory)]/60 max-w-lg mt-6 leading-relaxed">
               Bespoke collections tailored for royalty, weddings, and milestones. Individually molded, hand-polished, and custom-packaged.
             </p>
 
@@ -191,13 +195,13 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-center gap-5 mt-10 w-full sm:w-auto">
               <NextLink
                 href="/shop"
-                className="btn-solid-gold w-full sm:w-auto text-center"
+                className="btn-solid-gold w-full sm:w-auto text-center px-8 py-3 text-sm font-bold shadow-[0_0_20px_rgba(212,175,55,0.4)]"
               >
                 Shop Now
               </NextLink>
               <NextLink
                 href="#about"
-                className="btn-gold w-full sm:w-auto text-center"
+                className="btn-gold w-full sm:w-auto text-center px-8 py-3 text-sm font-bold"
               >
                 Explore Collection
               </NextLink>
