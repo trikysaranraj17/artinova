@@ -11,6 +11,7 @@ import {
   Users, Upload, Eye, X, Check, ArrowRight, Loader2, Sparkles, TrendingUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import useReveal from '../../hooks/useReveal';
 
 const STEPS = [
   'Order received',
@@ -25,6 +26,8 @@ const STEPS = [
 export default function AdminDashboardPage() {
   const { user, isAdmin, setLoginModalOpen, loginWithGoogle, logout } = useApp();
   
+  useReveal();
+
   // Dashboard sections tabs
   const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'orders'>('analytics');
   
@@ -562,7 +565,7 @@ export default function AdminDashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               
               {/* Sales Chart */}
-              <div className="glass-card p-6 rounded-lg border border-champagne-gold/10">
+              <div className="luxury-card p-6 rounded-lg border border-champagne-gold/10 reveal">
                 <div className="flex items-center gap-2 mb-6">
                   <TrendingUp size={16} className="text-royal-gold" />
                   <h4 className="font-cinzel text-xs uppercase tracking-widest text-champagne-gold font-semibold">
@@ -607,7 +610,7 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Category Chart */}
-              <div className="glass-card p-6 rounded-lg border border-champagne-gold/10">
+              <div className="luxury-card p-6 rounded-lg border border-champagne-gold/10 reveal">
                 <h4 className="font-cinzel text-xs uppercase tracking-widest text-champagne-gold font-semibold mb-8">
                   Categories Volume Share
                 </h4>
@@ -642,7 +645,7 @@ export default function AdminDashboardPage() {
           <div className="flex flex-col gap-8">
             
             {/* Header / Add Toggler */}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center reveal">
               <h3 className="font-cinzel text-sm uppercase tracking-widest text-champagne-gold font-semibold">
                 Boutique Registry
               </h3>
@@ -788,11 +791,11 @@ export default function AdminDashboardPage() {
             </AnimatePresence>
 
             {/* Products grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 reveal">
               {products.map((product) => (
                 <div
                   key={product.id}
-                  className="glass-panel p-5 rounded-lg border border-champagne-gold/5 flex items-center justify-between gap-6"
+                  className="luxury-card p-5 rounded-lg border border-champagne-gold/5 flex items-center justify-between gap-6"
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="relative w-16 h-16 rounded border border-champagne-gold/10 overflow-hidden shrink-0">
@@ -847,7 +850,7 @@ export default function AdminDashboardPage() {
                   return (
                     <div
                       key={order.id}
-                      className={`glass-panel rounded-lg border transition-all ${
+                      className={`luxury-card reveal rounded-lg border transition-all ${
                         isExpanded ? 'border-royal-gold/40 shadow-[0_0_15px_rgba(212,175,55,0.05)]' : 'border-champagne-gold/5'
                       }`}
                     >

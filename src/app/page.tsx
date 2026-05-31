@@ -11,6 +11,7 @@ import { ArrowRight, Sparkles, Award, ShieldCheck, Truck, Gift, Heart, Eye } fro
 
 // Dynamically import the R3F 3D Hero canvas with SSR disabled to prevent Node compilation errors
 const Hero3DCanvas = dynamic(() => import('../components/Hero3DCanvas'), { ssr: false });
+import useReveal from '../hooks/useReveal';
 
 export default function HomePage() {
   const { addItemToCart, toggleItemWishlist, wishlist } = useApp();
@@ -18,6 +19,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [loaderVisible, setLoaderVisible] = useState(true);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+
+  useReveal();
 
   // Load products
   useEffect(() => {
@@ -146,14 +149,20 @@ export default function HomePage() {
         )}
       </AnimatePresence>
 
-      {/* 2. HERO SECTION WITH 3D CANVAS */}
-      <section className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-ambient-glow">
+      {/* 2. HERO SECTION WITH VIDEO CANVAS */}
+      <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
         
-        {/* Dynamic 3D Scene */}
-        <Hero3DCanvas />
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="video-bg"
+          src="https://cdn.shopify.com/videos/c/o/v/6f7c6f0d9c4e4b5f8c1e8b3b3b3b3b3b.mp4"
+        />
 
         {/* Cinematic Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070708] via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_20%,#070708_100%)] pointer-events-none" />
 
         {/* Hero Copywriting */}
         <div className="relative z-10 text-center max-w-4xl px-6 flex flex-col items-center select-none">
@@ -169,7 +178,7 @@ export default function HomePage() {
             </span>
 
             {/* Title */}
-            <h1 className="font-cinzel text-4xl md:text-7xl font-extrabold tracking-wider leading-tight text-gold-gradient text-center max-w-3xl">
+            <h1 className="font-cinzel text-4xl md:text-7xl font-extrabold tracking-wider leading-tight text-3d-luxury-gold text-center max-w-3xl">
               Crafting Emotions <br className="hidden md:inline" /> Into Luxury Gifts
             </h1>
 
@@ -182,13 +191,13 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-center gap-5 mt-10 w-full sm:w-auto">
               <NextLink
                 href="/shop"
-                className="w-full sm:w-auto text-center font-poppins text-xs font-semibold uppercase tracking-[0.2em] bg-[var(--color-royal-gold)] text-matte-black px-10 py-4 rounded hover:bg-[var(--color-champagne-gold)] hover:shadow-[0_0_15px_rgba(214,175,55,0.4)] transition-all duration-300"
+                className="btn-solid-gold w-full sm:w-auto text-center"
               >
                 Shop Now
               </NextLink>
               <NextLink
                 href="#about"
-                className="w-full sm:w-auto text-center font-poppins text-xs font-semibold uppercase tracking-[0.2em] border border-[var(--color-champagne-gold)]/20 px-9 py-4 rounded hover:bg-[var(--color-champagne-gold)]/5 text-[var(--color-soft-ivory)] hover:border-[var(--color-royal-gold)] transition-all duration-300"
+                className="btn-gold w-full sm:w-auto text-center"
               >
                 Explore Collection
               </NextLink>
@@ -198,14 +207,15 @@ export default function HomePage() {
 
         {/* Animated mouse scroll hint */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none opacity-40 hover:opacity-100 transition-opacity">
-          <span className="font-poppins text-[9px] uppercase tracking-[0.25em] text-[var(--color-soft-ivory)]">Scroll</span>
-          <div className="w-[18px] h-[30px] border border-[var(--color-soft-ivory)]/50 rounded-full flex justify-center pt-1.5">
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              className="w-1.5 h-1.5 rounded-full bg-[var(--color-royal-gold)]"
-            />
-          </div>
+          <div style={{ width: '1px', height: '100px', background: 'var(--gradient-gold)', animation: 'scroll-line 3s infinite' }}></div>
+          <style jsx>{`
+            @keyframes scroll-line {
+              0% { transform: scaleY(0); transform-origin: top; opacity: 0; }
+              50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+              51% { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
+              100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+            }
+          `}</style>
         </div>
       </section>
 
@@ -244,18 +254,17 @@ export default function HomePage() {
               {products.slice(0, 3).map((product) => {
                 const isWishlisted = wishlist.some((p) => p.id === product.id);
                 return (
-                  <motion.div
+                  <div
                     key={product.id}
-                    className="glass-card flex flex-col h-full rounded-lg overflow-hidden group perspective-container"
-                    whileHover={{ scale: 1.01 }}
+                    className="luxury-card reveal flex flex-col h-full rounded-lg overflow-hidden group perspective-container"
                   >
                     {/* Card Image Container */}
-                    <div className="relative h-72 w-full overflow-hidden">
+                    <div className="relative h-72 w-full img-zoom-container">
                       <Image
                         src={product.images[0] || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800'}
                         alt={product.title}
                         fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="object-cover"
                         sizes="(max-width: 768px) 100vw, 33vw"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-matte-black)]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -303,12 +312,12 @@ export default function HomePage() {
                       
                       <button
                         onClick={() => addItemToCart(product.id, 1)}
-                        className="w-full py-3 border border-[var(--color-royal-gold)]/30 hover:border-[var(--color-royal-gold)] hover:bg-[var(--color-royal-gold)] hover:text-matte-black transition-all duration-300 font-poppins text-[10px] uppercase tracking-[0.2em] font-semibold cursor-pointer"
+                        className="w-full py-3 border border-[var(--color-royal-gold)]/30 hover:border-[var(--color-royal-gold)] hover:bg-[var(--color-royal-gold)] hover:text-matte-black transition-all duration-300 font-poppins text-[10px] uppercase tracking-[0.2em] font-semibold cursor-pointer z-10"
                       >
                         Add to Cart
                       </button>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -322,7 +331,7 @@ export default function HomePage() {
         {/* Glowing backdrop leaks */}
         <div className="absolute top-20 right-10 w-96 h-96 rounded-full bg-[var(--color-burgundy-glow)]/10 blur-[120px] pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center reveal">
           
           {/* Text block */}
           <div className="flex flex-col gap-6 text-center lg:text-left items-center lg:items-start">
@@ -397,7 +406,7 @@ export default function HomePage() {
           </div>
 
           {/* Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 reveal">
             
             {/* Card 1 */}
             <div className="glass-card p-8 rounded-lg flex flex-col items-center text-center gap-4">
@@ -470,7 +479,7 @@ export default function HomePage() {
             Patron Testimonials
           </h2>
 
-          <div className="relative h-64 flex items-center justify-center">
+          <div className="relative h-64 flex items-center justify-center reveal">
             <AnimatePresence mode="wait">
               {testimonials.map((t, idx) => {
                 if (idx !== currentTestimonial) return null;
@@ -532,7 +541,7 @@ export default function HomePage() {
           </div>
 
           {/* Masonry Grid */}
-          <div className="columns-1 sm:columns-2 md:columns-3 gap-6 space-y-6">
+          <div className="columns-1 sm:columns-2 md:columns-3 gap-6 space-y-6 reveal">
             {instagramGallery.map((img, idx) => (
               <div
                 key={idx}

@@ -24,6 +24,32 @@ export default function Footer() {
       <div className="absolute -bottom-48 -left-48 w-96 h-96 rounded-full bg-[var(--color-deep-bronze)]/5 blur-[100px] pointer-events-none" />
       <div className="absolute -top-48 -right-48 w-96 h-96 rounded-full bg-[var(--color-burgundy-glow)]/10 blur-[120px] pointer-events-none" />
 
+      {/* Wave layers (Black & Gold Theme) */}
+      <div 
+        className="wave-layer wave-layer-1 absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay"
+        style={{ background: 'radial-gradient(ellipse at bottom, rgba(212,175,55,0.15) 0%, transparent 60%)' }}
+      />
+      <div 
+        className="wave-layer wave-layer-2 absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay"
+        style={{ background: 'radial-gradient(ellipse at top right, rgba(245,230,200,0.1) 0%, transparent 70%)' }}
+      />
+
+      {/* Gold Particles */}
+      {[...Array(12)].map((_, i) => (
+        <div
+          key={i}
+          className="gold-particle"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            width: `${Math.random() * 4 + 2}px`,
+            height: `${Math.random() * 4 + 2}px`,
+            animationDelay: `${Math.random() * 5}s`,
+            animationDuration: `${Math.random() * 10 + 5}s`
+          }}
+        />
+      ))}
+
       {/* Main Grid Content */}
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-16 relative z-10 text-center md:text-left">
         
