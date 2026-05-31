@@ -98,7 +98,7 @@ export default function Footer() {
           
           {/* Social Links */}
           <div className="flex items-center gap-4 text-[var(--color-soft-ivory)]/60">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-[var(--color-champagne-gold)]/10 hover:border-[var(--color-royal-gold)] hover:text-[var(--color-royal-gold)] transition-all duration-300 flex items-center justify-center">
+            <a href="https://instagram.com/__artinova__" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-[var(--color-champagne-gold)]/10 hover:border-[var(--color-royal-gold)] hover:text-[var(--color-royal-gold)] transition-all duration-300 flex items-center justify-center">
               <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
@@ -144,15 +144,15 @@ export default function Footer() {
           <div className="flex flex-col items-center md:items-start gap-4 text-[var(--color-soft-ivory)]/50 font-poppins text-xs tracking-wide">
             <div className="flex items-center gap-3">
               <MapPin size={14} className="text-[var(--color-royal-gold)] shrink-0" />
-              <span>Chennai, Tamil Nadu, India</span>
+              <span>Chennai, Kanchipuram, Vandavasi</span>
             </div>
             <div className="flex items-center gap-3">
               <Phone size={14} className="text-[var(--color-royal-gold)] shrink-0" />
-              <span>+91 98407 06312</span>
+              <span>+91 99942 03670 (Akash)</span>
             </div>
             <div className="flex items-center gap-3">
               <Mail size={14} className="text-[var(--color-royal-gold)] shrink-0" />
-              <span>deepaksabari28@gmail.com</span>
+              <span>akashselva18@gmail.com</span>
             </div>
             
             {/* Newsletter input */}

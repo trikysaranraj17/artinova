@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import { getProducts, Product } from '../lib/db';
 import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Sparkles, Award, ShieldCheck, Truck, Gift, Heart, Eye } from 'lucide-react';
+import { ArrowRight, Sparkles, Award, ShieldCheck, Truck, Gift, Heart, Eye, Camera, Layers, Users, Smile, Info } from 'lucide-react';
 
 // Dynamically import the R3F 3D Hero canvas with SSR disabled to prevent Node compilation errors
 const Hero3DCanvas = dynamic(() => import('../components/Hero3DCanvas'), { ssr: false });
@@ -18,7 +18,6 @@ export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [loaderVisible, setLoaderVisible] = useState(true);
-  const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   useReveal();
 
@@ -58,43 +57,6 @@ export default function HomePage() {
     };
   }, []);
 
-  // Testimonials Auto-sliding
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const testimonials = [
-    {
-      name: 'Princess Beatrice H.',
-      role: 'Private Collector',
-      text: 'The Royal Monarch Keepsake box exceeded all levels of expectation. The velvet lining is thick, the wings emblem feels heavy and royal, and the ambient design glows in the dressing hall. Visually unforgettable.',
-      rating: 5
-    },
-    {
-      name: 'Alexander V.',
-      role: 'Corporate CEO',
-      text: 'We commissioned custom letter openers for our executive board. The integration of amber and gold dust in the handles represents true custom excellence. ARTINOVA is modern gifting nobility.',
-      rating: 5
-    },
-    {
-      name: 'Clara & Marcus',
-      role: 'Bespoke Client',
-      text: 'Our personalized couple album is a work of high-end art. The Italian leather scent, the gold-leaf paper edges, the meticulous box. Truly, this is crafting emotions into luxury.',
-      rating: 5
-    }
-  ];
-
-  const instagramGallery = [
-    { url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=600&auto=format&fit=crop&q=80', height: 'h-64' },
-    { url: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&auto=format&fit=crop&q=80', height: 'h-80' },
-    { url: 'https://images.unsplash.com/photo-1574926053821-79c5e338a933?w=600&auto=format&fit=crop&q=80', height: 'h-96' },
-    { url: 'https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=600&auto=format&fit=crop&q=80', height: 'h-72' },
-    { url: 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=600&auto=format&fit=crop&q=80', height: 'h-80' },
-    { url: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&auto=format&fit=crop&q=80', height: 'h-96' }
-  ];
 
   return (
     <div className="relative">
@@ -329,249 +291,204 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. ABOUT BRAND STORYTELLING SECTION */}
-      <section id="about" className="py-28 px-6 bg-[var(--color-luxury-charcoal)]/50 relative overflow-hidden select-none">
-        
-        {/* Glowing backdrop leaks */}
-        <div className="absolute top-20 right-10 w-96 h-96 rounded-full bg-[var(--color-burgundy-glow)]/10 blur-[120px] pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center reveal">
-          
-          {/* Text block */}
-          <div className="flex flex-col gap-6 text-center lg:text-left items-center lg:items-start">
-            <span className="font-poppins text-xs text-[var(--color-royal-gold)] uppercase tracking-[0.3em] font-semibold">The Artisan Legacy</span>
-            <h2 className="font-cinzel text-3xl md:text-5xl font-bold tracking-wide text-[var(--color-soft-ivory)]">
-              Artisans of the Soul
-            </h2>
-            <div className="w-16 h-[1px] bg-[var(--color-royal-gold)]/60 my-2" />
-            <p className="font-playfair italic text-lg text-[var(--color-champagne-gold)]/90 leading-relaxed max-w-lg">
-              &ldquo;A gift is not a mere object. It is a bridge between two minds, an emblem of silent adoration, cast in gold.&rdquo;
-            </p>
-            <p className="font-poppins text-xs md:text-sm text-[var(--color-soft-ivory)]/60 leading-relaxed max-w-xl">
-              At ARTINOVA, we refuse the modern standard of mechanical production. We believe in the slow, meticulous crafting of individual statements. Our materials are imported premium grain wood, crystals, and solid brass, layered with real leaf plating and micro-shined to reflect ambient lighting.
-            </p>
-            <p className="font-poppins text-xs md:text-sm text-[var(--color-soft-ivory)]/60 leading-relaxed max-w-xl">
-              Every detail is tailored to your emotional message. When a box is opened, it is not simply opened—it is unveiled.
-            </p>
-            <div className="mt-4">
-              <NextLink
-                href="/shop"
-                className="font-poppins text-xs uppercase tracking-widest text-[var(--color-royal-gold)] hover:text-[var(--color-champagne-gold)] inline-flex items-center gap-2 font-semibold"
-              >
-                Discover The Craft <ArrowRight size={14} />
-              </NextLink>
-            </div>
-          </div>
-
-          {/* Layered Image showcase */}
-          <div className="relative flex justify-center items-center">
-            {/* Background geometric design */}
-            <div className="absolute w-[80%] h-[80%] border border-[var(--color-royal-gold)]/10 rounded-full scale-105 pointer-events-none" />
-            
-            {/* Primary Image */}
-            <div className="relative w-[300px] h-[380px] md:w-[380px] md:h-[480px] rounded overflow-hidden shadow-2xl border border-[var(--color-champagne-gold)]/10 z-10 transform -rotate-2">
-              <Image
-                src="https://images.unsplash.com/photo-1544816155-12df9643f363?w=800"
-                alt="Handcrafting process"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-            </div>
-            
-            {/* Secondary Floating Image */}
-            <div className="absolute bottom-[-40px] left-[-20px] md:left-[20px] w-[180px] h-[220px] md:w-[220px] md:h-[260px] rounded overflow-hidden shadow-2xl border border-[var(--color-royal-gold)]/20 z-20 transform translate-x-[-10px] translate-y-[20px] rotate-3 hidden sm:block">
-              <Image
-                src="https://images.unsplash.com/photo-1513151233558-d860c5398176?w=500"
-                alt="Keepsake detail"
-                fill
-                className="object-cover"
-                sizes="220px"
-              />
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* 5. WHY CHOOSE US SECTION */}
-      <section id="why-choose-us" className="py-28 px-6 bg-[#070708] select-none">
-        <div className="max-w-7xl mx-auto">
-          
-          {/* Header */}
-          <div className="text-center flex flex-col items-center gap-4 mb-20">
-            <span className="font-poppins text-xs text-[var(--color-royal-gold)] uppercase tracking-[0.3em] font-semibold">Quality Commitment</span>
-            <h2 className="font-cinzel text-3xl md:text-5xl font-bold tracking-wide text-[var(--color-soft-ivory)]">
-              The Standard of Royalty
-            </h2>
-            <p className="font-poppins text-xs md:text-sm text-[var(--color-soft-ivory)]/50 max-w-md leading-relaxed mt-2 uppercase tracking-widest">
-              Why patrons around the globe trust ARTINOVA with their most critical personal statements.
-            </p>
-          </div>
-
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 reveal">
-            
-            {/* Card 1 */}
-            <div className="glass-card p-8 rounded-lg flex flex-col items-center text-center gap-4">
-              <div className="p-4 rounded-full border border-[var(--color-champagne-gold)]/15 text-[var(--color-royal-gold)] bg-[var(--color-luxury-charcoal)]/40">
-                <Heart size={20} />
-              </div>
-              <h3 className="font-cinzel text-md font-bold text-[var(--color-champagne-gold)] uppercase tracking-wide">Handmade</h3>
-              <p className="font-poppins text-[10px] text-[var(--color-soft-ivory)]/50 leading-relaxed">
-                Individually cut, aligned, and finished. No mass assembly templates.
-              </p>
-            </div>
-
-            {/* Card 2 */}
-            <div className="glass-card p-8 rounded-lg flex flex-col items-center text-center gap-4">
-              <div className="p-4 rounded-full border border-[var(--color-champagne-gold)]/15 text-[var(--color-royal-gold)] bg-[var(--color-luxury-charcoal)]/40">
-                <Award size={20} />
-              </div>
-              <h3 className="font-cinzel text-md font-bold text-[var(--color-champagne-gold)] uppercase tracking-wide">Materials</h3>
-              <p className="font-poppins text-[10px] text-[var(--color-soft-ivory)]/50 leading-relaxed">
-                Rich Honduran mahogany, luxury velvet linings, and authentic leaf gilding.
-              </p>
-            </div>
-
-            {/* Card 3 */}
-            <div className="glass-card p-8 rounded-lg flex flex-col items-center text-center gap-4">
-              <div className="p-4 rounded-full border border-[var(--color-champagne-gold)]/15 text-[var(--color-royal-gold)] bg-[var(--color-luxury-charcoal)]/40">
-                <Sparkles size={20} />
-              </div>
-              <h3 className="font-cinzel text-md font-bold text-[var(--color-champagne-gold)] uppercase tracking-wide">Personalized</h3>
-              <p className="font-poppins text-[10px] text-[var(--color-soft-ivory)]/50 leading-relaxed">
-                Custom wing engravings and monogram options detailed to order specification.
-              </p>
-            </div>
-
-            {/* Card 4 */}
-            <div className="glass-card p-8 rounded-lg flex flex-col items-center text-center gap-4">
-              <div className="p-4 rounded-full border border-[var(--color-champagne-gold)]/15 text-[var(--color-royal-gold)] bg-[var(--color-luxury-charcoal)]/40">
-                <Truck size={20} />
-              </div>
-              <h3 className="font-cinzel text-md font-bold text-[var(--color-champagne-gold)] uppercase tracking-wide">Delivery</h3>
-              <p className="font-poppins text-[10px] text-[var(--color-soft-ivory)]/50 leading-relaxed">
-                Priority packing and tracked logistics ensuring safe courier handling.
-              </p>
-            </div>
-
-            {/* Card 5 */}
-            <div className="glass-card p-8 rounded-lg flex flex-col items-center text-center gap-4">
-              <div className="p-4 rounded-full border border-[var(--color-champagne-gold)]/15 text-[var(--color-royal-gold)] bg-[var(--color-luxury-charcoal)]/40">
-                <Gift size={20} />
-              </div>
-              <h3 className="font-cinzel text-md font-bold text-[var(--color-champagne-gold)] uppercase tracking-wide">Packaging</h3>
-              <p className="font-poppins text-[10px] text-[var(--color-soft-ivory)]/50 leading-relaxed">
-                Every box arrives sealed in protective textured gift wrap with custom ribbon bindings.
-              </p>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* 6. TESTIMONIALS SECTION */}
-      <section className="py-28 px-6 bg-[var(--color-luxury-charcoal)]/30 relative overflow-hidden select-none">
-        
+      {/* 4. OUR BESPOKE SERVICES SECTION */}
+      <section id="services" className="py-28 px-6 bg-[#070708] relative select-none">
         {/* Glow leaks */}
-        <div className="absolute top-1/2 left-10 w-96 h-96 rounded-full bg-[var(--color-deep-bronze)]/5 blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/3 right-10 w-[500px] h-[500px] rounded-full bg-[var(--color-royal-gold)]/5 blur-[150px] pointer-events-none" />
+        <div className="absolute bottom-1/3 left-10 w-[500px] h-[500px] rounded-full bg-[var(--color-burgundy-glow)]/5 blur-[150px] pointer-events-none" />
 
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <span className="font-poppins text-xs text-[var(--color-royal-gold)] uppercase tracking-[0.3em] font-semibold">Elite Appreciations</span>
-          <h2 className="font-cinzel text-3xl md:text-5xl font-bold tracking-wide text-[var(--color-soft-ivory)] mt-2 mb-16">
-            Patron Testimonials
-          </h2>
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
+          <div className="flex flex-col items-center text-center mb-20 gap-4">
+            <span className="font-poppins text-xs text-[var(--color-royal-gold)] uppercase tracking-[0.35em] font-semibold border border-[var(--color-royal-gold)]/20 py-1.5 px-4 rounded-full bg-[#070708]/50 backdrop-blur-md">
+              Bespoke Gift Catalog
+            </span>
+            <h2 className="font-cinzel text-3xl md:text-5xl font-bold tracking-wide text-[var(--color-soft-ivory)] mt-2">
+              Our Creative Creations
+            </h2>
+            <div className="w-24 h-[1px] bg-gradient-to-r from-transparent via-[var(--color-royal-gold)] to-transparent mt-4" />
+            <p className="font-poppins text-xs md:text-sm text-[var(--color-soft-ivory)]/50 max-w-2xl mt-4 leading-relaxed">
+              Explore our curated range of custom gifts and handcrafted items. Every piece is crafted individually and delivered with love across India.
+            </p>
+          </div>
 
-          <div className="relative h-64 flex items-center justify-center reveal">
-            <AnimatePresence mode="wait">
-              {testimonials.map((t, idx) => {
-                if (idx !== currentTestimonial) return null;
-                return (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.6 }}
-                    className="glass-panel p-10 rounded-lg flex flex-col gap-6 border border-[var(--color-champagne-gold)]/10"
-                  >
-                    <p className="font-playfair text-md md:text-xl italic text-[var(--color-champagne-gold)]/90 leading-relaxed">
-                      &ldquo;{t.text}&rdquo;
-                    </p>
-                    <div className="flex flex-col">
-                      <span className="font-cinzel text-sm font-semibold tracking-wider text-[var(--color-royal-gold)] uppercase">
-                        {t.name}
-                      </span>
-                      <span className="font-poppins text-[9px] text-[var(--color-soft-ivory)]/40 uppercase tracking-widest mt-1">
-                        {t.role}
+          {/* Grid Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {catalogWorks.map((work, index) => {
+              const IconComponent = work.icon;
+              return (
+                <div
+                  key={index}
+                  className="glass-card hover:border-[var(--color-royal-gold)]/40 p-8 rounded-2xl flex flex-col justify-between relative overflow-hidden group border border-[var(--color-champagne-gold)]/5 h-full"
+                >
+                  {/* Subtle Gradient Glow in card background on hover */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${work.color} opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`} />
+
+                  <div className="relative z-10 flex flex-col gap-5">
+                    {/* Top Bar: Icon & Badge */}
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="p-3.5 rounded-xl bg-matte-black/60 border border-[var(--color-champagne-gold)]/10 text-[var(--color-royal-gold)] shadow-md group-hover:scale-110 transition-transform duration-500">
+                        <IconComponent size={20} />
+                      </div>
+                      <span className="bg-[var(--color-royal-gold)]/10 border border-[var(--color-royal-gold)]/20 px-3 py-1 text-[8.5px] uppercase tracking-widest text-[var(--color-royal-gold)] rounded-full font-semibold font-poppins">
+                        {work.badge}
                       </span>
                     </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-          </div>
 
-          {/* Bullet Indicators */}
-          <div className="flex justify-center gap-3 mt-8">
-            {testimonials.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentTestimonial(idx)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                  idx === currentTestimonial ? 'bg-[var(--color-royal-gold)] w-6' : 'bg-[var(--color-soft-ivory)]/20'
-                }`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+                    {/* Content */}
+                    <div className="flex flex-col gap-2.5">
+                      <h3 className="font-cinzel text-lg md:text-xl font-bold tracking-wide text-[var(--color-soft-ivory)] group-hover:text-[var(--color-royal-gold)] transition-colors">
+                        {work.title}
+                      </h3>
+                      <p className="font-poppins text-[11.5px] text-[var(--color-soft-ivory)]/65 leading-relaxed">
+                        {work.description}
+                      </p>
+                    </div>
 
-      {/* 7. INSTAGRAM GALLERY SECTION */}
-      <section className="py-28 px-6 bg-[#070708]/90 select-none">
-        <div className="max-w-7xl mx-auto">
-          
-          {/* Header */}
-          <div className="flex flex-col items-center text-center gap-4 mb-20">
-            <span className="font-poppins text-xs text-[var(--color-royal-gold)] uppercase tracking-[0.3em] font-semibold">Visual Aesthetics</span>
-            <h2 className="font-cinzel text-3xl md:text-5xl font-bold tracking-wide text-[var(--color-soft-ivory)]">
-              The Artisan Gallery
-            </h2>
-            <p className="font-poppins text-xs text-[var(--color-soft-ivory)]/50 uppercase tracking-widest mt-1">
-              Tag <span className="text-[var(--color-royal-gold)]">@ArtinovaLux</span> on Instagram to join our digital gallery
-            </p>
-          </div>
+                    {/* Pricing details banner */}
+                    <div className="p-3.5 rounded-lg bg-matte-black/40 border border-[var(--color-champagne-gold)]/5 flex flex-col gap-1 mt-1">
+                      <div className="flex justify-between items-center text-xs font-semibold font-poppins text-[var(--color-royal-gold)]">
+                        <span>Price:</span>
+                        <span>{work.price}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 font-poppins text-[9.5px] text-[var(--color-soft-ivory)]/40 mt-0.5">
+                        <Info size={10} className="shrink-0 text-[var(--color-royal-gold)]/50" />
+                        <span className="truncate">{work.detail}</span>
+                      </div>
+                    </div>
 
-          {/* Masonry Grid */}
-          <div className="columns-1 sm:columns-2 md:columns-3 gap-6 space-y-6 reveal">
-            {instagramGallery.map((img, idx) => (
-              <div
-                key={idx}
-                className="relative overflow-hidden rounded group border border-[var(--color-champagne-gold)]/5 break-inside-avoid shadow-lg"
-              >
-                <div className={`${img.height} relative w-full`}>
-                  <Image
-                    src={img.url}
-                    alt={`Gallery ${idx + 1}`}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-[#070708]/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                    <span className="font-cinzel text-xs uppercase tracking-[0.25em] text-[var(--color-royal-gold)] border border-[var(--color-royal-gold)]/30 py-2 px-6 bg-[#070708]/80 rounded backdrop-blur-sm">
-                      Inspect
-                    </span>
+                    {/* List Features */}
+                    <ul className="flex flex-col gap-2 mt-2">
+                      {work.features.map((feat, fIndex) => (
+                        <li key={fIndex} className="flex items-center gap-2.5 font-poppins text-[10.5px] text-[var(--color-soft-ivory)]/55">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-royal-gold)]/60 shrink-0" />
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="relative z-10 mt-8 pt-4 border-t border-[var(--color-champagne-gold)]/5 flex items-center justify-between gap-4">
+                    <NextLink
+                      href="/contact"
+                      className="w-full text-center py-2.5 rounded border border-[var(--color-royal-gold)]/30 hover:border-[var(--color-royal-gold)] hover:bg-[var(--color-royal-gold)] hover:text-matte-black transition-all duration-300 font-poppins text-[9px] uppercase tracking-[0.2em] font-bold z-10 cursor-pointer"
+                    >
+                      Inquire / Order Now
+                    </NextLink>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
-
         </div>
       </section>
+
+      {/* End of content */}
 
     </div>
   );
 }
+
+const catalogWorks = [
+  {
+    title: "Bespoke Photo Frames",
+    description: "Your cherished memories, beautifully framed in premium quality wood. Available in 12+ custom sizes.",
+    price: "₹250 - ₹4,500",
+    detail: "Sizes: 3x4\" to 30x40\"",
+    badge: "Best Seller",
+    features: ["Premium Wood Frame", "Includes Design Charge", "Includes Shipping"],
+    icon: Layers,
+    color: "from-amber-500/10 to-yellow-500/10"
+  },
+  {
+    title: "Custom Wrapper & Photo Chocolates",
+    description: "Make every moment sweeter with high quality chocolates and custom designed photo wrappers.",
+    price: "Small ₹25 | Medium ₹70 | Large ₹400",
+    detail: "Min. Order: Small (30 pcs) | Med (12 pcs)",
+    badge: "Personalized",
+    features: ["Premium Taste", "Personalized photo wrappers", "Includes Shipping"],
+    icon: Gift,
+    color: "from-rose-500/10 to-pink-500/10"
+  },
+  {
+    title: "Artisan Gift Bouquets",
+    description: "Thoughtful bouquets styled beautifully with fresh/preserved flowers, chocolates, or jewelry.",
+    price: "₹850 - ₹1,300",
+    detail: "Flower, Chocolate, Caring, Photo, Accessories",
+    badge: "Elegant Design",
+    features: ["Premium arrangement", "Custom styling options", "Includes Shipping"],
+    icon: Sparkles,
+    color: "from-purple-500/10 to-indigo-500/10"
+  },
+  {
+    title: "Luminous Polaroid Prints",
+    description: "Retro polaroid prints available with ambient fairy lights to beautifully light up your favorite memories.",
+    price: "₹149 - ₹649",
+    detail: "Small, Medium & Large sets (10 or 24 pics)",
+    badge: "Highly Popular",
+    features: ["With or Without Light options", "High quality photo print", "Includes Shipping"],
+    icon: Camera,
+    color: "from-teal-500/10 to-emerald-500/10"
+  },
+  {
+    title: "Custom Photo Magnets & Prints",
+    description: "Turn your refrigerator or metallic boards into a gallery of memories with custom magnet sets.",
+    price: "₹149 - ₹249",
+    detail: "Sizes: 3x4\" (10 Pcs), 4x6\" (10 Pcs), 8x12\" (5 Pcs)",
+    badge: "New Arrival",
+    features: ["Durable magnetic back", "Vivid color printing", "Includes Shipping"],
+    icon: Smile,
+    color: "from-cyan-500/10 to-blue-500/10"
+  },
+  {
+    title: "Curated Gift Hampers",
+    description: "Stunning themed hampers tailored for weddings, birthdays, anniversaries, or house warmings.",
+    price: "Custom Budget",
+    detail: "Fully custom hampers made for your budget",
+    badge: "Specialty",
+    features: ["Tailored assortment", "Premium boxes & trays", "Occasion styling"],
+    icon: Award,
+    color: "from-amber-600/10 to-red-600/10"
+  },
+  {
+    title: "Occasion Return Gifts",
+    description: "Delight your guests with customized return gifts for baby showers, naming ceremonies, or half-sarees.",
+    price: "Bulk Quote Available",
+    detail: "Handmade concepts tailored to your request",
+    badge: "Bulk Ordering",
+    features: ["Themed branding", "Heartfelt tags", "Customized layout options"],
+    icon: Users,
+    color: "from-orange-500/10 to-amber-500/10"
+  },
+  {
+    title: "Handmade Charm Bracelets",
+    description: "Intricately hand-woven charm bracelets. Beautifully handmade with love, just for you.",
+    price: "₹35 per Piece",
+    detail: "Min. Order: 5 Pieces",
+    badge: "Bespoke Jewelry",
+    features: ["Butterfly & star charms", "Includes Shipping", "Custom color threads"],
+    icon: Heart,
+    color: "from-rose-600/10 to-red-500/10"
+  },
+  {
+    title: "3D Miniature Couple Frames",
+    description: "Enchanting 3D clay-style miniatures of couples and families housed in premium glass shadow frames.",
+    price: "A4: ₹1,599 | A3: ₹2,599",
+    detail: "A4 & A3 sizes with custom text and details",
+    badge: "Signature Art",
+    features: ["Handcrafted figurines", "Premium frame housing", "Includes Shipping"],
+    icon: ShieldCheck,
+    color: "from-yellow-600/10 to-amber-500/10"
+  },
+  {
+    title: "Anime Poster Packs",
+    description: "Vibrant, high-resolution anime posters available in customized packs to style your personal space.",
+    price: "₹89 - ₹199",
+    detail: "9 Poster (4x6\"), 4 Poster (6x8\"), 2 Poster (8x12\")",
+    badge: "Fan Favorite",
+    features: ["Vivid print details", "Durable card stock", "Includes Shipping"],
+    icon: Layers,
+    color: "from-purple-600/10 to-pink-500/10"
+  }
+];
