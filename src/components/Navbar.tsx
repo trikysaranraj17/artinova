@@ -92,7 +92,7 @@ export default function Navbar() {
           {/* Icons / Right (20px from edge, gap: 20px, 40x40px tappable area) */}
           <div className="flex items-center gap-5">
             {/* Search Icon */}
-            <div className="relative flex items-center justify-center">
+            <div className="hidden md:flex relative items-center justify-center">
               <button 
                 onClick={() => setSearchOpen(!searchOpen)}
                 className="w-10 h-10 flex items-center justify-center text-[#F5F0E8]/80 hover:text-[#C9A84C] transition-colors cursor-pointer"
@@ -146,31 +146,33 @@ export default function Navbar() {
             )}
 
             {/* Profile / Login */}
-            {user ? (
-              <div className="flex items-center gap-3 pl-2 border-l border-[#C9A84C]/25">
-                <NextLink
-                  href="/profile"
-                  className="w-10 h-10 flex items-center justify-center text-[#F5F0E8]/80 hover:text-[#C9A84C] transition-colors"
-                  title="Profile"
-                >
-                  <User size={16} strokeWidth={1.5} />
-                </NextLink>
+            <div className="hidden md:flex items-center">
+              {user ? (
+                <div className="flex items-center gap-3 pl-2 border-l border-[#C9A84C]/25">
+                  <NextLink
+                    href="/profile"
+                    className="w-10 h-10 flex items-center justify-center text-[#F5F0E8]/80 hover:text-[#C9A84C] transition-colors"
+                    title="Profile"
+                  >
+                    <User size={16} strokeWidth={1.5} />
+                  </NextLink>
+                  <button
+                    onClick={logout}
+                    className="w-10 h-10 flex items-center justify-center text-[#F5F0E8]/40 hover:text-red-400 transition-colors cursor-pointer"
+                    title="Logout"
+                  >
+                    <LogOut size={15} strokeWidth={1.5} />
+                  </button>
+                </div>
+              ) : (
                 <button
-                  onClick={logout}
-                  className="w-10 h-10 flex items-center justify-center text-[#F5F0E8]/40 hover:text-red-400 transition-colors cursor-pointer"
-                  title="Logout"
+                  onClick={() => setLoginModalOpen(true)}
+                  className="font-accent text-[9px] uppercase tracking-[0.15em] border border-[#C9A84C]/40 px-3 py-2 rounded hover:bg-[#C9A84C] hover:text-[#0A0A0A] transition-all duration-300 font-semibold cursor-pointer"
                 >
-                  <LogOut size={15} strokeWidth={1.5} />
+                  Sign In
                 </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setLoginModalOpen(true)}
-                className="font-accent text-[9px] uppercase tracking-[0.15em] border border-[#C9A84C]/40 px-3 py-2 rounded hover:bg-[#C9A84C] hover:text-[#0A0A0A] transition-all duration-300 font-semibold cursor-pointer"
-              >
-                Sign In
-              </button>
-            )}
+              )}
+            </div>
 
             {/* Mobile Toggler */}
             <button
@@ -202,6 +204,25 @@ export default function Navbar() {
             >
               <X size={24} />
             </button>
+
+            {/* Mobile Search input inside menu */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.05 }}
+              className="w-full max-w-xs mb-8 px-4"
+            >
+              <div className="relative flex items-center bg-[#111111] border border-[#C9A84C]/20 rounded-md px-3 py-2">
+                <Search size={14} className="text-[#9A8F7E] mr-2 shrink-0" />
+                <input 
+                  type="text" 
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent text-xs text-[#F5F0E8] border-none outline-none focus:ring-0 p-0"
+                />
+              </div>
+            </motion.div>
 
             {/* Links staggered fade-up */}
             <div className="flex flex-col items-center gap-6">
