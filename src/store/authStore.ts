@@ -59,7 +59,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             .eq('user_id', u.id)
             .single();
 
-          const isSystemAdmin = adminData || u.email?.toLowerCase() === 'deepaksabari28@gmail.com';
+          const isSystemAdmin = u.email?.toLowerCase() === 'deepaksabari28@gmail.com' || u.email?.toLowerCase() === 'deepaksabari28@gmial.com';
 
           const userProfile: UserProfile = {
             id: u.id,
@@ -67,7 +67,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             full_name: profile?.full_name || u.user_metadata?.full_name || '',
             phone: profile?.phone || '',
             avatar_url: profile?.avatar_url || '',
-            isAdmin: !!isSystemAdmin
+            isAdmin: isSystemAdmin
           };
 
           set({
@@ -91,7 +91,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const parsed = JSON.parse(storedUser);
         set({
           user: parsed,
-          isAdmin: parsed.email?.toLowerCase() === 'deepaksabari28@gmail.com' || parsed.isAdmin || false,
+          isAdmin: parsed.email?.toLowerCase() === 'deepaksabari28@gmail.com' || parsed.email?.toLowerCase() === 'deepaksabari28@gmial.com',
           isGuest: false
         });
       } else if (isGuestMode) {
@@ -108,10 +108,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     try {
       // Direct Admin Credential Check for deepaksabari28@gmail.com
-      if (lowerEmail === 'deepaksabari28@gmail.com' && !isSupabaseConfigured) {
+      if ((lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com') && !isSupabaseConfigured) {
         const adminUser: UserProfile = {
           id: 'usr-deepaksabari',
-          email: 'deepaksabari28@gmail.com',
+          email: lowerEmail,
           full_name: 'Deepak Sabari (Admin)',
           phone: '+91 99999 99999',
           address: 'Artinova Studio HQ',
@@ -131,7 +131,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           const u = data.user;
           const { data: profile } = await supabase.from('profiles').select('*').eq('id', u.id).single();
           const { data: adminData } = await supabase.from('admin_users').select('*').eq('user_id', u.id).single();
-          const isSystemAdmin = adminData || u.email?.toLowerCase() === 'deepaksabari28@gmail.com';
+          const isSystemAdmin = u.email?.toLowerCase() === 'deepaksabari28@gmail.com' || u.email?.toLowerCase() === 'deepaksabari28@gmial.com';
 
           const userProfile: UserProfile = {
             id: u.id,
@@ -139,7 +139,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             full_name: profile?.full_name || '',
             phone: profile?.phone || '',
             avatar_url: profile?.avatar_url || '',
-            isAdmin: !!isSystemAdmin
+            isAdmin: isSystemAdmin
           };
 
           set({ user: userProfile, isAdmin: !!isSystemAdmin, isGuest: false, loginModalOpen: false });
@@ -153,15 +153,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           throw new Error('No account found with this email. Please sign up.');
         }
 
-        let isNewAdmin = existing.isAdmin || lowerEmail === 'deepaksabari28@gmail.com';
-        if (adminSecret) {
-          const expectedSecret = process.env.NEXT_PUBLIC_ADMIN_SIGNUP_SECRET || 'ARTINOVA_LUX_ADMIN';
-          if (adminSecret === expectedSecret) {
-            isNewAdmin = true;
-          } else {
-            throw new Error('Invalid Administrator token code.');
-          }
-        }
+        const isNewAdmin = lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com';
 
         const authenticatedUser: UserProfile = {
           id: existing.id,
@@ -203,23 +195,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           });
           if (profileErr) console.error('Error creating profile metadata:', profileErr);
 
-          let isNewAdmin = lowerEmail === 'deepaksabari28@gmail.com';
-          if (adminSecret) {
-            const expectedSecret = process.env.NEXT_PUBLIC_ADMIN_SIGNUP_SECRET || 'ARTINOVA_LUX_ADMIN';
-            if (adminSecret === expectedSecret) {
-              isNewAdmin = true;
-            } else {
-              throw new Error('Invalid Administrator token code.');
-            }
-          }
-
-          if (isNewAdmin) {
-            await supabase.from('admin_users').insert({
-              user_id: u.id,
-              email: lowerEmail,
-              name: name
-            });
-          }
+          const isNewAdmin = lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com';
 
           const userProfile: UserProfile = {
             id: u.id,
@@ -238,15 +214,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           throw new Error('An account already exists with this email address.');
         }
 
-        let isNewAdmin = lowerEmail === 'deepaksabari28@gmail.com';
-        if (adminSecret) {
-          const expectedSecret = process.env.NEXT_PUBLIC_ADMIN_SIGNUP_SECRET || 'ARTINOVA_LUX_ADMIN';
-          if (adminSecret === expectedSecret) {
-            isNewAdmin = true;
-          } else {
-            throw new Error('Invalid Administrator token code.');
-          }
-        }
+        const isNewAdmin = lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com';
 
         const newUser = {
           id: `usr-${Date.now()}`,
@@ -350,7 +318,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         );
         if (emailInput === null) return;
         const email = emailInput.trim() || 'google-client@luxury.com';
-        const isSpecialAdmin = email.toLowerCase() === 'deepaksabari28@gmail.com';
+        const isSpecialAdmin = email.toLowerCase() === 'deepaksabari28@gmail.com' || email.toLowerCase() === 'deepaksabari28@gmial.com';
         
         const mockGoogleUser = {
           id: isSpecialAdmin ? 'usr-deepaksabari' : 'usr-google-' + Date.now(),

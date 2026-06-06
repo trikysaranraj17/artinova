@@ -201,17 +201,17 @@ export default function ProductDetailPage() {
           <ArrowLeft size={13} /> Back to Boutique
         </NextLink>
 
-        {/* 2-Column Product Detail Layout */}
+        {/* 2-Column Product Detail Layout (50/50) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
           
-          {/* LEFT: Product Gallery */}
-          <div className="flex flex-col gap-5">
+          {/* LEFT: Product Gallery (sticky top: 100px on desktop) */}
+          <div className="lg:sticky lg:top-[100px] flex flex-col gap-3">
             {/* Main Image Magnifier Container */}
             <div 
               ref={imgContainerRef}
               onMouseMove={handleMouseMove}
               onMouseLeave={() => setLensShow(false)}
-              className="relative aspect-square w-full border border-[#C9A84C]/15 rounded-lg bg-[#111111] overflow-hidden shadow-2xl"
+              className="relative aspect-square w-full border border-[#C9A84C]/15 rounded-xl bg-[#111111] overflow-hidden shadow-2xl cursor-zoom-in"
             >
               <img 
                 src={activeImage} 
@@ -229,12 +229,12 @@ export default function ProductDetailPage() {
                     top: `${lensPos.y}px`,
                     backgroundImage: `url(${activeImage})`,
                     backgroundPosition: lensBgPos,
-                    backgroundSize: '800px 800px' // adjust based on zoom scale
+                    backgroundSize: '800px 800px'
                   }}
                 />
               )}
 
-              {/* 360° View Badge */}
+              {/* 360° View Ready Badge */}
               <span className="absolute bottom-4 left-4 bg-[#0A0A0A]/80 border border-[#C9A84C]/35 px-3 py-1 rounded text-[8px] font-accent uppercase tracking-widest text-[#C9A84C]">
                 ✦ 360° View Ready
               </span>
@@ -248,16 +248,16 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
-            {/* Thumbnail selector strip */}
-            <div className="grid grid-cols-4 gap-3">
+            {/* Thumbnail selector strip - 4 items, gap 8px, mt: 12px */}
+            <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
               {product.images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImage(img)}
-                  className={`aspect-square relative rounded overflow-hidden border transition-all ${
+                  className={`w-[72px] h-[72px] shrink-0 relative rounded-lg overflow-hidden border transition-all ${
                     activeImage === img 
-                      ? 'border-[#C9A84C] scale-95 shadow-[0_0_8px_rgba(201,168,76,0.3)]' 
-                      : 'border-[#C9A84C]/15 hover:border-[#C9A84C]/45'
+                      ? 'border-2 border-[#C9A84C] scale-95 shadow-[0_0_8px_rgba(201,168,76,0.3)]' 
+                      : 'border border-[#C9A84C]/15 hover:border-[#C9A84C]/45'
                   }`}
                 >
                   <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
@@ -266,11 +266,11 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* RIGHT: Product Info details */}
-          <div className="flex flex-col gap-6">
+          {/* RIGHT: Product Info details (overflow-y: auto if long) */}
+          <div className="flex flex-col">
             
-            {/* Badges */}
-            <div className="flex items-center gap-2">
+            {/* Badges - flex row, gap 8px, mb: 12px */}
+            <div className="flex items-center gap-2 mb-3">
               <span className="px-2.5 py-1 bg-[#111111] border border-[#C9A84C]/30 text-[#C9A84C] rounded text-[8px] font-accent uppercase tracking-widest font-bold">
                 Luxury Keepsake
               </span>
@@ -281,50 +281,46 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Title */}
-            <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-wide text-[#F5F0E8]">
+            {/* Product Title — Cormorant 38px, lh 1.2, mb: 12px */}
+            <h1 className="font-display text-[38px] leading-[1.2] font-bold tracking-wide text-[#F5F0E8] mb-3">
               {product.name}
             </h1>
 
-            {/* Reviews summary */}
-            <div className="flex items-center gap-1">
-              <div className="flex text-[#C9A84C] text-[11px]">
+            {/* Stars row — gap 8px, mb: 16px */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex text-[#C9A84C] text-[11px] gap-0.5">
                 {Array.from({ length: 5 }).map((_, i) => <span key={i}>★</span>)}
               </div>
-              <span className="text-[#9A8F7E] text-xs font-semibold ml-2">
+              <span className="text-[#9A8F7E] text-xs font-semibold">
                 4.9 ({reviews.length || 128} reviews)
               </span>
             </div>
 
-            {/* Prices panel */}
-            <div className="flex flex-col gap-1 border-y border-[#C9A84C]/15 py-4 select-none">
-              <div className="flex items-baseline gap-4">
-                <span className="font-display text-3xl font-semibold text-[#C9A84C]">
-                  ₹{product.price.toLocaleString()}
-                </span>
-                {product.original_price && (
-                  <span className="font-body text-[#9A8F7E]/50 line-through text-sm">
-                    ₹{product.original_price.toLocaleString()}
-                  </span>
-                )}
-              </div>
-              {saveAmt > 0 && (
-                <span className="text-emerald-400 font-accent text-[9px] uppercase tracking-widest font-bold mt-1">
-                  You save ₹{saveAmt.toLocaleString()} (Free wrap included)
+            {/* Price row — mb: 24px */}
+            <div className="flex items-baseline gap-4 mb-6 select-none">
+              <span className="font-display text-3xl font-semibold text-[#C9A84C]">
+                ₹{product.price.toLocaleString()}
+              </span>
+              {product.original_price && (
+                <span className="font-body text-[#9A8F7E]/50 line-through text-sm">
+                  ₹{product.original_price.toLocaleString()}
                 </span>
               )}
             </div>
 
-            {/* Description */}
-            <div className="flex flex-col gap-2">
+            {/* Divider */}
+            <hr className="border-t border-[#C9A84C]/15 mb-6" />
+
+            {/* Description — mb: 24px */}
+            <div className="flex flex-col gap-2 mb-6">
               <h4 className="font-accent text-[10px] uppercase tracking-widest text-[#C9A84C] font-semibold">The Description</h4>
               <p className="font-body text-xs sm:text-sm text-[#9A8F7E] leading-relaxed">
                 {product.description}
               </p>
             </div>
 
-            {/* Features lists */}
-            <div className="grid grid-cols-2 gap-3 text-xs text-[#F5F0E8]/80 font-body py-2">
+            {/* Features list — mb: 24px */}
+            <div className="grid grid-cols-2 gap-3 text-xs text-[#F5F0E8]/80 font-body mb-6">
               <div className="flex items-center gap-2">
                 <span className="text-[#C9A84C]">✦</span>
                 <span>Handcrafted in India</span>
@@ -343,9 +339,9 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Customizations options (conditional) */}
+            {/* Customization block — mb: 24px */}
             {product.is_customizable && (
-              <div className="p-6 rounded-lg bg-[#111111] border border-[#C9A84C]/15 flex flex-col gap-4">
+              <div className="p-6 rounded-lg bg-[#111111] border border-[#C9A84C]/15 flex flex-col gap-4 mb-6">
                 <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C] flex items-center gap-2">
                   <span>🛠️</span> Customization panel
                 </h3>
@@ -362,7 +358,7 @@ export default function ProductDetailPage() {
                   />
                 </div>
 
-                {/* Photo uploader (if applicable to photo gifts) */}
+                {/* Photo uploader */}
                 {(product.slug.includes('photo') || product.slug.includes('frame') || product.slug.includes('accordion')) && (
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Memory Photo Upload</label>
@@ -407,66 +403,67 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {/* Qty and Actions */}
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-4">
-                {/* Quantity */}
-                <div className="flex items-center border border-[#C9A84C]/20 bg-[#111111] px-2 h-12 rounded">
-                  <button 
-                    onClick={() => setQty(prev => Math.max(1, prev - 1))}
-                    className="px-3 text-[#9A8F7E] hover:text-[#C9A84C] text-lg font-bold cursor-pointer"
-                  >
-                    -
-                  </button>
-                  <span className="w-10 text-center text-xs font-bold">{qty}</span>
-                  <button 
-                    onClick={() => setQty(prev => prev + 1)}
-                    className="px-3 text-[#9A8F7E] hover:text-[#C9A84C] text-lg font-bold cursor-pointer"
-                  >
-                    +
-                  </button>
-                </div>
-                
-                <span className="text-[11px] text-[#9A8F7E] font-body">
-                  Estimated Delivery: 5–7 Business Days
-                </span>
-              </div>
+            {/* Divider */}
+            <hr className="border-t border-[#C9A84C]/15 mb-6" />
 
-              {/* Buttons */}
-              <div className="grid grid-cols-2 gap-4">
+            {/* Quantity + Delivery row — mb: 24px */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+              {/* Quantity */}
+              <div className="flex items-center border border-[#C9A84C]/20 bg-[#111111] px-2 h-12 rounded">
                 <button 
-                  onClick={handleAddToCart}
-                  className="btn-solid-gold h-14 w-full flex items-center justify-center gap-2 cursor-pointer"
+                  onClick={() => setQty(prev => Math.max(1, prev - 1))}
+                  className="px-3 text-[#9A8F7E] hover:text-[#C9A84C] text-lg font-bold cursor-pointer"
                 >
-                  <ShoppingCart size={14} /> Add To Cart
+                  -
                 </button>
+                <span className="w-10 text-center text-xs font-bold">{qty}</span>
                 <button 
-                  onClick={handleBuyNow}
-                  className="btn-gold h-14 w-full flex items-center justify-center cursor-pointer"
+                  onClick={() => setQty(prev => prev + 1)}
+                  className="px-3 text-[#9A8F7E] hover:text-[#C9A84C] text-lg font-bold cursor-pointer"
                 >
-                  Buy Now
-                </button>
-              </div>
-
-              {/* Secondary links */}
-              <div className="flex items-center gap-4 text-xs font-accent uppercase tracking-widest text-[#9A8F7E] mt-2 select-none">
-                <button 
-                  onClick={() => toggleItem(user?.id || 'guest', product.id)}
-                  className="hover:text-[#C9A84C] transition-colors flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Heart size={13} fill={isWishlisted ? '#ef4444' : 'none'} className={isWishlisted ? 'text-red-500' : ''} /> {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
-                </button>
-                <span className="text-[#C9A84C]/20">|</span>
-                <button 
-                  onClick={handleShare}
-                  className="hover:text-[#C9A84C] transition-colors flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Share2 size={13} /> {copiedLink ? 'Link Copied!' : 'Share Creation'}
+                  +
                 </button>
               </div>
+              
+              <span className="text-[11px] text-[#9A8F7E] font-body">
+                Estimated Delivery: 5–7 Business Days
+              </span>
             </div>
 
-            {/* Premium Guarantee */}
+            {/* Add to Cart button — 56px height, full width, mb: 12px */}
+            <button 
+              onClick={handleAddToCart}
+              className="btn-solid-gold h-[56px] w-full flex items-center justify-center gap-2 mb-3 cursor-pointer"
+            >
+              <ShoppingCart size={14} /> Add To Cart
+            </button>
+
+            {/* Buy Now button — 56px height, full width, mb: 16px */}
+            <button 
+              onClick={handleBuyNow}
+              className="btn-gold h-[56px] w-full flex items-center justify-center mb-4 cursor-pointer"
+            >
+              Buy Now
+            </button>
+
+            {/* Wishlist + Share row — gap 16px, mb: 32px */}
+            <div className="flex items-center gap-4 text-xs font-accent uppercase tracking-widest text-[#9A8F7E] mb-8 select-none">
+              <button 
+                onClick={() => toggleItem(user?.id || 'guest', product.id)}
+                className="hover:text-[#C9A84C] transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <Heart size={13} fill={isWishlisted ? '#ef4444' : 'none'} className={isWishlisted ? 'text-red-500' : ''} /> {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
+              </button>
+              <span className="text-[#C9A84C]/20">|</span>
+              <button 
+                onClick={handleShare}
+                className="hover:text-[#C9A84C] transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <Share2 size={13} /> {copiedLink ? 'Link Copied!' : 'Share Creation'}
+              </button>
+            </div>
+
+            {/* Delivery info strip — icon + text rows */}
             <div className="p-5 rounded-lg bg-[#111111] border border-[#C9A84C]/10 flex gap-4">
               <ShieldCheck className="text-[#C9A84C] shrink-0" size={18} />
               <div className="flex flex-col gap-1">

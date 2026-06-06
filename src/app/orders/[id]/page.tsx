@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import NextLink from 'next/link';
 import { getOrderById, getOrderItems, getTrackingUpdates, Order, OrderItem, TrackingUpdate } from '../../../lib/db';
 import { useAuthStore } from '../../../store/authStore';
-import { ArrowLeft, Calendar, FileText, CheckCircle2, ChevronRight, MessageCircle, MapPin, ClipboardList, ShieldAlert, Image as ImageIcon, X, ZoomIn, Loader2 } from 'lucide-react';
+import { ArrowLeft, Calendar, FileText, CheckCircle2, Check, ChevronRight, MessageCircle, MapPin, ClipboardList, ShieldAlert, Image as ImageIcon, X, ZoomIn, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const STATUS_STEPS = [
@@ -394,17 +394,87 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             </div>
 
             {/* Tracking timeline */}
-            <div className="bg-[#111111] border border-[#C9A84C]/10 p-6 rounded-lg shadow-xl">
+            <div className="bg-[#111111] border border-[#C9A84C]/10 p-6 md:p-8 rounded-lg shadow-xl">
               <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C] border-b border-[#C9A84C]/5 pb-4 mb-6 select-none">
                 Workshop Progress Track
               </h3>
 
-              <div className="relative pl-4 flex flex-col gap-6">
-                <div className="absolute left-[15px] top-3 bottom-3 w-[2px] bg-[#0A0A0A] border-l border-[#C9A84C]/10" />
+              {/* DESKTOP HORIZONTAL TIMELINE */}
+              <div className="hidden md:block select-none relative py-8">
+                {/* Horizontal Connector Line Track */}
+                <div className="absolute top-[20px] left-[6%] right-[6%] h-[4px] bg-[#0A0A0A] border-y border-[#C9A84C]/10 rounded-full" />
+                
+                {/* Active filled golden line */}
                 {activeStepIndex !== -1 && (
                   <div 
-                    className="absolute left-[15px] top-3 w-[2px] bg-[#C9A84C] transition-all duration-1000 shadow-[0_0_8px_rgba(201,168,76,0.4)]"
-                    style={{ height: `${(activeStepIndex / (STATUS_STEPS.length - 1)) * 86}%` }}
+                    className="absolute top-[20px] left-[6%] h-[4px] bg-gradient-to-r from-[#B8860B] via-[#C9A84C] to-[#F5F0E8] transition-all duration-1000 shadow-[0_0_8px_rgba(201,168,76,0.5)] rounded-full animate-shimmer-sweep"
+                    style={{
+                      width: `${(activeStepIndex / (STATUS_STEPS.length - 1)) * 88}%`
+                    }}
+                  />
+                )}
+
+                <div className="relative flex justify-between items-start">
+                  {STATUS_STEPS.map((step, idx) => {
+                    const isCompleted = idx < activeStepIndex;
+                    const isActive = idx === activeStepIndex;
+
+                    const log = trackingLogs.find(l => l.stage.toLowerCase() === step.key.toLowerCase());
+                    const dateText = log ? formatDate(log.created_at) : '';
+
+                    return (
+                      <div key={step.key} className="flex flex-col items-center flex-1 relative">
+                        {/* Node circle 40x40px */}
+                        <div className="relative z-10 flex items-center justify-center w-[40px] h-[40px] rounded-full transition-all duration-300">
+                          {isCompleted ? (
+                            <div className="w-[40px] h-[40px] rounded-full bg-[#C9A84C] text-[#0A0A0A] flex items-center justify-center shadow-[0_0_12px_rgba(201,168,76,0.3)]">
+                              <Check className="w-[18px] h-[18px] text-white" strokeWidth={3} />
+                            </div>
+                          ) : isActive ? (
+                            <div className="w-[40px] h-[40px] rounded-full border-2 border-[#C9A84C] bg-[#C9A84C]/25 flex items-center justify-center shadow-[0_0_15px_rgba(201,168,76,0.5)] animate-pulse-gold-circle scale-105">
+                              <div className="w-2.5 h-2.5 rounded-full bg-[#C9A84C]" />
+                            </div>
+                          ) : (
+                            <div className="w-[40px] h-[40px] rounded-full border border-[#C9A84C]/10 bg-[#0D0D0D] flex items-center justify-center text-[#9A8F7E]/30 text-xs font-bold">
+                              {idx + 1}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Node Info Label */}
+                        <div className="mt-4 text-center px-1">
+                          <div className={`font-body font-medium text-[11px] leading-tight ${isActive ? 'text-[#C9A84C] font-bold' : isCompleted ? 'text-[#F5F0E8]' : 'text-[#9A8F7E]/40'}`}>
+                            {idx + 1}. {step.label.replace('Order ', '').replace(' Started', '').replace(' Check', '')}
+                          </div>
+                          {isCompleted && dateText && (
+                            <div className="text-[10px] text-[#9A8F7E]/60 mt-1 select-none font-body">
+                              {dateText}
+                            </div>
+                          )}
+                          {isActive && (
+                            <div className="text-[10px] text-[#C9A84C] mt-1 select-none font-accent font-bold tracking-widest uppercase animate-pulse">
+                              Active
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* MOBILE VERTICAL TIMELINE */}
+              <div className="block md:hidden select-none relative pl-6 flex flex-col gap-8 py-2">
+                {/* Central connecting line */}
+                <div className="absolute left-[7px] top-2 bottom-2 w-[2px] bg-[#0A0A0A] border-l border-[#C9A84C]/10" />
+                
+                {/* Active filled line */}
+                {activeStepIndex !== -1 && (
+                  <div 
+                    className="absolute left-[7px] top-2 w-[2px] bg-gradient-to-b from-[#B8860B] to-[#C9A84C] transition-all duration-1000 shadow-[0_0_8px_rgba(201,168,76,0.4)]"
+                    style={{
+                      height: `${(activeStepIndex / (STATUS_STEPS.length - 1)) * 92}%`
+                    }}
                   />
                 )}
 
@@ -412,28 +482,51 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                   const isCompleted = idx < activeStepIndex;
                   const isActive = idx === activeStepIndex;
 
+                  const log = trackingLogs.find(l => l.stage.toLowerCase() === step.key.toLowerCase());
+                  const dateText = log ? formatDate(log.created_at) : '';
+
                   return (
-                    <div key={step.key} className="flex gap-4 items-start relative z-10 select-none">
-                      <div className="w-8 h-8 rounded-full border bg-[#111111] flex items-center justify-center shrink-0">
+                    <div key={step.key} className="flex gap-4 items-start relative z-10">
+                      {/* Dot circle 16px */}
+                      <div className="flex items-center justify-center shrink-0 w-[16px] h-[16px] relative mt-1">
                         {isCompleted ? (
-                          <div className="w-8 h-8 rounded-full border border-[#C9A84C] bg-[#C9A84C]/10 text-[#C9A84C] flex items-center justify-center">
-                            <CheckCircle2 size={13} />
+                          <div className="w-[16px] h-[16px] rounded-full bg-[#C9A84C] flex items-center justify-center text-[#0A0A0A] shadow-[0_0_6px_rgba(201,168,76,0.3)]">
+                            <Check className="w-[10px] h-[10px] text-white" strokeWidth={4} />
                           </div>
                         ) : isActive ? (
-                          <div className="w-8 h-8 rounded-full border-2 border-[#C9A84C] bg-[#C9A84C]/25 flex items-center justify-center">
-                            <div className="w-2 h-2 rounded-full bg-[#C9A84C] animate-pulse" />
+                          <div className="w-[16px] h-[16px] rounded-full border-2 border-[#C9A84C] bg-[#C9A84C]/25 flex items-center justify-center shadow-[0_0_10px_rgba(201,168,76,0.6)] animate-pulse-gold-circle-small">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#C9A84C]" />
                           </div>
                         ) : (
-                          <div className="w-8 h-8 rounded-full border border-[#C9A84C]/10 bg-[#0A0A0A] flex items-center justify-center text-[#9A8F7E]/30 text-[9px] font-bold">
-                            {idx + 1}
-                          </div>
+                          <div className="w-[16px] h-[16px] rounded-full border border-[#C9A84C]/20 bg-[#0D0D0D]" />
                         )}
                       </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className={`font-accent text-xs font-bold ${isActive ? 'text-[#C9A84C]' : isCompleted ? 'text-[#C9A84C]/85' : 'text-[#9A8F7E]/40'}`}>
-                          {step.label}
+
+                      {/* Content column */}
+                      <div className="flex flex-col gap-1 flex-1">
+                        <div className="flex justify-between items-start">
+                          <span className={`font-body font-medium text-[13px] ${isActive ? 'text-[#C9A84C] font-bold' : isCompleted ? 'text-[#F5F0E8]' : 'text-[#9A8F7E]/40'}`}>
+                            {step.label}
+                          </span>
+                          {dateText && (
+                            <span className="text-[10px] text-[#9A8F7E]/50 font-body shrink-0 ml-2">
+                              {dateText}
+                            </span>
+                          )}
+                        </div>
+                        <span className="font-body text-[11px] text-[#9A8F7E]/70 leading-relaxed">
+                          {step.desc}
                         </span>
-                        <span className="font-body text-[10px] text-[#9A8F7E]/75 leading-relaxed">{step.desc}</span>
+                        {isActive && order.courier && order.tracking_number && step.key === 'shipped' && (
+                          <div className="mt-2 text-[10px] p-2 bg-[#0A0A0A] border border-[#C9A84C]/15 rounded text-[#9A8F7E] w-fit">
+                            Courier: <strong className="text-white">{order.courier}</strong> &bull; AWB: <strong className="text-[#C9A84C]">{order.tracking_number}</strong>
+                          </div>
+                        )}
+                        {log && log.note && (
+                          <div className="text-[11.5px] text-[#9A8F7E]/60 italic font-body mt-1">
+                            Note: &ldquo;{log.note}&rdquo;
+                          </div>
+                        )}
                       </div>
                     </div>
                   );

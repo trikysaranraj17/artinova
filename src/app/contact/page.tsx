@@ -1,13 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Globe, ShieldCheck } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Send, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function ContactPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [subject, setSubject] = useState('Custom Design Commission');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -19,7 +18,6 @@ export default function ContactPage() {
     setError(null);
 
     try {
-      // Send message to the owner's email using FormSubmit AJAX API
       const response = await fetch('https://formsubmit.co/ajax/deepaksabari28@gmail.com', {
         method: 'POST',
         headers: {
@@ -29,9 +27,8 @@ export default function ContactPage() {
         body: JSON.stringify({
           name,
           email,
-          subject,
           message,
-          _subject: `New ARTINOVA Inquiry: ${subject}`
+          _subject: `New ARTINOVA Inquiry from ${name}`
         })
       });
 
@@ -53,207 +50,141 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen pt-40 pb-24 px-6 bg-ambient-glow relative overflow-hidden">
-      {/* Decorative ambient glowing circles */}
-      <div className="absolute top-1/4 left-[-10%] w-[500px] h-[500px] rounded-full bg-burgundy-glow/10 blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-[-10%] w-[500px] h-[500px] rounded-full bg-deep-bronze/10 blur-[130px] pointer-events-none" />
+    <div className="min-h-screen pt-32 pb-24 px-6 bg-[#0A0A0A] relative overflow-hidden font-body select-none">
+      {/* Golden backdrop glow */}
+      <div className="absolute top-1/4 left-[-10%] w-[400px] h-[400px] bg-[#C9A84C]/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-[-10%] w-[400px] h-[400px] bg-[#C9A84C]/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto relative z-10">
         
-        {/* Title */}
-        <div className="flex flex-col items-center text-center gap-2 mb-16">
-          <span className="font-poppins text-xs text-royal-gold uppercase tracking-[0.3em] font-semibold">Get In Touch</span>
-          <h1 className="font-cinzel text-4xl md:text-6xl font-bold tracking-wide text-gold-gradient">
-            Connect with Artisans
+        {/* Title Section */}
+        <div className="text-center mb-16 md:mb-24">
+          <h1 className="text-3xl md:text-5xl font-display font-semibold tracking-[0.25em] text-[#F5F0E8] uppercase leading-none">
+            GET IN <span className="text-[#C9A84C]">TOUCH</span>
           </h1>
-          <div className="w-16 h-[1px] bg-royal-gold/60 mt-2" />
-          <p className="font-poppins text-xs md:text-sm text-soft-ivory/50 max-w-md leading-relaxed mt-3">
-            Inquire about custom sizing, custom engraving, and bespoke bulk wedding/milestone commissions.
+          <div className="w-10 h-[1px] bg-[#C9A84C] mt-6 mx-auto" />
+          <p className="text-xs md:text-sm text-[#9A8F7E]/70 max-w-lg mx-auto leading-relaxed mt-4 italic font-body">
+            Connect with our curation team to bring luxury resin art to your doorstep.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        {/* 2-Column Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 lg:gap-24 items-start">
           
-          {/* Contact info card (Left - 5 columns) */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
+          {/* Left Column: LUXURY CONCIERGE */}
+          <div className="bg-[#111111] border border-[#C9A84C]/10 p-8 md:p-12 rounded-xl shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-[#C9A84C]/5 blur-[60px] pointer-events-none" />
             
-            {/* Core Info Panel */}
-            <div className="glass-panel p-8 rounded-lg border border-champagne-gold/5 flex flex-col gap-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-royal-gold/5 blur-[50px] pointer-events-none" />
-              
-              <h3 className="font-cinzel text-sm uppercase tracking-widest text-champagne-gold font-bold border-b border-champagne-gold/10 pb-4">
-                Artisan Headquarters
-              </h3>
+            <h2 className="text-xl font-display font-bold text-[#F5F0E8] tracking-widest uppercase mb-8">
+              LUXURY <span className="text-[#C9A84C]">CONCIERGE</span>
+            </h2>
 
-              <div className="flex flex-col gap-5">
-                {/* Location */}
-                <div className="flex items-start gap-4">
-                  <div className="p-3.5 rounded bg-royal-gold/5 border border-royal-gold/20 text-royal-gold mt-1">
-                    <MapPin size={16} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-poppins text-[10px] uppercase tracking-widest text-soft-ivory/30">Head Office Location</span>
-                    <span className="font-poppins text-xs text-soft-ivory/80 leading-relaxed mt-1">
-                      Chennai / Kanchipuram / Vandavasi,<br />
-                      Tamil Nadu, India
-                    </span>
-                  </div>
-                </div>
-
-                {/* Email */}
-                <div className="flex items-start gap-4">
-                  <div className="p-3.5 rounded bg-royal-gold/5 border border-royal-gold/20 text-royal-gold mt-1">
-                    <Mail size={16} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-poppins text-[10px] uppercase tracking-widest text-soft-ivory/30">Email Correspondence</span>
-                    <a href="mailto:deepaksabari28@gmail.com" className="font-poppins text-xs text-royal-gold hover:text-champagne-gold transition-colors mt-1 font-semibold">
-                      deepaksabari28@gmail.com
-                    </a>
-                  </div>
-                </div>
-
-                {/* Phone */}
-                <div className="flex items-start gap-4">
-                  <div className="p-3.5 rounded bg-royal-gold/5 border border-royal-gold/20 text-royal-gold mt-1">
-                    <Phone size={16} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-poppins text-[10px] uppercase tracking-widest text-soft-ivory/30">Telephone Registry</span>
-                    <span className="font-poppins text-xs text-soft-ivory/80 mt-1 font-semibold">
-                      +91 99942 03670 (Akash)
-                    </span>
-                  </div>
-                </div>
-
-                {/* Hours */}
-                <div className="flex items-start gap-4">
-                  <div className="p-3.5 rounded bg-royal-gold/5 border border-royal-gold/20 text-royal-gold mt-1">
-                    <Clock size={16} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-poppins text-[10px] uppercase tracking-widest text-soft-ivory/30">Atelier Hours</span>
-                    <span className="font-poppins text-xs text-soft-ivory/70 mt-1">
-                      Mon &ndash; Fri: 09:00 &ndash; 18:00 IST <br />
-                      Sat: 10:00 &ndash; 16:00 IST
-                    </span>
-                  </div>
-                </div>
+            <div className="flex flex-col gap-6 font-sans">
+              <div>
+                <h4 className="text-[10px] text-[#C9A84C] tracking-widest uppercase mb-1 font-bold">Curation Management</h4>
+                <p className="text-lg font-display text-white font-medium">Mr. Akash</p>
               </div>
-            </div>
 
-            {/* Verification Note */}
-            <div className="glass-panel p-6 rounded-lg border border-champagne-gold/5 flex items-start gap-3">
-              <ShieldCheck className="text-royal-gold shrink-0 mt-0.5" size={16} />
-              <div className="flex flex-col gap-1 font-poppins text-[10px] leading-relaxed text-soft-ivory/50">
-                <span className="uppercase text-champagne-gold font-bold tracking-wider">Secured Channel Enforced</span>
-                <span>All custom inquiries are directly dispatched to the executive artisan database. A representative will contact you within 24 business hours.</span>
+              <div>
+                <h4 className="text-[10px] text-[#C9A84C] tracking-widest uppercase mb-1 font-bold">WhatsApp Concierge</h4>
+                <p className="text-lg font-mono text-white font-semibold">+91 99942 03670</p>
               </div>
-            </div>
 
+              <div>
+                <h4 className="text-[10px] text-[#C9A84C] tracking-widest uppercase mb-1 font-bold">Direct Correspondence</h4>
+                <p className="text-sm font-mono text-[#9A8F7E] font-medium break-all select-all">deepaksabari28@gmail.com</p>
+              </div>
+
+              <a 
+                href="https://wa.me/919994203670" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-full mt-6 py-4 bg-transparent border border-[#C9A84C] text-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0A0A0A] font-accent text-[10px] font-bold uppercase tracking-widest text-center transition-all duration-300 rounded shadow-md hover:shadow-[0_0_15px_rgba(201,168,76,0.3)] block cursor-pointer"
+              >
+                CONNECT ON WHATSAPP
+              </a>
+            </div>
           </div>
 
-          {/* Contact form (Right - 7 columns) */}
-          <div className="lg:col-span-7">
-            <div className="glass-card p-8 md:p-10 rounded-lg border border-champagne-gold/10">
-              <h3 className="font-cinzel text-sm uppercase tracking-widest text-champagne-gold font-semibold mb-6 flex items-center gap-2">
-                <MessageSquare size={16} className="text-royal-gold" /> Compose Inquiry Message
-              </h3>
-
-              {success ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="bg-emerald-950/30 border border-emerald-500/20 text-emerald-200 text-xs p-6 rounded-lg flex flex-col gap-4 font-poppins text-center items-center"
+          {/* Right Column: DIRECT INQUIRY FORM */}
+          <div className="bg-[#111111] border border-[#C9A84C]/10 p-8 md:p-12 rounded-xl shadow-2xl">
+            {success ? (
+              <div className="bg-emerald-950/20 border border-emerald-500/20 text-emerald-200 text-xs p-6 rounded-lg flex flex-col gap-4 text-center items-center font-sans">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500 flex items-center justify-center text-emerald-400 mb-2">
+                  <Send size={18} />
+                </div>
+                <h4 className="font-display text-base uppercase tracking-wider text-emerald-300 font-bold">Inquiry Dispatched</h4>
+                <p className="text-[#9A8F7E]/85 max-w-xs leading-relaxed font-body">
+                  Thank you. Your bespoke inquiry has been sent to our desk. We will connect with you shortly.
+                </p>
+                <button
+                  onClick={() => setSuccess(false)}
+                  className="mt-2 text-[#C9A84C] font-accent font-bold text-[10px] uppercase tracking-widest hover:text-[#F5F0E8] transition-colors cursor-pointer"
                 >
-                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500 flex items-center justify-center text-emerald-400 mb-2">
-                    <Send size={18} />
+                  Send Another Inquiry
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-6 font-sans">
+                <h2 className="text-xl font-display font-bold text-[#F5F0E8] tracking-widest uppercase mb-2">
+                  DIRECT <span className="text-[#C9A84C]">INQUIRY</span>
+                </h2>
+
+                {error && (
+                  <div className="bg-red-950/30 border border-red-500/20 text-red-200 text-xs p-4 rounded">
+                    {error}
                   </div>
-                  <h4 className="font-cinzel text-sm uppercase tracking-wider text-emerald-300 font-bold">Message Dispatched</h4>
-                  <p className="text-soft-ivory/60 max-w-sm">
-                    Thank you. Your custom request has been successfully queued. A confirmation email has been forwarded to you.
-                  </p>
-                  <button
-                    onClick={() => setSuccess(false)}
-                    className="mt-2 text-royal-gold font-bold text-xs uppercase tracking-wider hover:text-champagne-gold transition-colors"
-                  >
-                    Send Another Inquiry
-                  </button>
-                </motion.div>
-              ) : (
-                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                  {error && (
-                    <div className="bg-red-950/40 border border-red-500/20 text-red-200 text-xs p-4 rounded font-poppins">
-                      {error}
-                    </div>
+                )}
+
+                <div className="flex flex-col gap-1">
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="YOUR NAME"
+                    className="bg-[#0A0A0A] border border-[#C9A84C]/15 py-3.5 px-4 text-xs rounded focus:outline-none focus:border-[#C9A84C]/60 text-white placeholder-[#9A8F7E]/45 uppercase font-medium tracking-wider"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="YOUR EMAIL"
+                    className="bg-[#0A0A0A] border border-[#C9A84C]/15 py-3.5 px-4 text-xs rounded focus:outline-none focus:border-[#C9A84C]/60 text-white placeholder-[#9A8F7E]/45 uppercase font-medium tracking-wider"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <textarea
+                    required
+                    rows={5}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="HOW CAN WE ASSIST YOU?"
+                    className="bg-[#0A0A0A] border border-[#C9A84C]/15 py-3.5 px-4 text-xs rounded focus:outline-none focus:border-[#C9A84C]/60 text-white placeholder-[#9A8F7E]/45 resize-none uppercase font-medium tracking-wider leading-relaxed"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-2 py-4 bg-[#C9A84C] text-[#0A0A0A] font-accent text-[10px] font-bold uppercase tracking-widest rounded hover:bg-[#F5F0E8] transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="animate-spin" size={14} />
+                      SENDING INQUIRY...
+                    </>
+                  ) : (
+                    'SEND INQUIRY'
                   )}
-
-                  {/* Name */}
-                  <div className="flex flex-col gap-1.5">
-                    <label className="font-poppins text-[10px] uppercase tracking-wider text-soft-ivory/50 pl-1 font-semibold">Your Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Enter your name"
-                      className="bg-matte-black/55 border border-champagne-gold/15 py-3 px-4 text-xs font-poppins rounded focus:outline-none focus:border-royal-gold/60 text-soft-ivory"
-                    />
-                  </div>
-
-                  {/* Email */}
-                  <div className="flex flex-col gap-1.5">
-                    <label className="font-poppins text-[10px] uppercase tracking-wider text-soft-ivory/50 pl-1 font-semibold">Email Address</label>
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="patron@luxury.com"
-                      className="bg-matte-black/55 border border-champagne-gold/15 py-3 px-4 text-xs font-poppins rounded focus:outline-none focus:border-royal-gold/60 text-soft-ivory"
-                    />
-                  </div>
-
-                  {/* Subject Dropdown */}
-                  <div className="flex flex-col gap-1.5">
-                    <label className="font-poppins text-[10px] uppercase tracking-wider text-soft-ivory/50 pl-1 font-semibold">Inquiry Subject</label>
-                    <select
-                      value={subject}
-                      onChange={(e) => setSubject(e.target.value)}
-                      className="bg-matte-black/55 border border-champagne-gold/15 py-3 px-4 text-xs font-poppins rounded focus:outline-none focus:border-royal-gold/60 text-soft-ivory cursor-pointer"
-                    >
-                      <option value="Custom Design Commission">Custom Design Commission</option>
-                      <option value="Wedding / Bulk Registry">Wedding / Bulk Registry</option>
-                      <option value="Corporate Gifting Programs">Corporate Gifting Programs</option>
-                      <option value="Material & Crafting Inquiries">Material & Crafting Inquiries</option>
-                      <option value="Other Inquiries">Other Inquiries</option>
-                    </select>
-                  </div>
-
-                  {/* Message */}
-                  <div className="flex flex-col gap-1.5">
-                    <label className="font-poppins text-[10px] uppercase tracking-wider text-soft-ivory/50 pl-1 font-semibold">Your Message</label>
-                    <textarea
-                      required
-                      rows={5}
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Outline your bespoke request, sizing requirements, color options..."
-                      className="bg-matte-black/55 border border-champagne-gold/15 py-3 px-4 text-xs font-poppins rounded focus:outline-none focus:border-royal-gold/60 text-soft-ivory resize-none"
-                    />
-                  </div>
-
-                  {/* Submit */}
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full mt-2 py-4 bg-royal-gold text-matte-black font-poppins text-xs font-bold uppercase tracking-[0.25em] rounded hover:bg-champagne-gold hover:shadow-[0_0_15px_rgba(214,175,55,0.4)] transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {loading ? 'SENDING INQUIRY...' : 'SEND MESSAGE'}
-                  </button>
-                </form>
-              )}
-            </div>
+                </button>
+              </form>
+            )}
           </div>
 
         </div>

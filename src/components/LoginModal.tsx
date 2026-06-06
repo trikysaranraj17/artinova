@@ -38,20 +38,15 @@ export default function LoginModal() {
     setFormLoading(true);
 
     if (isSignUp) {
-      if (isAdminSignUp && !adminSecret) {
-        setError('Admin authorization secret code is required.');
-        setFormLoading(false);
-        return;
-      }
       try {
-        await signup(email, password, fullName, phone, address, isAdminSignUp ? adminSecret : undefined);
+        await signup(email, password, fullName, phone, address);
         setSuccessMsg('Account created successfully.');
       } catch (err: any) {
         setError(err.message || 'Failed to sign up.');
       }
     } else {
       try {
-        await login(email, password, isAdminSignUp ? adminSecret : undefined);
+        await login(email, password);
         setSuccessMsg('Welcome to Artinova.');
       } catch (err: any) {
         setError(err.message || 'Authentication failed.');
@@ -185,26 +180,7 @@ export default function LoginModal() {
                   </>
                 )}
 
-                <div className="flex items-center gap-2 mt-2 mb-6 select-none">
-                  <input
-                    type="checkbox"
-                    id="adminCheck"
-                    checked={isAdminSignUp}
-                    onChange={(e) => setIsAdminSignUp(e.target.checked)}
-                    className="appearance-none w-3.5 h-3.5 border border-[#C9A84C]/35 checked:bg-[#C9A84C] cursor-pointer"
-                  />
-                  <label htmlFor="adminCheck" className="font-accent text-[9px] uppercase tracking-widest text-[#9A8F7E] cursor-pointer">
-                    Store Administrator
-                  </label>
-                </div>
 
-                <AnimatePresence>
-                  {isAdminSignUp && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-                      <InputField label="Admin Token" type="password" value={adminSecret} onChange={(e: any) => setAdminSecret(e.target.value)} placeholder="Authentication Code" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
 
                 <button
                   type="submit"
