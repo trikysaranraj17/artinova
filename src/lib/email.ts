@@ -1,68 +1,50 @@
 import { Order, OrderItem } from './db';
 
-interface EmailPayload {
-  orderId: string;
-  customerName: string;
-  customerPhone: string;
-  customerEmail: string;
-  shippingAddress: string;
-  totalAmount: string;
-  orderItems: string;
-  hasPaymentScreenshot: string;
-  _subject: string;
-  _honey?: string;
-}
-
 /**
- * Dispatches completed order details to the shop owner via FormSubmit.co.
- * End destination: deepaksabari28@gmail.com
+ * Triggers a premium luxury HTML email via Resend (proxied through Next.js /api/email).
+ * Supported emailTypes: 'placed' | 'verified' | 'rejected' | 'shipped' | 'delivered'
  */
-export async function sendOrderEmailNotification(order: Order, items: OrderItem[]): Promise<boolean> {
-  const endpoint = 'https://formsubmit.co/ajax/deepaksabari28@gmail.com';
-  
-  // Format items nicely for the email body
-  const formattedItems = items
-    .map(
-      (item) =>
-        `- ${item.product?.title || 'Custom Keepsake'} [Qty: ${item.quantity}] - $${(
-          item.price * item.quantity
-        ).toFixed(2)}`
-    )
-    .join('\n');
-
-  const payload: EmailPayload = {
-    orderId: order.id,
-    customerName: order.shipping_name,
-    customerPhone: order.shipping_phone,
-    customerEmail: order.shipping_email,
-    shippingAddress: order.shipping_address,
-    totalAmount: `$${order.total_amount.toFixed(2)}`,
-    orderItems: formattedItems,
-    hasPaymentScreenshot: order.screenshot_url ? 'Yes, base64 receipt receipt uploaded (review in Admin Panel).' : 'No screenshot uploaded.',
-    _subject: `[ARTINOVA] New Luxury Order Received - Ref: ${order.id.slice(0, 8)}`,
-    _honey: '' // Honeypot spam blocker
-  };
-
+export async function sendEmailTrigger(
+  order: Order,
+  items: OrderItem[],
+  emailType: 'placed' | 'verified' | 'rejected' | 'shipped' | 'delivered',
+  recipientEmail: string,
+  extraData?: any
+): Promise<boolean> {
   try {
-    const response = await fetch(endpoint, {
+    const payload = {
+      orderId: order.id,
+      emailType,
+      recipientEmail,
+      orderNumber: order.order_number,
+      customerName: order.shipping_name || 'Bespoke Patron',
+      items: items.map(item => ({
+        product_name: item.product_name,
+        quantity: item.quantity,
+        price: item.price,
+        customization: item.customization
+      })),
+      total: order.total,
+      extraData
+    };
+
+    const response = await fetch('/api/email', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('FormSubmit server rejected submission:', errorText);
+      console.error('Email API returned non-ok response status:', response.status);
       return false;
     }
 
-    const jsonResult = await response.json();
-    return jsonResult.success === 'true' || jsonResult.success === true;
+    const result = await response.json();
+    return !!result.success;
   } catch (error) {
-    console.error('Failed to dispatch FormSubmit email notification:', error);
+    console.error('Failed to trigger email notification fetch request:', error);
     return false;
   }
 }

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import LoginModal from './LoginModal';
+import MiniCartDrawer from './MiniCartDrawer';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -17,6 +18,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           {children}
         </main>
         <LoginModal />
+        <MiniCartDrawer />
       </>
     );
   }
@@ -28,6 +30,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         {children}
       </main>
       <LoginModal />
+      <MiniCartDrawer />
       <Footer />
     </>
   );

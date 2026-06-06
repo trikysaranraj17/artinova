@@ -53,7 +53,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen py-16 px-6 bg-ambient-glow relative overflow-hidden">
+    <div className="min-h-screen pt-40 pb-24 px-6 bg-ambient-glow relative overflow-hidden">
       {/* Decorative ambient glowing circles */}
       <div className="absolute top-1/4 left-[-10%] w-[500px] h-[500px] rounded-full bg-burgundy-glow/10 blur-[130px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-[-10%] w-[500px] h-[500px] rounded-full bg-deep-bronze/10 blur-[130px] pointer-events-none" />
@@ -94,8 +94,8 @@ export default function ContactPage() {
                   <div className="flex flex-col">
                     <span className="font-poppins text-[10px] uppercase tracking-widest text-soft-ivory/30">Head Office Location</span>
                     <span className="font-poppins text-xs text-soft-ivory/80 leading-relaxed mt-1">
-                      12, Luxury Mansion Chambers, <br />
-                      Golden Boulevard, London, UK
+                      Chennai / Kanchipuram / Vandavasi,<br />
+                      Tamil Nadu, India
                     </span>
                   </div>
                 </div>
@@ -121,7 +121,7 @@ export default function ContactPage() {
                   <div className="flex flex-col">
                     <span className="font-poppins text-[10px] uppercase tracking-widest text-soft-ivory/30">Telephone Registry</span>
                     <span className="font-poppins text-xs text-soft-ivory/80 mt-1 font-semibold">
-                      +44 (20) 7946 0885
+                      +91 99942 03670 (Akash)
                     </span>
                   </div>
                 </div>
@@ -134,8 +134,8 @@ export default function ContactPage() {
                   <div className="flex flex-col">
                     <span className="font-poppins text-[10px] uppercase tracking-widest text-soft-ivory/30">Atelier Hours</span>
                     <span className="font-poppins text-xs text-soft-ivory/70 mt-1">
-                      Mon &ndash; Fri: 09:00 &ndash; 18:00 BST <br />
-                      Sat: 10:00 &ndash; 16:00 BST
+                      Mon &ndash; Fri: 09:00 &ndash; 18:00 IST <br />
+                      Sat: 10:00 &ndash; 16:00 IST
                     </span>
                   </div>
                 </div>

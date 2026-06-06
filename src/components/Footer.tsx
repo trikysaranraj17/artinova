@@ -1,197 +1,190 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import NextLink from 'next/link';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Mail, Phone, MessageSquare } from 'lucide-react';
 
 export default function Footer() {
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setSubscribed(true);
-      setEmail('');
-      setTimeout(() => setSubscribed(false), 5000);
-    }
-  };
-
   return (
-    <footer className="relative bg-[#121214] border-t border-[var(--color-royal-gold)]/10 pt-24 pb-12 overflow-hidden select-none">
+    <footer className="relative bg-[#080808] border-t border-[#C9A84C]/15 pt-20 pb-10 overflow-hidden select-none">
       
       {/* Background ambient glowing leaks */}
-      <div className="absolute -bottom-48 -left-48 w-96 h-96 rounded-full bg-[var(--color-deep-bronze)]/5 blur-[100px] pointer-events-none" />
-      <div className="absolute -top-48 -right-48 w-96 h-96 rounded-full bg-[var(--color-burgundy-glow)]/10 blur-[120px] pointer-events-none" />
-
-      {/* Wave layers (Black & Gold Theme) */}
-      <div 
-        className="wave-layer wave-layer-1 absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay"
-        style={{ background: 'radial-gradient(ellipse at bottom, rgba(212,175,55,0.15) 0%, transparent 60%)' }}
-      />
-      <div 
-        className="wave-layer wave-layer-2 absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay"
-        style={{ background: 'radial-gradient(ellipse at top right, rgba(245,230,200,0.1) 0%, transparent 70%)' }}
-      />
-
-      {/* Gift Opening Effect */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 pointer-events-none opacity-20 z-0 select-none">
-        <svg viewBox="0 0 200 200" className="w-full h-full text-[var(--color-royal-gold)]">
-          <style>
-            {`
-              .gift-box { transform-origin: center bottom; animation: shake 2s infinite ease-in-out; }
-              .gift-lid { transform-origin: center; animation: popOpen 4s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-              .gift-sparkle { animation: sparklePop 4s infinite; }
-              @keyframes shake {
-                0%, 100% { transform: rotate(0deg); }
-                25% { transform: rotate(2deg); }
-                75% { transform: rotate(-2deg); }
-              }
-              @keyframes popOpen {
-                0%, 40% { transform: translateY(0) rotate(0deg); opacity: 1; }
-                50% { transform: translateY(-40px) rotate(15deg); opacity: 0; }
-                100% { transform: translateY(-40px) rotate(15deg); opacity: 0; }
-              }
-              @keyframes sparklePop {
-                0%, 45% { opacity: 0; transform: scale(0) translateY(0); }
-                50% { opacity: 1; transform: scale(1.5) translateY(-30px); }
-                60%, 100% { opacity: 0; transform: scale(0) translateY(-50px); }
-              }
-            `}
-          </style>
-          {/* Main Box */}
-          <path className="gift-box" d="M60 100 H140 V160 H60 Z" fill="currentColor" fillOpacity="0.8" />
-          <path className="gift-box" d="M95 100 H105 V160 H95 Z" fill="var(--color-champagne-gold)" />
-          {/* Lid */}
-          <g className="gift-lid">
-            <path d="M50 80 H150 V100 H50 Z" fill="currentColor" />
-            <path d="M95 80 H105 V100 H95 Z" fill="var(--color-champagne-gold)" />
-            {/* Bow */}
-            <path d="M100 80 C80 50, 60 70, 95 80 Z" fill="var(--color-champagne-gold)" />
-            <path d="M100 80 C120 50, 140 70, 105 80 Z" fill="var(--color-champagne-gold)" />
-          </g>
-          {/* Sparkles */}
-          <circle className="gift-sparkle" cx="100" cy="70" r="4" fill="var(--color-soft-ivory)" style={{ animationDelay: '0.1s' }} />
-          <circle className="gift-sparkle" cx="70" cy="50" r="3" fill="var(--color-soft-ivory)" style={{ animationDelay: '0.2s' }} />
-          <circle className="gift-sparkle" cx="130" cy="60" r="5" fill="var(--color-soft-ivory)" style={{ animationDelay: '0.15s' }} />
-        </svg>
-      </div>
-
-
+      <div className="absolute -bottom-48 -left-48 w-96 h-96 rounded-full bg-[#B8860B]/5 blur-[100px] pointer-events-none" />
 
       {/* Main Grid Content */}
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-16 relative z-10 text-center md:text-left">
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 relative z-10 text-center md:text-left">
         
-        {/* Brand block */}
-        <div className="flex flex-col items-center md:items-start gap-6">
-          <div className="flex flex-col">
-            <span className="font-cinzel text-2xl font-bold tracking-[0.25em] text-gold-gradient">
-              ARTINOVA
-            </span>
-            <span className="font-poppins text-[10px] uppercase tracking-[0.35em] text-[var(--color-royal-gold)]/70 -mt-0.5">
-              Customized Gift
-            </span>
-          </div>
-          <p className="font-poppins text-xs text-[var(--color-soft-ivory)]/50 leading-relaxed max-w-sm">
-            Crafting raw human emotions into timeless physical luxury. Every single piece is individually handcrafted and detailed to royal perfection.
+        {/* Column 1: Brand & Socials */}
+        <div className="flex flex-col items-center md:items-start gap-4">
+          <span className="font-display text-2xl font-bold tracking-[0.25em] text-[#F5F0E8] select-none">
+            ARTINOVA
+          </span>
+          <p className="font-body italic text-xs text-[#9A8F7E] max-w-xs leading-relaxed">
+            "Crafting Emotions Into Luxury Gifts"
+          </p>
+          <p className="font-body text-xs text-[#9A8F7E]/70 max-w-xs leading-relaxed">
+            Ultra-premium handcrafted gifting studio designed to celebrate life's most meaningful milestones.
           </p>
           
           {/* Social Links */}
-          <div className="flex items-center gap-4 text-[var(--color-soft-ivory)]/60">
-            <a href="https://instagram.com/__artinova__" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-[var(--color-champagne-gold)]/10 hover:border-[var(--color-royal-gold)] hover:text-[var(--color-royal-gold)] transition-all duration-300 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          <div className="flex items-center gap-3.5 text-[#F5F0E8]/70 mt-2">
+            <a 
+              href="https://instagram.com/artinova.studio" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="p-2 rounded-full border border-[#C9A84C]/15 hover:border-[#C9A84C] hover:text-[#C9A84C] transition-all duration-300 flex items-center justify-center"
+              aria-label="Instagram"
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
               </svg>
             </a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-[var(--color-champagne-gold)]/10 hover:border-[var(--color-royal-gold)] hover:text-[var(--color-royal-gold)] transition-all duration-300 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+            <a 
+              href="https://wa.me/919994203670" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="p-2 rounded-full border border-[#C9A84C]/15 hover:border-[#C9A84C] hover:text-[#C9A84C] transition-all duration-300 flex items-center justify-center"
+              aria-label="WhatsApp"
+            >
+              <MessageSquare size={14} />
+            </a>
+            <a 
+              href="https://facebook.com" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="p-2 rounded-full border border-[#C9A84C]/15 hover:border-[#C9A84C] hover:text-[#C9A84C] transition-all duration-300 flex items-center justify-center"
+              aria-label="Facebook"
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
               </svg>
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-full border border-[var(--color-champagne-gold)]/10 hover:border-[var(--color-royal-gold)] hover:text-[var(--color-royal-gold)] transition-all duration-300 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+            <a 
+              href="https://pinterest.com" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="p-2 rounded-full border border-[#C9A84C]/15 hover:border-[#C9A84C] hover:text-[#C9A84C] transition-all duration-300 flex items-center justify-center"
+              aria-label="Pinterest"
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
               </svg>
             </a>
           </div>
         </div>
 
-        {/* Explore Links */}
-        <div className="flex flex-col items-center gap-6">
-          <h4 className="font-cinzel text-sm uppercase tracking-[0.2em] text-[var(--color-champagne-gold)] font-semibold">
-            Explore
+        {/* Column 2: Quick Links */}
+        <div className="flex flex-col items-center md:items-start gap-4">
+          <h4 className="font-accent text-[11px] uppercase tracking-[0.2em] text-[#C9A84C] font-semibold">
+            Quick Links
           </h4>
-          <div className="flex flex-col items-center gap-3.5">
-            <NextLink href="/" className="font-poppins text-xs text-[var(--color-soft-ivory)]/50 hover:text-[var(--color-royal-gold)] transition-colors uppercase tracking-widest">
+          <div className="flex flex-col items-center md:items-start gap-2.5">
+            <NextLink href="/" className="font-body text-xs text-[#9A8F7E] hover:text-[#C9A84C] transition-colors">
               Home
             </NextLink>
-            <NextLink href="/shop" className="font-poppins text-xs text-[var(--color-soft-ivory)]/50 hover:text-[var(--color-royal-gold)] transition-colors uppercase tracking-widest">
+            <NextLink href="/shop" className="font-body text-xs text-[#9A8F7E] hover:text-[#C9A84C] transition-colors">
+              Shop
+            </NextLink>
+            <NextLink href="/shop?tab=collections" className="font-body text-xs text-[#9A8F7E] hover:text-[#C9A84C] transition-colors">
               Collections
             </NextLink>
-            <NextLink href="/contact" className="font-poppins text-xs text-[var(--color-soft-ivory)]/50 hover:text-[var(--color-royal-gold)] transition-colors uppercase tracking-widest">
+            <NextLink href="/#about" className="font-body text-xs text-[#9A8F7E] hover:text-[#C9A84C] transition-colors">
+              About
+            </NextLink>
+            <NextLink href="/contact" className="font-body text-xs text-[#9A8F7E] hover:text-[#C9A84C] transition-colors">
               Contact
             </NextLink>
           </div>
         </div>
 
-        {/* Contact Info / Newsletter */}
-        <div className="flex flex-col items-center md:items-start gap-6">
-          <h4 className="font-cinzel text-sm uppercase tracking-[0.2em] text-[var(--color-champagne-gold)] font-semibold self-center md:self-start">
-            Contact Details
+        {/* Column 3: Customer Care */}
+        <div className="flex flex-col items-center md:items-start gap-4">
+          <h4 className="font-accent text-[11px] uppercase tracking-[0.2em] text-[#C9A84C] font-semibold">
+            Customer Care
           </h4>
-          <div className="flex flex-col items-center md:items-start gap-4 text-[var(--color-soft-ivory)]/50 font-poppins text-xs tracking-wide">
-            <div className="flex items-center gap-3">
-              <MapPin size={14} className="text-[var(--color-royal-gold)] shrink-0" />
-              <span>Chennai, Kanchipuram, Vandavasi</span>
+          <div className="flex flex-col items-center md:items-start gap-2.5">
+            <NextLink href="/profile" className="font-body text-xs text-[#9A8F7E] hover:text-[#C9A84C] transition-colors">
+              Track Order
+            </NextLink>
+            <NextLink href="/profile" className="font-body text-xs text-[#9A8F7E] hover:text-[#C9A84C] transition-colors">
+              My Account
+            </NextLink>
+            <NextLink href="/#faq" className="font-body text-xs text-[#9A8F7E] hover:text-[#C9A84C] transition-colors">
+              FAQ
+            </NextLink>
+            <NextLink href="/contact" className="font-body text-xs text-[#9A8F7E] hover:text-[#C9A84C] transition-colors">
+              Returns & Refunds
+            </NextLink>
+          </div>
+        </div>
+
+        {/* Column 4: Contact Info */}
+        <div className="flex flex-col items-center md:items-start gap-4">
+          <h4 className="font-accent text-[11px] uppercase tracking-[0.2em] text-[#C9A84C] font-semibold">
+            Gifting Studio
+          </h4>
+          <div className="flex flex-col items-center md:items-start gap-3 text-[#9A8F7E] font-body text-xs">
+            <div className="flex items-center gap-2.5">
+              <Mail size={13} className="text-[#C9A84C] shrink-0" />
+              <span>deepaksabari28@gmail.com</span>
             </div>
-            <div className="flex items-center gap-3">
-              <Phone size={14} className="text-[var(--color-royal-gold)] shrink-0" />
+            <div className="flex items-center gap-2.5">
+              <Phone size={13} className="text-[#C9A84C] shrink-0" />
               <span>+91 99942 03670 (Akash)</span>
             </div>
-            <div className="flex items-center gap-3">
-              <Mail size={14} className="text-[var(--color-royal-gold)] shrink-0" />
-              <span>akashselva18@gmail.com</span>
+            <div className="flex items-center gap-2.5">
+              <span className="font-accent text-[10px] text-[#C9A84C] shrink-0">Studio:</span>
+              <span>Chennai, Tamil Nadu, India</span>
             </div>
             
-            {/* Newsletter input */}
-            <form onSubmit={handleSubscribe} className="relative mt-3 w-full max-w-xs">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your email address..."
-                required
-                className="w-full bg-[#070708]/60 border border-[var(--color-champagne-gold)]/15 py-2.5 pl-4 pr-12 text-xs font-poppins rounded focus:outline-none focus:border-[var(--color-royal-gold)]/60 text-white transition-colors"
-              />
-              <button
-                type="submit"
-                className="absolute right-1 top-1 bottom-1 px-3 text-[var(--color-royal-gold)] hover:text-white transition-colors"
-              >
-                <Send size={12} />
-              </button>
-            </form>
-            {subscribed && (
-              <span className="font-poppins text-[9px] text-[var(--color-royal-gold)] animate-pulse mt-1">
-                Newsletter registration received.
-              </span>
-            )}
+            <a 
+              href="https://wa.me/919994203670?text=Hello%20Artinova,%20I%20would%20like%20to%20inquire%20about%20a%20personalized%20gift."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 flex items-center justify-center gap-2 border border-[#C9A84C]/50 hover:border-[#C9A84C] bg-[#C9A84C]/5 hover:bg-[#C9A84C]/15 py-2 px-4 rounded text-[10px] font-accent uppercase tracking-wider text-[#C9A84C] transition-all duration-300"
+            >
+              Chat on WhatsApp
+            </a>
           </div>
         </div>
 
       </div>
 
-      {/* Gilded Line and copyrights */}
-      <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-[var(--color-soft-ivory)]/5 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-        <div className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[var(--color-royal-gold)]/20 to-transparent -translate-y-8" />
+      {/* Symmetrical footer bottom divider */}
+      <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-[#C9A84C]/10 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
         
-        <span className="font-poppins text-[9px] text-[var(--color-soft-ivory)]/30 uppercase tracking-widest text-center md:text-left">
-          © {new Date().getFullYear()} ARTINOVA CUSTOMIZED GIFT. ALL RIGHTS RESERVED.
+        <span className="font-body text-[10px] text-[#9A8F7E]/50 uppercase tracking-widest text-center md:text-left">
+          © {new Date().getFullYear()} ARTINOVA. All Rights Reserved.
         </span>
-        <div className="flex items-center gap-6 text-[9px] font-poppins uppercase tracking-widest text-[var(--color-soft-ivory)]/30">
-          <a href="#" className="hover:text-[var(--color-royal-gold)] transition-colors">Privacy Policy</a>
-          <a href="#" className="hover:text-[var(--color-royal-gold)] transition-colors">Terms of Service</a>
+        
+        {/* Payment vectors row */}
+        <div className="flex items-center gap-4">
+          {/* UPI Vector Logo */}
+          <div className="h-4 w-auto text-[#9A8F7E]/40 hover:text-[#C9A84C] transition-colors flex items-center gap-1.5 border border-[#9A8F7E]/20 px-2 py-0.5 rounded text-[8px] font-accent tracking-widest font-extrabold uppercase select-none">
+            <svg viewBox="0 0 100 100" className="w-3.5 h-3.5" fill="currentColor">
+              <path d="M 50,15 L 85,45 L 85,85 L 15,85 L 15,45 Z" fill="none" stroke="currentColor" strokeWidth="6" />
+              <path d="M 35,65 L 50,45 L 65,65 Z" />
+            </svg>
+            UPI
+          </div>
+          
+          {/* GPay Vector Badge */}
+          <div className="h-4 w-auto text-[#9A8F7E]/40 hover:text-[#C9A84C] transition-colors flex items-center gap-1 border border-[#9A8F7E]/20 px-2 py-0.5 rounded text-[8px] font-accent tracking-widest font-extrabold uppercase select-none">
+            <svg viewBox="0 0 100 100" className="w-3 h-3" fill="currentColor">
+              <path d="M50 10c22.1 0 40 17.9 40 40s-17.9 40-40 40S10 72.1 10 50 27.9 10 50 10m0-5C25.1 5 5 25.1 5 50s20.1 45 45 45 45-20.1 45-45S74.9 5 50 5z" />
+              <path d="M35 55 h30 v10 h-30 z M60 35 v25 h10 v-25 z" />
+            </svg>
+            GPay
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6 text-[10px] font-body uppercase tracking-wider text-[#9A8F7E]/50">
+          <NextLink href="/contact" className="hover:text-[#C9A84C] transition-colors">Privacy Policy</NextLink>
+          <NextLink href="/contact" className="hover:text-[#C9A84C] transition-colors">Terms of Service</NextLink>
+          <NextLink href="/contact" className="hover:text-[#C9A84C] transition-colors">Refund Policy</NextLink>
         </div>
       </div>
     </footer>

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AppProvider } from "../context/AppContext";
 import LayoutWrapper from "../components/LayoutWrapper";
 import CustomCursor from "../components/CustomCursor";
 import LenisScroll from "../components/LenisScroll";
+import LoadingScreen from "../components/shared/LoadingScreen";
 
 export const metadata: Metadata = {
   title: "ARTINOVA | Luxury Handcrafted Customized Gifts & Keepsakes",
@@ -25,20 +25,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-ambient-glow min-h-screen flex flex-col antialiased relative selection:bg-royal-gold/30 selection:text-champagne-gold">
-        <AppProvider>
-          {/* Ambient Noise overlay */}
-          <div className="noise-overlay" />
-          
-          {/* Animation/Smooth scrolling effects */}
-          <LenisScroll />
-          <CustomCursor />
-          
-          {/* Layout switcher wrapper */}
-          <LayoutWrapper>
-            {children}
-          </LayoutWrapper>
-        </AppProvider>
+      <body className="bg-ambient-glow min-h-screen flex flex-col antialiased relative selection:bg-gold-champagne/30 selection:text-gold-champagne">
+        {/* Global Cinematic Loading Screen */}
+        <LoadingScreen />
+
+        {/* Ambient Noise overlay */}
+        <div className="noise-overlay" />
+        
+        {/* Animation/Smooth scrolling effects */}
+        <LenisScroll />
+        <CustomCursor />
+        
+        {/* Layout switcher wrapper */}
+        <LayoutWrapper>
+          {children}
+        </LayoutWrapper>
       </body>
     </html>
   );

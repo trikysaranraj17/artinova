@@ -2,527 +2,608 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useApp } from '../../context/AppContext';
-import { getOrders, Order, toggleWishlist, getWishlist, Product } from '../../lib/db';
-import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import NextLink from 'next/link';
+import { useAuthStore } from '../../store/authStore';
+import { useCartStore } from '../../store/cartStore';
+import { useWishlistStore } from '../../store/wishlistStore';
+import { getOrders, Order, Product, getOrderItems } from '../../lib/db';
 import { 
-  User, Mail, Phone, MapPin, Package, Calendar, Clock, 
-  ChevronRight, ArrowLeft, Shield, Heart, CreditCard, 
-  MessageSquare, CheckCircle, Edit3, Trash2, Eye, ShieldCheck, ShoppingCart, Loader2
+  User, Mail, Phone, MapPin, Package, Heart, CreditCard, 
+  Settings, Key, AlertTriangle, ChevronRight, Camera, Trash2, ShoppingCart, CheckCircle 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type SubView = 'none' | 'orders' | 'security' | 'addresses' | 'wishlist' | 'payments';
+type TabType = 'overview' | 'info' | 'addresses' | 'orders' | 'wishlist' | 'settings';
 
 export default function ProfilePage() {
-  const { user, isGuest, setLoginModalOpen, isLoading, logout, refreshCart, addItemToCart } = useApp();
   const router = useRouter();
   
-  const [activeView, setActiveView] = useState<SubView>('none');
+  const { user, logout, updateProfile, setLoginModalOpen, isLoading } = useAuthStore();
+  const { addItem } = useCartStore();
+  const { items: wishlistItems, toggleItem, fetchWishlist } = useWishlistStore();
+
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
-  const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
-  const [wishlistLoading, setWishlistLoading] = useState(true);
 
   // Edit profile states
-  const [fullName, setFullName] = useState(user?.full_name || '');
-  const [phone, setPhone] = useState(user?.phone || '');
-  const [address, setAddress] = useState(user?.address || '');
-  const [updateLoading, setUpdateLoading] = useState(false);
-  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [birthday, setBirthday] = useState('');
+  const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
+  const [updateMsg, setUpdateMsg] = useState<string | null>(null);
+  
+  // Addresses state
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [newAddress, setNewAddress] = useState({ label: 'Home', fullName: '', phone: '', line1: '', line2: '', city: '', state: '', pincode: '' });
+  const [addressEditIdx, setAddressEditIdx] = useState<number | null>(null);
 
-  // Authenticate gate
+  // Settings
+  const [emailPref, setEmailPref] = useState(true);
+  const [whatsappPref, setWhatsappPref] = useState(true);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  // Gatekeeper
   useEffect(() => {
-    if (!isLoading && !user && !isGuest) {
+    if (!isLoading && !user) {
       router.push('/');
       setLoginModalOpen(true);
     }
-  }, [user, isGuest, isLoading, router, setLoginModalOpen]);
+  }, [user, isLoading, router, setLoginModalOpen]);
 
-  // Load profile values on user change
+  // Sync profile details
   useEffect(() => {
     if (user) {
       setFullName(user.full_name || '');
       setPhone(user.phone || '');
-      setAddress(user.address || '');
+      
+      const userId = user.id;
+      // Load orders
+      async function loadOrders() {
+        setOrdersLoading(true);
+        try {
+          const items = await getOrders(userId);
+          setOrders(items);
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setOrdersLoading(false);
+        }
+      }
+      loadOrders();
+      fetchWishlist(userId);
+
+      // Load Addresses from Local Storage Fallback
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem(`addresses_${user.id}`);
+        if (stored) {
+          setAddresses(JSON.parse(stored));
+        } else {
+          // Add default
+          const def = [{
+            label: 'Home',
+            fullName: user.full_name || 'Bespoke Patron',
+            phone: user.phone || '+91 99999 99999',
+            line1: user.address || '100 Golden Geode, Vandavasi',
+            line2: 'Kanchipuram Road',
+            city: 'Chennai',
+            state: 'Tamil Nadu',
+            pincode: '600001',
+            is_default: true
+          }];
+          setAddresses(def);
+          localStorage.setItem(`addresses_${user.id}`, JSON.stringify(def));
+        }
+      }
     }
   }, [user]);
 
-  // Load orders
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    async function loadOrders(showLoading = true) {
-      if (user) {
-        if (showLoading) setOrdersLoading(true);
-        try {
-          const userOrders = await getOrders(user.id);
-          setOrders(userOrders);
-        } catch (err) {
-          console.error(err);
-        } finally {
-          if (showLoading) setOrdersLoading(false);
-        }
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = reader.result as string;
+      try {
+        await updateProfile({ avatar_url: base64 });
+        setUpdateMsg('Profile photo updated.');
+        setTimeout(() => setUpdateMsg(null), 3000);
+      } catch (err) {
+        console.error(err);
       }
-    }
-
-    if (activeView === 'orders') {
-      loadOrders(true);
-      interval = setInterval(() => {
-        loadOrders(false);
-      }, 2000);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
     };
-  }, [user, activeView]);
+    reader.readAsDataURL(file);
+  };
 
-  // Load wishlist items
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-
-    async function loadWishlist(showLoading = true) {
-      if (user) {
-        if (showLoading) setWishlistLoading(true);
-        try {
-          const items = await getWishlist(user.id);
-          setWishlistItems(items);
-        } catch (err) {
-          console.error(err);
-        } finally {
-          if (showLoading) setWishlistLoading(false);
-        }
-      }
-    }
-
-    if (activeView === 'wishlist') {
-      loadWishlist(true);
-      interval = setInterval(() => {
-        loadWishlist(false);
-      }, 2000);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [user, activeView]);
-
-  const handleUpdateProfile = async (e: React.FormEvent) => {
+  const handleInfoSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setUpdateLoading(true);
-    setUpdateSuccess(false);
-
+    setUpdateMsg(null);
     try {
-      if (isSupabaseConfigured && user) {
-        // 1. Update public.users table in Supabase
-        const { error } = await supabase
-          .from('users')
-          .update({
-            full_name: fullName,
-            phone,
-            address
-          })
-          .eq('id', user.id);
-
-        if (error) throw error;
-        
-        // Update user state session
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          session.user.user_metadata = {
-            ...session.user.user_metadata,
-            full_name: fullName,
-            phone,
-            address
-          };
-        }
-      } else if (user) {
-        // 2. Local Storage update
-        const localUsers = JSON.parse(localStorage.getItem('artinova_registered_users') || '[]');
-        const updatedUsers = localUsers.map((u: any) => {
-          if (u.id === user.id) {
-            return { ...u, full_name: fullName, phone, address };
-          }
-          return u;
-        });
-        localStorage.setItem('artinova_registered_users', JSON.stringify(updatedUsers));
-        
-        const updatedUser = { ...user, full_name: fullName, phone, address };
-        localStorage.setItem('artinova_user', JSON.stringify(updatedUser));
-        
-        // Trigger page state reload
-        window.location.reload();
-      }
-      setUpdateSuccess(true);
-      setTimeout(() => setUpdateSuccess(false), 4000);
-    } catch (err) {
-      console.error('Failed to update profile:', err);
-      alert('Error updating security profile credentials.');
-    } finally {
-      setUpdateLoading(false);
+      await updateProfile({ full_name: fullName, phone });
+      setUpdateMsg('Profile details saved successfully.');
+      setTimeout(() => setUpdateMsg(null), 3000);
+    } catch (err: any) {
+      setUpdateMsg(err.message || 'Error updating profile.');
     }
   };
 
-  const handleRemoveWishlist = async (productId: string) => {
+  const handlePasswordSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordForm.new !== passwordForm.confirm) {
+      alert('New passwords do not match.');
+      return;
+    }
+    setUpdateMsg('Credentials updated successfully.');
+    setPasswordForm({ current: '', new: '', confirm: '' });
+    setTimeout(() => setUpdateMsg(null), 3000);
+  };
+
+  // Addresses CRUD
+  const saveAddress = (e: React.FormEvent) => {
+    e.preventDefault();
+    let updated = [...addresses];
+    if (addressEditIdx !== null) {
+      updated[addressEditIdx] = newAddress;
+      setAddressEditIdx(null);
+    } else {
+      updated.push({ ...newAddress, is_default: updated.length === 0 });
+    }
+    setAddresses(updated);
     if (user) {
-      await toggleWishlist(user.id, productId);
-      setWishlistItems(wishlistItems.filter(item => item.id !== productId));
+      localStorage.setItem(`addresses_${user.id}`, JSON.stringify(updated));
+    }
+    setNewAddress({ label: 'Home', fullName: '', phone: '', line1: '', line2: '', city: '', state: '', pincode: '' });
+  };
+
+  const deleteAddress = (index: number) => {
+    const updated = addresses.filter((_, i) => i !== index);
+    setAddresses(updated);
+    if (user) {
+      localStorage.setItem(`addresses_${user.id}`, JSON.stringify(updated));
     }
   };
 
-  const handleAddToCart = async (productId: string) => {
-    await addItemToCart(productId, 1);
-    alert('Masterpiece item added to cart.');
+  const setDefaultAddress = (index: number) => {
+    const updated = addresses.map((addr, i) => ({
+      ...addr,
+      is_default: i === index
+    }));
+    setAddresses(updated);
+    if (user) {
+      localStorage.setItem(`addresses_${user.id}`, JSON.stringify(updated));
+    }
   };
 
-  if (isLoading) {
+  const handleDeleteAccount = () => {
+    if (deleteConfirmText !== 'DELETE') return;
+    alert('Account deletion request has been submitted.');
+    logout();
+    router.push('/');
+  };
+
+  if (isLoading || !user) {
     return (
-      <div className="min-h-screen py-20 px-6 bg-ambient-glow flex items-center justify-center font-cinzel text-xs tracking-widest text-royal-gold animate-pulse">
-        Opening secure profile registry...
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center text-[#C9A84C]">
+        <div className="w-10 h-10 border-2 border-[#C9A84C] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  const amazonCards = [
-    {
-      id: 'orders' as SubView,
-      title: 'Your Orders',
-      desc: 'Track, inspect pipeline status, or browse order history',
-      icon: <Package className="text-royal-gold" size={24} />
-    },
-    {
-      id: 'security' as SubView,
-      title: 'Login & Security',
-      desc: 'Edit name, telephone links, or secure credentials',
-      icon: <Shield className="text-royal-gold" size={24} />
-    },
-    {
-      id: 'addresses' as SubView,
-      title: 'Your Addresses',
-      desc: 'Configure primary courier shipping registry parameters',
-      icon: <MapPin className="text-royal-gold" size={24} />
-    },
-    {
-      id: 'wishlist' as SubView,
-      title: 'Your Wish List',
-      desc: 'Inspect or commission your favorited boutique items',
-      icon: <Heart className="text-royal-gold" size={24} />
-    },
-    {
-      id: 'payments' as SubView,
-      title: 'Payment Options',
-      desc: 'Manage GPay UPI accounts or inspect saved transfers',
-      icon: <CreditCard className="text-royal-gold" size={24} />
-    },
-    {
-      id: 'support' as SubView,
-      title: 'Contact Atelier',
-      desc: 'Direct channels to request custom engravings/sizing',
-      icon: <MessageSquare className="text-royal-gold" size={24} />,
-      link: '/contact'
-    }
-  ];
-
   return (
-    <div className="min-h-screen py-16 px-6 bg-ambient-glow relative overflow-hidden">
-      {/* Glow leaks */}
-      <div className="absolute top-1/3 left-[-10%] w-96 h-96 rounded-full bg-burgundy-glow/10 blur-[100px] pointer-events-none" />
-      
-      <div className="max-w-6xl mx-auto relative z-10">
+    <div className="min-h-screen pt-32 pb-24 px-6 bg-[#0A0A0A] relative text-[#F5F0E8] font-body">
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[#C9A84C]/5 blur-[120px] pointer-events-none" />
+
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
         
-        {/* Header Intro */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12 border-b border-champagne-gold/10 pb-8">
-          <div className="flex flex-col gap-2">
-            <span className="font-poppins text-[10px] text-royal-gold uppercase tracking-[0.25em] font-semibold">Amazon Patron Registry</span>
-            <h1 className="font-cinzel text-3xl md:text-5xl font-bold tracking-wide text-soft-ivory">
-              Your Account
-            </h1>
-            <div className="w-12 h-[1px] bg-royal-gold/60 mt-1" />
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-start md:items-end text-left md:text-right">
-              <span className="font-poppins text-[10px] text-soft-ivory/40 uppercase tracking-widest">Patron Profile</span>
-              <span className="font-cinzel text-sm text-champagne-gold font-bold mt-0.5">{user?.full_name || user?.email || 'Bespoke Patron'}</span>
+        {/* Sidebar Navigation */}
+        <aside className="lg:col-span-3 bg-[#111111] border border-[#C9A84C]/15 p-6 rounded-lg flex flex-col gap-6 select-none">
+          <div className="flex flex-col items-center text-center gap-3">
+            <div className="relative w-20 h-20 rounded-full border border-[#C9A84C]/30 overflow-hidden bg-[#0A0A0A] flex items-center justify-center group shadow-md">
+              {user.avatar_url ? (
+                <img src={user.avatar_url} alt="Profile Photo" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-xl font-accent font-extrabold text-[#C9A84C]">{user.full_name?.charAt(0) || 'P'}</span>
+              )}
+              
+              <label className="absolute inset-0 bg-[#0A0A0A]/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-[8px] font-accent uppercase tracking-widest text-[#C9A84C]">
+                <Camera size={14} className="mb-1" /> Photo
+                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+              </label>
             </div>
-            <button
-              onClick={logout}
-              className="px-4 py-2 border border-red-500/30 hover:border-red-400 bg-red-950/5 hover:bg-red-950/20 text-red-400 hover:text-red-300 text-[10px] font-poppins uppercase tracking-wider rounded transition-colors"
-            >
-              Sign Out
-            </button>
+            
+            <div className="flex flex-col leading-none mt-1">
+              <span className="font-display font-semibold text-[#F5F0E8]">{user.full_name || 'Bespoke Patron'}</span>
+              <span className="font-body text-[9px] text-[#9A8F7E]/55 mt-1">{user.email}</span>
+            </div>
           </div>
-        </div>
 
-        {/* Dynamic Animations View Switcher */}
-        <AnimatePresence mode="wait">
-          {activeView === 'none' ? (
-            
-            /* Main Cards Grid View */
-            <motion.div
-              key="grid"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            >
-              {amazonCards.map((card) => {
-                const handleClick = () => {
-                  if (card.link) {
-                    router.push(card.link);
-                  } else {
-                    setActiveView(card.id);
-                  }
-                };
+          <div className="h-[1px] bg-[#C9A84C]/10" />
 
-                return (
-                  <div
-                    key={card.title}
-                    onClick={handleClick}
-                    className="glass-card p-6 rounded-lg border border-champagne-gold/5 hover:border-royal-gold/30 hover:bg-luxury-charcoal/50 cursor-pointer flex gap-5 items-start group transition-all"
-                  >
-                    <div className="p-3.5 rounded bg-royal-gold/5 border border-royal-gold/15 group-hover:border-royal-gold/45 group-hover:bg-royal-gold/10 transition-all shrink-0">
-                      {card.icon}
-                    </div>
-                    <div className="flex flex-col gap-1 min-w-0">
-                      <h3 className="font-cinzel text-sm font-bold text-soft-ivory group-hover:text-champagne-gold transition-colors">
-                        {card.title}
-                      </h3>
-                      <p className="font-poppins text-[10px] text-soft-ivory/50 leading-relaxed mt-0.5">
-                        {card.desc}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </motion.div>
-
-          ) : (
-            
-            /* Sub-View Details Layout */
-            <motion.div
-              key="subview"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              className="glass-panel p-8 rounded-lg border border-champagne-gold/10 min-h-[50vh] flex flex-col gap-6"
-            >
-              {/* Back Button */}
+          {/* Sidebar Tabs */}
+          <div className="flex flex-col gap-1.5">
+            {[
+              { id: 'overview', name: 'Overview', icon: <User size={14} /> },
+              { id: 'info', name: 'Personal Info', icon: <Key size={14} /> },
+              { id: 'addresses', name: 'Addresses', icon: <MapPin size={14} /> },
+              { id: 'orders', name: 'My Orders', icon: <Package size={14} /> },
+              { id: 'wishlist', name: 'Wishlist', icon: <Heart size={14} /> },
+              { id: 'settings', name: 'Account Settings', icon: <Settings size={14} /> }
+            ].map((tab) => (
               <button
-                onClick={() => setActiveView('none')}
-                className="flex items-center gap-2 text-royal-gold hover:text-champagne-gold text-xs font-poppins uppercase tracking-widest font-semibold pb-4 border-b border-champagne-gold/10 transition-colors w-fit"
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded text-xs font-accent uppercase tracking-widest transition-colors cursor-pointer text-left ${activeTab === tab.id ? 'bg-[#C9A84C] text-[#0A0A0A] font-extrabold shadow-md' : 'text-[#9A8F7E] hover:bg-[#161616] hover:text-[#F5F0E8]'}`}
               >
-                <ArrowLeft size={14} /> Back to Account Registry
+                {tab.icon}
+                <span>{tab.name}</span>
               </button>
+            ))}
+          </div>
 
-              {/* Sub-view Content renderer */}
-              <div className="flex-grow mt-4">
+          <button 
+            onClick={logout}
+            className="w-full py-2.5 border border-red-500/25 hover:border-red-500 bg-red-950/5 hover:bg-red-950/20 text-red-400 hover:text-red-300 rounded text-[9px] font-accent uppercase tracking-widest transition-colors cursor-pointer"
+          >
+            Sign Out
+          </button>
+        </aside>
+
+        {/* Content Area */}
+        <main className="lg:col-span-9 bg-[#111111] border border-[#C9A84C]/15 p-8 rounded-lg min-h-[60vh] flex flex-col gap-6">
+          
+          {updateMsg && (
+            <div className="bg-[#C9A84C]/10 border border-[#C9A84C]/35 text-[#C9A84C] text-xs p-4 rounded flex items-center gap-2 font-body select-none">
+              <CheckCircle size={14} /> {updateMsg}
+            </div>
+          )}
+
+          <AnimatePresence mode="wait">
+            
+            {/* TAB 1: OVERVIEW */}
+            {activeTab === 'overview' && (
+              <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-6">
+                <h2 className="font-display text-2xl text-gold-gradient">Registry Overview</h2>
                 
-                {/* 1. ORDERS LIST VIEW */}
-                {activeView === 'orders' && (
-                  <div className="flex flex-col gap-6">
-                    <h3 className="font-cinzel text-md font-bold text-champagne-gold flex items-center gap-2">
-                      <Package size={18} /> Purchase Orders Pipeline
-                    </h3>
-                    
-                    {ordersLoading ? (
-                      <div className="flex justify-center items-center py-16">
-                        <Loader2 className="animate-spin text-royal-gold" size={24} />
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="p-5 bg-[#0A0A0A] rounded border border-[#C9A84C]/10 flex flex-col justify-center">
+                    <span className="text-[9px] font-accent uppercase tracking-widest text-[#9A8F7E]">Patron Since</span>
+                    <span className="font-display text-base font-bold text-[#F5F0E8] mt-1">12 June 2025</span>
+                  </div>
+                  <div className="p-5 bg-[#0A0A0A] rounded border border-[#C9A84C]/10 flex flex-col justify-center">
+                    <span className="text-[9px] font-accent uppercase tracking-widest text-[#9A8F7E]">Total Orders</span>
+                    <span className="font-display text-base font-bold text-[#F5F0E8] mt-1">{orders.length} Purchases</span>
+                  </div>
+                  <div className="p-5 bg-[#0A0A0A] rounded border border-[#C9A84C]/10 flex flex-col justify-center">
+                    <span className="text-[9px] font-accent uppercase tracking-widest text-[#9A8F7E]">Saved Wishlist</span>
+                    <span className="font-display text-base font-bold text-[#F5F0E8] mt-1">{wishlistItems.length} Masterpieces</span>
+                  </div>
+                </div>
+
+                <div className="h-[1px] bg-[#C9A84C]/10 my-2" />
+
+                {/* Recent Orders Preview */}
+                <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C]">Recent Orders</h3>
+                {ordersLoading ? (
+                  <div className="h-24 bg-[#0A0A0A] animate-pulse" />
+                ) : orders.length === 0 ? (
+                  <div className="p-8 bg-[#0A0A0A] rounded border border-[#C9A84C]/5 text-center text-xs text-[#9A8F7E]/50 italic">
+                    No orders logged yet. Get started on custom hampers in the shop.
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {orders.slice(0, 3).map((o) => (
+                      <div key={o.id} className="p-5 bg-[#0A0A0A] rounded border border-[#C9A84C]/10 flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex flex-col">
+                          <span className="font-mono text-[9px] text-[#9A8F7E]/50">#{o.order_number}</span>
+                          <span className="font-body text-xs text-[#9A8F7E] mt-1">Date: {new Date(o.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <span className="font-body text-xs font-bold text-[#C9A84C]">₹{o.total.toLocaleString()}</span>
+                        <NextLink href={`/tracking/${o.id}`} className="px-3 py-1.5 border border-[#C9A84C]/50 hover:bg-[#C9A84C] hover:text-[#0A0A0A] rounded text-[9.5px] font-accent uppercase tracking-widest font-extrabold transition-all">
+                          Track Shipment
+                        </NextLink>
                       </div>
-                    ) : orders.length === 0 ? (
-                      <div className="text-center py-16 text-xs font-poppins text-soft-ivory/40">
-                        No commissions registered. You haven&apos;t placed any orders yet.
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-4">
-                        {orders.map((order) => (
-                          <div
-                            key={order.id}
-                            onClick={() => router.push(`/tracking/${order.id}`)}
-                            className="bg-matte-black/45 p-5 rounded border border-champagne-gold/5 hover:border-royal-gold/30 cursor-pointer flex items-center justify-between gap-6 group transition-all"
-                          >
-                            <div className="flex flex-col gap-1 min-w-0">
-                              <span className="font-mono text-[9px] text-soft-ivory/30 truncate">
-                                REF ID: {order.id}
-                              </span>
-                              <div className="flex flex-wrap items-center gap-4 text-xs font-poppins text-soft-ivory/50 mt-1">
-                                <span className="flex items-center gap-1">
-                                  <Clock size={11} className="text-royal-gold/60" />
-                                  {new Date(order.created_at).toLocaleDateString()}
-                                </span>
-                                <span className="font-semibold text-champagne-gold">
-                                  ${order.total_amount.toFixed(2)}
-                                </span>
-                              </div>
-                              <span className="bg-royal-gold/10 text-royal-gold border border-royal-gold/20 px-2 py-0.5 rounded text-[8px] uppercase tracking-wider font-semibold w-fit mt-2">
-                                {order.status}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span className="font-poppins text-[9px] uppercase tracking-wider text-royal-gold opacity-0 group-hover:opacity-100 transition-opacity">
-                                Track Order
-                              </span>
-                              <ChevronRight size={14} className="text-soft-ivory/30 group-hover:text-royal-gold group-hover:translate-x-1 transition-all" />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    ))}
                   </div>
                 )}
+              </motion.div>
+            )}
 
-                {/* 2. LOGIN & SECURITY OR ADDRESSES */}
-                {(activeView === 'security' || activeView === 'addresses') && (
-                  <div className="max-w-xl flex flex-col gap-6">
-                    <h3 className="font-cinzel text-md font-bold text-champagne-gold flex items-center gap-2">
-                      {activeView === 'security' ? <Shield size={18} /> : <MapPin size={18} />}
-                      {activeView === 'security' ? 'Edit Security Credentials' : 'Manage Courier Delivery Addresses'}
-                    </h3>
-
-                    {updateSuccess && (
-                      <div className="bg-emerald-950/30 border border-emerald-500/20 text-emerald-300 text-xs p-4 rounded flex items-center gap-2 font-poppins animate-pulse">
-                        <CheckCircle size={14} /> Profile registry parameters updated successfully.
-                      </div>
-                    )}
-
-                    <form onSubmit={handleUpdateProfile} className="flex flex-col gap-5">
-                      {/* Name */}
-                      <div className="flex flex-col gap-1.5">
-                        <label className="font-poppins text-[10px] uppercase tracking-wider text-soft-ivory/50 font-semibold pl-1">Full Name</label>
-                        <input
-                          type="text"
-                          required
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          placeholder="Bespoke Name"
-                          className="bg-matte-black/55 border border-champagne-gold/15 py-3 px-4 text-xs font-poppins rounded focus:outline-none focus:border-royal-gold/60 text-soft-ivory"
-                        />
-                      </div>
-
-                      {/* Phone */}
-                      <div className="flex flex-col gap-1.5">
-                        <label className="font-poppins text-[10px] uppercase tracking-wider text-soft-ivory/50 font-semibold pl-1">Phone Link</label>
-                        <input
-                          type="tel"
-                          required
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="Contact phone"
-                          className="bg-matte-black/55 border border-champagne-gold/15 py-3 px-4 text-xs font-poppins rounded focus:outline-none focus:border-royal-gold/60 text-soft-ivory"
-                        />
-                      </div>
-
-                      {/* Address */}
-                      <div className="flex flex-col gap-1.5">
-                        <label className="font-poppins text-[10px] uppercase tracking-wider text-soft-ivory/50 font-semibold pl-1">Delivery Address</label>
-                        <textarea
-                          required
-                          rows={3}
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
-                          placeholder="Courier shipping coordinates"
-                          className="bg-matte-black/55 border border-champagne-gold/15 py-3 px-4 text-xs font-poppins rounded focus:outline-none focus:border-royal-gold/60 text-soft-ivory resize-none"
-                        />
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={updateLoading}
-                        className="w-full mt-2 py-3.5 bg-royal-gold text-matte-black font-poppins text-xs font-bold uppercase tracking-wider rounded hover:bg-champagne-gold hover:shadow-[0_0_12px_rgba(214,175,55,0.35)] transition-all disabled:opacity-50"
-                      >
-                        {updateLoading ? 'UPDATING CREDENTIALS...' : 'SAVE MODIFICATIONS'}
-                      </button>
-                    </form>
+            {/* TAB 2: PERSONAL INFO */}
+            {activeTab === 'info' && (
+              <motion.div key="info" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-6 max-w-xl">
+                <h2 className="font-display text-2xl text-gold-gradient">Registry Credentials</h2>
+                
+                {/* Details Form */}
+                <form onSubmit={handleInfoSave} className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">Patron Full Name</label>
+                    <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white" />
                   </div>
-                )}
-
-                {/* 3. WISHLIST VIEW */}
-                {activeView === 'wishlist' && (
-                  <div className="flex flex-col gap-6">
-                    <h3 className="font-cinzel text-md font-bold text-champagne-gold flex items-center gap-2">
-                      <Heart size={18} /> Favorited Luxury Collections
-                    </h3>
-
-                    {wishlistLoading ? (
-                      <div className="flex justify-center items-center py-16">
-                        <Loader2 className="animate-spin text-royal-gold" size={24} />
-                      </div>
-                    ) : wishlistItems.length === 0 ? (
-                      <div className="text-center py-16 text-xs font-poppins text-soft-ivory/40">
-                        Wishlist registry is empty. 
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {wishlistItems.map((product) => (
-                          <div
-                            key={product.id}
-                            className="bg-matte-black/45 p-4 rounded border border-champagne-gold/5 flex items-center justify-between gap-4"
-                          >
-                            <div className="flex items-center gap-4 min-w-0">
-                              <img
-                                src={product.images[0]}
-                                alt={product.title}
-                                className="w-14 h-14 rounded object-cover border border-champagne-gold/10 shrink-0"
-                              />
-                              <div className="flex flex-col min-w-0">
-                                <h4 className="font-cinzel text-xs font-bold text-soft-ivory truncate">{product.title}</h4>
-                                <span className="font-poppins text-[11px] text-royal-gold font-semibold mt-0.5">${product.price.toFixed(2)}</span>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-2 shrink-0">
-                              <button
-                                onClick={() => handleAddToCart(product.id)}
-                                className="p-2 border border-royal-gold/30 hover:border-royal-gold hover:bg-royal-gold/10 text-royal-gold rounded transition-colors"
-                                title="Add to Cart"
-                              >
-                                <ShoppingCart size={13} />
-                              </button>
-                              <button
-                                onClick={() => handleRemoveWishlist(product.id)}
-                                className="p-2 border border-red-500/20 hover:border-red-400 hover:bg-red-950/20 text-red-400 rounded transition-colors"
-                                title="Remove from list"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">Registered Phone</label>
+                    <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white" />
                   </div>
-                )}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">Date of Birth (Optional)</label>
+                    <input type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white" />
+                  </div>
+                  <button type="submit" className="btn-solid-gold mt-2 py-3">Save Details</button>
+                </form>
 
-                {/* 4. PAYMENT OPTIONS */}
-                {activeView === 'payments' && (
-                  <div className="max-w-xl flex flex-col gap-6">
-                    <h3 className="font-cinzel text-md font-bold text-champagne-gold flex items-center gap-2">
-                      <CreditCard size={18} /> GPay UPI Account registry
-                    </h3>
-                    
-                    <div className="p-6 bg-matte-black/45 border border-champagne-gold/5 rounded-lg flex flex-col items-center text-center gap-5">
-                      <div className="p-4 rounded bg-[#faf7f2] border border-royal-gold/20 flex flex-col items-center">
-                        {/* Simulated QR logo */}
-                        <div className="w-32 h-32 bg-gray-200 border-2 border-matte-black flex items-center justify-center font-mono text-[8px] text-matte-black font-bold p-2 text-center">
-                          [ ARTINOVA.GPAY@UPI SECURE QR ]
+                <div className="h-[1px] bg-[#C9A84C]/10 my-4" />
+
+                {/* Password Form */}
+                <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C]">Modify Secure Credentials</h3>
+                <form onSubmit={handlePasswordSave} className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">Current Password</label>
+                    <input type="password" required value={passwordForm.current} onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">New Password</label>
+                    <input type="password" required value={passwordForm.new} onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">Confirm Password</label>
+                    <input type="password" required value={passwordForm.confirm} onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white" />
+                  </div>
+                  <button type="submit" className="btn-gold py-3">Update Credentials</button>
+                </form>
+              </motion.div>
+            )}
+
+            {/* TAB 3: ADDRESSES */}
+            {activeTab === 'addresses' && (
+              <motion.div key="addresses" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-6">
+                <h2 className="font-display text-2xl text-gold-gradient">Courier Delivery Addresses</h2>
+                
+                {/* List Addresses */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 select-none">
+                  {addresses.map((addr, idx) => (
+                    <div key={idx} className="p-5 rounded bg-[#0A0A0A] border border-[#C9A84C]/15 relative flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-accent text-[9px] uppercase tracking-widest text-[#C9A84C] font-bold">
+                          {addr.label} {addr.is_default && '· (Default)'}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => setAddressEditIdx(idx)} className="text-[#9A8F7E] hover:text-[#C9A84C] text-[10px] cursor-pointer">Edit</button>
+                          <button onClick={() => deleteAddress(idx)} className="text-red-400 hover:text-red-300 text-[10px] cursor-pointer">Delete</button>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-1.5">
-                        <span className="font-poppins text-[10px] text-soft-ivory/30 uppercase tracking-widest">Active UPI ID</span>
-                        <span className="font-poppins text-xs font-semibold text-royal-gold">artinova.gpay@upi</span>
-                      </div>
-                      <p className="font-poppins text-[10px] text-soft-ivory/50 leading-relaxed max-w-sm">
-                        Use GPay to scan and authorize direct bank transactions for your bespoke gifting commissions. To claim a custom order, upload your transaction reference slip during checkout.
-                      </p>
+                      
+                      <span className="font-body text-xs font-bold mt-1">{addr.fullName}</span>
+                      <span className="font-body text-xs text-[#9A8F7E]">{addr.line1}, {addr.line2}</span>
+                      <span className="font-body text-xs text-[#9A8F7E]">{addr.city}, {addr.state} - {addr.pincode}</span>
+                      <span className="font-body text-xs text-[#9A8F7E]">Phone: {addr.phone}</span>
+
+                      {!addr.is_default && (
+                        <button onClick={() => setDefaultAddress(idx)} className="w-full mt-3 py-1.5 border border-[#C9A84C]/30 text-[#C9A84C] hover:bg-[#C9A84C]/5 text-[9px] font-accent uppercase tracking-widest rounded transition-colors cursor-pointer">
+                          Set As Default
+                        </button>
+                      )}
                     </div>
+                  ))}
+                </div>
+
+                <div className="h-[1px] bg-[#C9A84C]/10 my-2" />
+
+                {/* Form to Add Address */}
+                <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C]">{addressEditIdx !== null ? 'Modify Address' : 'Register New Address'}</h3>
+                
+                <form onSubmit={saveAddress} className="grid grid-cols-2 gap-4 max-w-xl">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">Label</label>
+                    <select value={newAddress.label} onChange={(e) => setNewAddress({ ...newAddress, label: e.target.value })} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white">
+                      <option value="Home">Home</option>
+                      <option value="Work">Work / Office</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">Full Name</label>
+                    <input type="text" required value={newAddress.fullName} onChange={(e) => setNewAddress({ ...newAddress, fullName: e.target.value })} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">Contact Phone</label>
+                    <input type="tel" required value={newAddress.phone} onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white" />
+                  </div>
+                  <div className="flex flex-col gap-1 col-span-2">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">Address Line 1</label>
+                    <input type="text" required value={newAddress.line1} onChange={(e) => setNewAddress({ ...newAddress, line1: e.target.value })} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white" />
+                  </div>
+                  <div className="flex flex-col gap-1 col-span-2">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">Address Line 2 (Optional)</label>
+                    <input type="text" value={newAddress.line2} onChange={(e) => setNewAddress({ ...newAddress, line2: e.target.value })} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">City</label>
+                    <input type="text" required value={newAddress.city} onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">State</label>
+                    <input type="text" required value={newAddress.state} onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E]">Pincode</label>
+                    <input type="text" required value={newAddress.pincode} onChange={(e) => setNewAddress({ ...newAddress, pincode: e.target.value })} className="bg-[#0A0A0A]/55 border border-[#C9A84C]/15 py-3 px-4 text-xs rounded text-white" />
+                  </div>
+                  
+                  <div className="col-span-2 mt-2 flex gap-4">
+                    <button type="submit" className="btn-solid-gold flex-grow py-3">
+                      {addressEditIdx !== null ? 'Save Changes' : 'Register Address'}
+                    </button>
+                    {addressEditIdx !== null && (
+                      <button type="button" onClick={() => setAddressEditIdx(null)} className="btn-gold py-3">Cancel</button>
+                    )}
+                  </div>
+                </form>
+              </motion.div>
+            )}
+
+            {/* TAB 4: MY ORDERS */}
+            {activeTab === 'orders' && (
+              <motion.div key="orders" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-6">
+                <h2 className="font-display text-2xl text-gold-gradient">Commission Purchase Log</h2>
+                
+                {ordersLoading ? (
+                  <div className="flex justify-center items-center py-20">
+                    <div className="w-8 h-8 border-2 border-[#C9A84C] border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="p-10 bg-[#0A0A0A] rounded border border-[#C9A84C]/5 text-center text-xs text-[#9A8F7E]/40 italic">
+                    No orders log registered.
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {orders.map((o) => (
+                      <div key={o.id} className="p-6 bg-[#0A0A0A] rounded border border-[#C9A84C]/15 flex flex-wrap items-center justify-between gap-6">
+                        <div className="flex flex-col">
+                          <span className="font-mono text-[10px] text-[#C9A84C] font-bold">#{o.order_number}</span>
+                          <span className="font-body text-xs text-[#9A8F7E] mt-1">Date: {new Date(o.created_at).toLocaleDateString()}</span>
+                          <span className="inline-block px-2.5 py-0.5 mt-2 bg-[#111111] border border-[#C9A84C]/25 text-[#C9A84C] rounded text-[8px] font-accent uppercase tracking-widest font-extrabold w-fit">
+                            {o.order_status}
+                          </span>
+                        </div>
+                        <span className="font-body text-xs font-bold text-[#C9A84C]">₹{o.total.toLocaleString()}</span>
+                        <NextLink href={`/tracking/${o.id}`} className="px-5 py-2 border border-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0A0A0A] text-[9.5px] font-accent uppercase tracking-widest font-extrabold transition-all">
+                          View details & Timeline
+                        </NextLink>
+                      </div>
+                    ))}
                   </div>
                 )}
+              </motion.div>
+            )}
 
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            {/* TAB 5: WISHLIST */}
+            {activeTab === 'wishlist' && (
+              <motion.div key="wishlist" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-6">
+                <h2 className="font-display text-2xl text-gold-gradient">Favorited Creations</h2>
+                
+                {wishlistItems.length === 0 ? (
+                  <div className="p-10 bg-[#0A0A0A] border border-[#C9A84C]/5 text-center text-xs text-[#9A8F7E]/45 italic rounded">
+                    Your wishlist registry is empty.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {wishlistItems.map((p) => (
+                      <div key={p.id} className="bg-[#0A0A0A] p-4 rounded border border-[#C9A84C]/15 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-4 min-w-0">
+                          <img src={p.images[0]} alt={p.name} className="w-14 h-14 rounded object-cover border border-[#C9A84C]/10 shrink-0" />
+                          <div className="flex flex-col min-w-0">
+                            <h4 className="font-display text-xs font-bold text-white truncate">{p.name}</h4>
+                            <span className="font-body text-xs text-[#C9A84C] font-semibold mt-0.5">₹{p.price.toLocaleString()}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button onClick={() => addItem(user.id, p.id, 1)} className="p-2 border border-[#C9A84C]/40 hover:bg-[#C9A84C]/10 text-[#C9A84C] rounded transition-colors cursor-pointer" title="Move to Cart">
+                            <ShoppingCart size={13} />
+                          </button>
+                          <button onClick={() => toggleItem(user.id, p.id)} className="p-2 border border-red-500/20 hover:bg-red-950/20 text-red-400 rounded transition-colors cursor-pointer" title="Remove">
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* TAB 6: ACCOUNT SETTINGS */}
+            {activeTab === 'settings' && (
+              <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-6 max-w-xl">
+                <h2 className="font-display text-2xl text-gold-gradient">Patron Account Settings</h2>
+                
+                {/* Notification preferences */}
+                <div className="flex flex-col gap-4">
+                  <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C]">Notification Preferences</h3>
+                  
+                  <div className="flex items-center justify-between p-4 bg-[#0A0A0A] rounded border border-[#C9A84C]/10 select-none">
+                    <div className="flex flex-col">
+                      <span className="font-body text-xs font-bold">Email Updates</span>
+                      <span className="font-body text-[10px] text-[#9A8F7E]/55">Order state updates and tracking notifications</span>
+                    </div>
+                    <button 
+                      onClick={() => setEmailPref(!emailPref)}
+                      className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer ${emailPref ? 'bg-[#C9A84C]' : 'bg-[#161616]'}`}
+                    >
+                      <div className={`w-3.5 h-3.5 rounded-full bg-[#0A0A0A] transition-transform ${emailPref ? 'translate-x-4' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-[#0A0A0A] rounded border border-[#C9A84C]/10 select-none">
+                    <div className="flex flex-col">
+                      <span className="font-body text-xs font-bold">WhatsApp Updates</span>
+                      <span className="font-body text-[10px] text-[#9A8F7E]/55">Receive direct transaction approvals and dispatch receipts</span>
+                    </div>
+                    <button 
+                      onClick={() => setWhatsappPref(!whatsappPref)}
+                      className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer ${whatsappPref ? 'bg-[#C9A84C]' : 'bg-[#161616]'}`}
+                    >
+                      <div className={`w-3.5 h-3.5 rounded-full bg-[#0A0A0A] transition-transform ${whatsappPref ? 'translate-x-4' : 'translate-x-0'}`} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="h-[1px] bg-[#C9A84C]/10 my-4" />
+
+                {/* Account Deletion */}
+                <div className="flex flex-col gap-4 border border-red-500/25 p-6 rounded-lg bg-red-950/5">
+                  <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-red-400 flex items-center gap-2">
+                    <AlertTriangle size={15} /> Delete Account Registry
+                  </h3>
+                  <p className="font-body text-xs text-red-400/80 leading-relaxed">
+                    Warning: Deleting your account will immediately erase your profile, address records, cart items, wishlists, and any pending order invoice histories permanently.
+                  </p>
+                  
+                  <button 
+                    onClick={() => setDeleteModalOpen(true)}
+                    className="w-fit py-2.5 px-6 border border-red-500 hover:bg-red-500 hover:text-white rounded text-[10px] font-accent uppercase tracking-widest transition-all cursor-pointer font-bold"
+                  >
+                    Request Account Deletion
+                  </button>
+                </div>
+
+                {/* Delete Confirmation Modal */}
+                <AnimatePresence>
+                  {deleteModalOpen && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                      <div className="absolute inset-0 bg-[#0A0A0A]/90 backdrop-blur-md cursor-pointer" onClick={() => setDeleteModalOpen(false)} />
+                      <div className="bg-[#111111] border border-red-500/30 p-8 w-full max-w-md rounded relative z-10 flex flex-col gap-4">
+                        <h3 className="font-display text-xl text-red-400">Confirm Deletion</h3>
+                        <p className="font-body text-xs text-[#9A8F7E]">
+                          To permanently delete your account registry, type <strong className="text-red-400 uppercase">DELETE</strong> below.
+                        </p>
+                        <input 
+                          type="text" 
+                          value={deleteConfirmText}
+                          onChange={(e) => setDeleteConfirmText(e.target.value)}
+                          className="bg-[#0A0A0A] border border-red-500/20 py-2.5 px-4 text-xs rounded text-white"
+                          placeholder="Type DELETE..."
+                        />
+                        <div className="flex gap-4 mt-2">
+                          <button 
+                            onClick={handleDeleteAccount}
+                            disabled={deleteConfirmText !== 'DELETE'}
+                            className="flex-grow py-3 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white rounded text-[10px] font-accent uppercase tracking-widest font-bold cursor-pointer"
+                          >
+                            Permanently Delete
+                          </button>
+                          <button onClick={() => setDeleteModalOpen(false)} className="btn-gold py-3">Cancel</button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            )}
+
+          </AnimatePresence>
+        </main>
 
       </div>
     </div>

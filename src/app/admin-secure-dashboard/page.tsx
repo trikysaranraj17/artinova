@@ -1,102 +1,174 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useApp } from '../../context/AppContext';
+import NextLink from 'next/link';
+import { useAuthStore } from '../../store/authStore';
 import { 
   getProducts, createProduct, updateProduct, deleteProduct, Product,
-  getOrders, updateOrderStatus, getOrderItems, Order, OrderItem
+  getOrders, updateOrderStatus, getOrderItems, Order, OrderItem,
+  getSettings, updateSettings, getTrackingUpdates, createTrackingUpdate
 } from '../../lib/db';
+import { sendEmailTrigger } from '../../lib/email';
 import { 
-  Plus, Trash2, Edit2, ShieldAlert, DollarSign, Package, ShoppingCart, 
-  Users, Upload, Eye, X, Check, ArrowRight, Loader2, Sparkles, TrendingUp
+  Plus, Trash2, Edit2, ShieldAlert, Package, ShoppingBag, 
+  Users, Upload, Eye, X, Check, ArrowRight, Loader2, Sparkles, 
+  TrendingUp, BarChart3, Settings, Truck, CreditCard, PieChart, 
+  Download, FileText, CheckCircle2, AlertCircle, RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import useReveal from '../../hooks/useReveal';
+
+// Recharts components imports
+import { 
+  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, 
+  BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell 
+} from 'recharts';
 
 const STEPS = [
-  'Order received',
-  'Crafting in progress',
-  'Quality check',
-  'Packed',
-  'Shipped',
-  'Out for delivery',
-  'Delivered'
+  { key: 'received', label: 'Order Received' },
+  { key: 'verified', label: 'Payment Verified' },
+  { key: 'design', label: 'Design Confirmed' },
+  { key: 'crafting', label: 'Crafting Started' },
+  { key: 'quality', label: 'Quality Check' },
+  { key: 'packaging', label: 'Packaging' },
+  { key: 'shipped', label: 'Shipped' },
+  { key: 'delivered', label: 'Delivered' }
 ];
 
-export default function AdminDashboardPage() {
-  const { user, isAdmin, setLoginModalOpen, loginWithGoogle, logout } = useApp();
-  
-  useReveal();
+const formatDate = (dateStr: string) => {
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  } catch (e) {
+    return dateStr;
+  }
+};
 
-  // Dashboard sections tabs
-  const [activeTab, setActiveTab] = useState<'analytics' | 'products' | 'orders'>('analytics');
+const getStatusText = (status: string) => {
+  switch (status) {
+    case 'received': return 'Order Received';
+    case 'verified': return 'Payment Verified';
+    case 'design': return 'Design Confirmed';
+    case 'crafting': return 'Crafting Started';
+    case 'quality': return 'Quality Check';
+    case 'packaging': return 'Packaging';
+    case 'shipped': return 'Shipped';
+    case 'delivered': return 'Delivered';
+    default: return status;
+  }
+};
+
+export default function AdminDashboardPage() {
+  const { user, isAdmin, setLoginModalOpen, loginWithGoogle, logout } = useAuthStore();
+  
+  const [isMounted, setIsMounted] = useState(false);
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'products' | 'orders' | 'customers' | 'tracking' | 'payments' | 'analytics' | 'settings'
+  >('overview');
   
   // Data states
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [settings, setSettings] = useState<any>({});
+  const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Form states (Add/Edit Product)
+  const [showProductForm, setShowProductForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [pTitle, setPTitle] = useState('');
+  const [pName, setPName] = useState('');
+  const [pSlug, setPSlug] = useState('');
   const [pPrice, setPPrice] = useState('');
+  const [pOriginalPrice, setPOriginalPrice] = useState('');
   const [pDescription, setPDescription] = useState('');
-  const [pCategory, setPCategory] = useState('Royal Box');
+  const [pCategory, setPCategory] = useState('cat-art');
   const [pStock, setPStock] = useState('10');
-  const [pImageBase64, setPImageBase64] = useState<string>('');
+  const [pCustomizable, setPCustomizable] = useState(false);
+  const [pCustomFields, setPCustomFields] = useState<Array<{ name: string; type: string; required: boolean }>>([]);
+  const [pFeatured, setPFeatured] = useState(false);
+  const [pActive, setPActive] = useState(true);
+  const [pImages, setPImages] = useState<string[]>([]);
+  const [pMetaTitle, setPMetaTitle] = useState('');
+  const [pMetaDescription, setPMetaDescription] = useState('');
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [showProductForm, setShowProductForm] = useState(false);
   
   // Expand Order Details
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [expandedOrderItems, setExpandedOrderItems] = useState<OrderItem[]>([]);
   const [itemsLoading, setItemsLoading] = useState(false);
+  const [internalNotes, setInternalNotes] = useState('');
+  const [courierName, setCourierName] = useState('');
+  const [trackingNumber, setTrackingNumber] = useState('');
   
   // View Screenshot Modal
   const [activeScreenshot, setActiveScreenshot] = useState<string | null>(null);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [selectedRejectOrderId, setSelectedRejectOrderId] = useState<string | null>(null);
 
-  // Status updating comments state
-  const [statusComment, setStatusComment] = useState('');
+  // Settings form states
+  const [setUpiId, setSetUpiId] = useState('');
+  const [setQrUrl, setSetQrUrl] = useState('');
+  const [setWaNumber, setSetWaNumber] = useState('');
+  const [setGstRate, setSetGstRate] = useState('');
+  const [setThreshold, setSetThreshold] = useState('');
 
+  // Hydration fix
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    setIsMounted(true);
+  }, []);
 
-    async function loadData(showLoading = true) {
-      if (isAdmin) {
-        if (showLoading) setLoading(true);
-        try {
-          const prods = await getProducts();
-          const ords = await getOrders();
-          setProducts(prods);
-          setOrders(ords);
-        } catch (err) {
-          console.error(err);
-        } finally {
-          if (showLoading) setLoading(false);
+  // Fetch initial data
+  const loadDashboardData = async (showLoading = true) => {
+    if (isAdmin) {
+      if (showLoading) setLoading(true);
+      try {
+        const prods = await getProducts();
+        const ords = await getOrders();
+        const config = await getSettings();
+        
+        setProducts(prods);
+        setOrders(ords);
+        setSettings(config);
+
+        // Map settings fields
+        setSetUpiId(config.gpay_upi_id || 'artinova@upi');
+        setSetQrUrl(config.gpay_qr_url || '');
+        setSetWaNumber(config.whatsapp_number || '+91 99942 03670');
+        setSetGstRate(config.gst_rate || '18');
+        setSetThreshold(config.free_shipping_threshold || '999');
+
+        // Compile customer list from registered users and orders
+        if (typeof window !== 'undefined') {
+          const registered = JSON.parse(localStorage.getItem('artinova_registered_users') || '[]');
+          const customersList = registered.map((u: any) => {
+            const userOrders = ords.filter(o => o.user_id === u.id);
+            const totalSpent = userOrders.reduce((sum, o) => sum + o.total, 0);
+            return {
+              ...u,
+              ordersCount: userOrders.length,
+              totalSpent,
+              joined: u.created_at || new Date().toISOString()
+            };
+          });
+          setCustomers(customersList);
         }
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+      } finally {
+        if (showLoading) setLoading(false);
       }
     }
-    loadData(true);
+  };
 
-    const handleFocus = () => {
-      loadData(false);
-    };
-    window.addEventListener('focus', handleFocus);
-
-    if (isAdmin) {
-      interval = setInterval(() => {
-        loadData(false);
-      }, 2000);
-    }
-
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      if (interval) clearInterval(interval);
-    };
+  useEffect(() => {
+    loadDashboardData(true);
   }, [isAdmin]);
 
-  // Load order items on expand
   const handleExpandOrder = async (orderId: string) => {
     if (expandedOrderId === orderId) {
       setExpandedOrderId(null);
@@ -107,8 +179,14 @@ export default function AdminDashboardPage() {
     setExpandedOrderId(orderId);
     setItemsLoading(true);
     try {
-      const items = await getOrderItems(orderId);
-      setExpandedOrderItems(items);
+      const orderData = orders.find(o => o.id === orderId);
+      if (orderData) {
+        setInternalNotes(orderData.admin_notes || '');
+        setCourierName(orderData.courier || '');
+        setTrackingNumber(orderData.tracking_number || '');
+      }
+      const orderItems = await getOrderItems(orderId);
+      setExpandedOrderItems(orderItems);
     } catch (err) {
       console.error(err);
     } finally {
@@ -116,20 +194,37 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Convert image to base64
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // UPI settings save
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await updateSettings('gpay_upi_id', setUpiId);
+      await updateSettings('gpay_qr_url', setQrUrl);
+      await updateSettings('whatsapp_number', setWaNumber);
+      await updateSettings('gst_rate', setGstRate);
+      await updateSettings('free_shipping_threshold', setThreshold);
+      
+      alert('Artinova system configuration updated successfully.');
+      loadDashboardData(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Convert Product Image to Base64
+  const handleProductImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploadError(null);
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      setUploadError('Image size exceeds 2MB limit.');
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('Image size exceeds 5MB limit.');
       return;
     }
 
     const reader = new FileReader();
     reader.onload = () => {
-      setPImageBase64(reader.result as string);
+      setPImages([reader.result as string]);
     };
     reader.onerror = () => {
       setUploadError('Failed to read image file.');
@@ -137,860 +232,1450 @@ export default function AdminDashboardPage() {
     reader.readAsDataURL(file);
   };
 
-  // Create or Update Product
+  const addCustomField = () => {
+    setPCustomFields([...pCustomFields, { name: '', type: 'text', required: true }]);
+  };
+
+  const removeCustomField = (idx: number) => {
+    setPCustomFields(pCustomFields.filter((_, i) => i !== idx));
+  };
+
+  const updateCustomField = (idx: number, field: string, val: any) => {
+    const updated = [...pCustomFields];
+    updated[idx] = { ...updated[idx], [field]: val };
+    setPCustomFields(updated);
+  };
+
+  // Product submit logic
   const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pTitle || !pPrice) return;
+    if (!pName || !pPrice) return;
+
+    const payload = {
+      name: pName,
+      slug: pSlug || pName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
+      description: pDescription,
+      price: parseFloat(pPrice),
+      original_price: pOriginalPrice ? parseFloat(pOriginalPrice) : undefined,
+      category_id: pCategory,
+      stock: parseInt(pStock, 10),
+      is_customizable: pCustomizable,
+      customization_fields: pCustomizable ? pCustomFields : [],
+      is_featured: pFeatured,
+      is_active: pActive,
+      meta_title: pMetaTitle,
+      meta_description: pMetaDescription
+    };
 
     try {
-      const productPayload = {
-        title: pTitle,
-        price: parseFloat(pPrice),
-        description: pDescription,
-        category: pCategory,
-        stock: parseInt(pStock),
-        images: pImageBase64 ? [pImageBase64] : ['https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800']
-      };
-
       if (isEditing && editId) {
-        await updateProduct(editId, productPayload);
+        await updateProduct(editId, payload, pImages);
       } else {
-        await createProduct(productPayload);
+        await createProduct(payload, pImages);
       }
-
-      // Reload
-      const fresh = await getProducts();
-      setProducts(fresh);
-      
-      // Reset form
-      resetForm();
+      resetProductForm();
+      loadDashboardData(false);
+      alert('Product catalog successfully updated.');
     } catch (err) {
       console.error(err);
     }
   };
 
-  const resetForm = () => {
-    setPTitle('');
+  const handleEditProductInit = (prod: Product) => {
+    setPName(prod.name);
+    setPSlug(prod.slug);
+    setPPrice(prod.price.toString());
+    setPOriginalPrice(prod.original_price?.toString() || '');
+    setPDescription(prod.description);
+    setPCategory(prod.category_id || 'cat-art');
+    setPStock(prod.stock.toString());
+    setPCustomizable(prod.is_customizable);
+    setPCustomFields(prod.customization_fields || []);
+    setPFeatured(prod.is_featured);
+    setPActive(prod.is_active);
+    setPImages(prod.images || []);
+    setPMetaTitle(prod.meta_title || '');
+    setPMetaDescription(prod.meta_description || '');
+    setIsEditing(true);
+    setEditId(prod.id);
+    setShowProductForm(true);
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    if (confirm('Permanently delete this product from catalog?')) {
+      await deleteProduct(id);
+      loadDashboardData(false);
+    }
+  };
+
+  const resetProductForm = () => {
+    setPName('');
+    setPSlug('');
     setPPrice('');
+    setPOriginalPrice('');
     setPDescription('');
-    setPCategory('Royal Box');
+    setPCategory('cat-art');
     setPStock('10');
-    setPImageBase64('');
+    setPCustomizable(false);
+    setPCustomFields([]);
+    setPFeatured(false);
+    setPActive(true);
+    setPImages([]);
+    setPMetaTitle('');
+    setPMetaDescription('');
     setIsEditing(false);
     setEditId(null);
     setShowProductForm(false);
   };
 
-  const handleEditInit = (product: Product) => {
-    setPTitle(product.title);
-    setPPrice(product.price.toString());
-    setPDescription(product.description);
-    setPCategory(product.category);
-    setPStock(product.stock.toString());
-    setPImageBase64(product.images[0] || '');
-    setIsEditing(true);
-    setEditId(product.id);
-    setShowProductForm(true);
-  };
-
-  const handleDeleteProduct = async (id: string) => {
-    if (confirm('Are you sure you want to permanently delete this product?')) {
-      const ok = await deleteProduct(id);
+  // Payment review controls
+  const handleVerifyPayment = async (orderId: string) => {
+    try {
+      const orderData = orders.find(o => o.id === orderId);
+      if (!orderData) return;
+      
+      const ok = await updateOrderStatus(
+        orderId, 
+        'verified', 
+        'verified', 
+        orderData.courier, 
+        orderData.tracking_number, 
+        internalNotes
+      );
       if (ok) {
-        setProducts(products.filter(p => p.id !== id));
+        // Send email trigger
+        const orderItems = await getOrderItems(orderId);
+        await sendEmailTrigger(orderData, orderItems, 'verified', orderData.shipping_email || '');
+        
+        alert('GPay Payment approved. Client notified.');
+        loadDashboardData(false);
       }
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  // Update tracking status
-  const handleStatusChange = async (orderId: string, newStatus: string) => {
-    const comment = statusComment || `Order status updated to: ${newStatus}`;
-    const ok = await updateOrderStatus(orderId, newStatus, comment);
-    if (ok) {
-      setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
-      setStatusComment('');
-      alert(`Order status updated to ${newStatus}`);
+  const handleRejectPaymentClick = (orderId: string) => {
+    setSelectedRejectOrderId(orderId);
+    setRejectModalOpen(true);
+  };
+
+  const handleConfirmRejectPayment = async () => {
+    if (!selectedRejectOrderId) return;
+    try {
+      const orderData = orders.find(o => o.id === selectedRejectOrderId);
+      if (!orderData) return;
+
+      const ok = await updateOrderStatus(
+        selectedRejectOrderId, 
+        'received', 
+        'rejected', 
+        orderData.courier, 
+        orderData.tracking_number, 
+        `Payment Rejected: ${rejectReason}`
+      );
+      if (ok) {
+        // Send rejection email trigger
+        const orderItems = await getOrderItems(selectedRejectOrderId);
+        await sendEmailTrigger(orderData, orderItems, 'rejected', orderData.shipping_email || '', { reason: rejectReason });
+        
+        alert('GPay Payment rejected. Client email notification sent.');
+        setRejectModalOpen(false);
+        setRejectReason('');
+        setSelectedRejectOrderId(null);
+        loadDashboardData(false);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  // Auth gate
+  // Advancing tracking stages
+  const handleUpdatePipeline = async (orderId: string, stage: string) => {
+    try {
+      const orderData = orders.find(o => o.id === orderId);
+      if (!orderData) return;
+
+      const ok = await updateOrderStatus(
+        orderId, 
+        stage, 
+        orderData.payment_status, 
+        courierName, 
+        trackingNumber, 
+        internalNotes
+      );
+      
+      if (ok) {
+        const orderItems = await getOrderItems(orderId);
+        
+        // Trigger shipment or delivery emails
+        if (stage === 'shipped') {
+          await sendEmailTrigger(orderData, orderItems, 'shipped', orderData.shipping_email || '', {
+            trackingNumber,
+            courier: courierName
+          });
+        } else if (stage === 'delivered') {
+          await sendEmailTrigger(orderData, orderItems, 'delivered', orderData.shipping_email || '');
+        }
+
+        alert(`Logistics stage advanced to: ${stage}`);
+        loadDashboardData(false);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Export Customer List CSV
+  const handleExportCSV = () => {
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    csvContent += 'Name,Email,Phone,Orders Count,Total Spent,Joined Date\r\n';
+    
+    customers.forEach(c => {
+      csvContent += `"${c.full_name}","${c.email}","${c.phone || ''}",${c.ordersCount},${c.totalSpent},"${new Date(c.joined).toLocaleDateString()}"\r\n`;
+    });
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `artinova_customers_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-[#070913] text-[#fafafa] flex flex-col relative overflow-hidden font-poppins select-none">
-        {/* Top Header */}
-        <header className="w-full py-4 px-6 md:px-12 flex items-center justify-between border-b border-royal-gold/15 bg-[#090b1a]/85 backdrop-blur-md z-50 shrink-0">
-          {/* Left: Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 text-royal-gold shrink-0">
-              <svg viewBox="0 0 100 100" className="w-full h-full text-royal-gold filter drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]">
-                <path d="M 40,50 C 25,48 10,40 10,25 C 10,20 20,18 28,26 C 33,31 38,40 40,47" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-                <path d="M 42,52 C 28,48 15,44 14,33 C 14,29 22,28 29,33 C 34,37 39,45 42,50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <path d="M 60,50 C 75,48 90,40 90,25 C 90,20 80,18 72,26 C 67,31 62,40 60,47" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-                <path d="M 58,52 C 72,48 85,44 86,33 C 86,29 78,28 71,33 C 66,37 61,45 58,50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <rect x="42" y="52" width="16" height="16" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2.5" />
-                <path d="M 40,52 L 60,52 M 50,52 L 50,68" stroke="currentColor" strokeWidth="2" />
-                <polygon points="50,38 52,43 57,45 52,47 50,52 48,47 43,45 48,43" fill="currentColor" />
-              </svg>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-cinzel text-sm font-bold tracking-[0.2em] text-gold-gradient leading-none">
-                ARTINOVA
-              </span>
-              <span className="font-poppins text-[8px] uppercase tracking-[0.3em] text-royal-gold/60 mt-0.5">
-                Admin Portal
-              </span>
-            </div>
+      <div className="min-h-screen bg-[#0A0A0A] text-[#F5F0E8] flex flex-col items-center justify-center p-6 relative overflow-hidden font-body select-none">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-[#C9A84C]/5 blur-[90px] pointer-events-none" />
+        
+        <div className="max-w-sm w-full bg-[#111111] border border-[#C9A84C]/15 rounded-xl p-8 flex flex-col items-center text-center shadow-2xl relative">
+          <div className="w-16 h-16 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C] flex items-center justify-center text-[#C9A84C] mb-6">
+            <ShieldAlert size={28} />
           </div>
 
-          {/* Center: Administration Mode Pill */}
-          <div className="hidden sm:block border border-royal-gold/40 bg-royal-gold/5 px-4 py-1.5 rounded-full text-[9px] uppercase tracking-[0.2em] text-royal-gold font-bold font-poppins">
-            ADMINISTRATION MODE
-          </div>
+          <h2 className="font-accent text-lg font-bold tracking-widest text-[#C9A84C] mb-2 uppercase">
+            Admin Panel Access
+          </h2>
+          <p className="text-xs text-[#9A8F7E] leading-relaxed mb-8 max-w-[260px]">
+            Please authenticate using authorized credentials to open the Artinova management dashboard.
+          </p>
 
-          {/* Right: Tamil & DarkMode */}
-          <div className="flex items-center gap-4">
-            <button className="border border-royal-gold/40 bg-royal-gold/5 px-3 py-1 rounded text-[9px] font-poppins font-bold uppercase tracking-wider text-royal-gold">
-              TAMIL
-            </button>
-            <button className="text-soft-ivory/60 hover:text-royal-gold transition-colors">
-              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-              </svg>
-            </button>
-          </div>
-        </header>
-
-        {/* Main centered box */}
-        <div className="flex-1 flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#090b16] to-[#04050a] relative">
-          {/* Toast Notification */}
-          <div className="absolute top-8 right-8 flex items-center gap-2.5 bg-[#0b2b1b] border border-emerald-500/20 text-emerald-200 px-4 py-3 rounded shadow-lg z-50 text-xs font-poppins">
-            <div className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-300">✓</div>
-            <span>System ready for verification.</span>
-          </div>
-
-          {/* Card */}
-          <div className="w-full max-w-sm bg-[#0a0c1a]/95 border border-royal-gold/15 rounded-2xl p-8 flex flex-col items-center text-center shadow-[0_15px_40px_rgba(0,0,0,0.5)] relative overflow-hidden">
-            <div className="absolute -top-24 -left-24 w-48 h-48 bg-royal-gold/5 rounded-full blur-3xl pointer-events-none" />
-
-            {/* Gold Lock Icon */}
-            <div className="w-20 h-20 rounded-full bg-[#11142a]/80 border border-royal-gold/20 flex items-center justify-center text-royal-gold shadow-[0_0_20px_rgba(212,175,55,0.05)] mb-6">
-              <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-            </div>
-
-            <h2 className="font-cinzel text-2xl font-bold tracking-wider text-soft-ivory mb-2">
-              Admin Portal
-            </h2>
-            <p className="font-poppins text-xs text-soft-ivory/50 mb-8 max-w-[240px]">
-              Sign in with your admin credentials.
-            </p>
-
-            {/* Google Sign In Button */}
-            <button
-              onClick={loginWithGoogle}
-              className="w-full bg-[#fafafa] text-[#070708] py-3.5 px-6 rounded-lg font-poppins text-xs font-bold uppercase tracking-wider hover:bg-champagne-gold hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer"
-            >
-              <svg viewBox="0 0 24 24" width="16" height="16" className="shrink-0">
-                <path
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  fill="#34A853"
-                />
-                <path
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                  fill="#EA4335"
-                />
-              </svg>
-              Sign in with Google
-            </button>
-          </div>
+          <button
+            onClick={loginWithGoogle}
+            className="w-full bg-[#C9A84C] text-[#0A0A0A] py-3.5 px-6 rounded font-accent text-[10px] font-bold uppercase tracking-widest hover:bg-[#F5F0E8] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+          >
+            Authenticate with Google
+          </button>
         </div>
       </div>
     );
   }
 
-  // Analytics helper metrics
-  const totalSales = orders.reduce((sum, o) => sum + o.total_amount, 0);
+  // Analytics variables
+  const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
   const totalOrdersCount = orders.length;
   const productsCount = products.length;
-  // Unique customers based on email
-  const customersCount = new Set(orders.map(o => o.shipping_email.toLowerCase())).size;
+  const pendingPayments = orders.filter(o => o.payment_status === 'pending').length;
+  
+  // Chart datasets
+  const salesHistoryData = orders
+    .map(o => ({
+      date: new Date(o.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+      amount: o.total
+    }))
+    .reverse()
+    .slice(0, 15);
+
+  const categoriesData = [
+    { name: 'Frames', value: products.filter(p => p.category_id === 'cat-frames').length },
+    { name: 'Hampers', value: products.filter(p => p.category_id === 'cat-hampers').length },
+    { name: 'Resin Art', value: products.filter(p => p.category_id === 'cat-art').length },
+    { name: 'Custom', value: products.filter(p => p.category_id === 'cat-keepsakes' || p.category_id === 'cat-accessories').length }
+  ];
+
+  const COLORS = ['#C9A84C', '#B8860B', '#9A8F7E', '#161616'];
 
   return (
-    <div className="min-h-screen bg-[#070913] text-[#fafafa] flex flex-col relative overflow-hidden font-poppins">
+    <div className="min-h-screen bg-[#0A0A0A] text-[#F5F0E8] flex flex-col font-body">
       
       {/* Top Header */}
-      <header className="w-full py-4 px-6 md:px-12 flex items-center justify-between border-b border-royal-gold/15 bg-[#090b1a]/85 backdrop-blur-md z-50 shrink-0 select-none">
-        {/* Left: Brand */}
+      <header className="w-full py-4 px-6 md:px-12 flex items-center justify-between border-b border-[#C9A84C]/15 bg-[#111111]/90 backdrop-blur-md z-[50] select-none">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 text-royal-gold shrink-0">
-            <svg viewBox="0 0 100 100" className="w-full h-full text-royal-gold filter drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]">
-              <path d="M 40,50 C 25,48 10,40 10,25 C 10,20 20,18 28,26 C 33,31 38,40 40,47" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-              <path d="M 42,52 C 28,48 15,44 14,33 C 14,29 22,28 29,33 C 34,37 39,45 42,50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              <path d="M 60,50 C 75,48 90,40 90,25 C 90,20 80,18 72,26 C 67,31 62,40 60,47" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-              <path d="M 58,52 C 72,48 85,44 86,33 C 86,29 78,28 71,33 C 66,37 61,45 58,50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              <rect x="42" y="52" width="16" height="16" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2.5" />
-              <path d="M 40,52 L 60,52 M 50,52 L 50,68" stroke="currentColor" strokeWidth="2" />
-              <polygon points="50,38 52,43 57,45 52,47 50,52 48,47 43,45 48,43" fill="currentColor" />
-            </svg>
-          </div>
           <div className="flex flex-col">
-            <span className="font-cinzel text-sm font-bold tracking-[0.2em] text-gold-gradient leading-none">
-              ARTINOVA
-            </span>
-            <span className="font-poppins text-[8px] uppercase tracking-[0.3em] text-royal-gold/60 mt-0.5">
-              Admin Portal
-            </span>
+            <span className="font-accent text-sm font-bold tracking-widest text-[#C9A84C] leading-none">ARTINOVA</span>
+            <span className="font-accent text-[8px] uppercase tracking-[0.25em] text-[#9A8F7E] mt-1">Management Desk</span>
           </div>
         </div>
 
-        {/* Center: Administration Mode Pill */}
-        <div className="hidden sm:block border border-royal-gold/40 bg-royal-gold/5 px-4 py-1.5 rounded-full text-[9px] uppercase tracking-[0.2em] text-royal-gold font-bold font-poppins">
-          ADMINISTRATION MODE
-        </div>
-
-        {/* Right: Profile Pic, Logout, Tamil, DarkMode */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-royal-gold/15 border border-royal-gold/30 flex items-center justify-center text-[10px] font-bold text-royal-gold uppercase select-none">
-              {user?.full_name?.charAt(0) || 'D'}
-            </div>
+            <span className="hidden md:inline text-[10px] text-[#9A8F7E] font-bold">{user?.email}</span>
             <button
               onClick={logout}
-              className="text-[10px] font-poppins font-bold uppercase tracking-wider text-soft-ivory/60 hover:text-red-400 transition-colors cursor-pointer"
+              className="text-[9px] font-accent font-bold uppercase tracking-widest text-[#9A8F7E] hover:text-red-400 transition-colors cursor-pointer border border-[#9A8F7E]/20 hover:border-red-400/30 px-3 py-1.5 rounded"
             >
-              Logout
+              Sign Out
             </button>
           </div>
-          <button className="border border-royal-gold/40 bg-royal-gold/5 px-3 py-1 rounded text-[9px] font-poppins font-bold uppercase tracking-wider text-royal-gold">
-            TAMIL
-          </button>
-          <button className="text-soft-ivory/60 hover:text-royal-gold transition-colors">
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-            </svg>
-          </button>
         </div>
       </header>
 
-      {/* Main Workspace: Sidebar + Content */}
-      <div className="flex-grow flex w-full relative overflow-hidden">
+      {/* Main Workspace Layout */}
+      <div className="flex-grow flex w-full relative">
         
-        {/* Sidebar */}
-        <aside className="w-64 bg-[#090b1a] border-r border-royal-gold/15 p-6 flex flex-col justify-between shrink-0 select-none">
-          <div className="flex flex-col gap-8">
-            <div className="flex items-center gap-3 pb-6 border-b border-royal-gold/10">
-              <div className="w-10 h-10 rounded-full bg-royal-gold/15 border border-royal-gold/35 flex items-center justify-center text-royal-gold text-lg font-bold">
-                {user?.full_name?.charAt(0) || 'D'}
+        {/* Sidebar Nav */}
+        <aside className="hidden lg:flex w-64 bg-[#111111] border-r border-[#C9A84C]/10 p-6 flex-col justify-between shrink-0 select-none">
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center gap-3 pb-6 border-b border-[#C9A84C]/10">
+              <div className="w-9 h-9 rounded bg-[#C9A84C]/10 border border-[#C9A84C]/35 flex items-center justify-center text-[#C9A84C] text-sm font-bold">
+                {user?.full_name?.charAt(0) || 'A'}
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="font-poppins text-xs font-bold text-soft-ivory truncate">
-                  {user?.full_name || 'deepaksabari'}
-                </span>
-                <span className="font-poppins text-[10px] text-soft-ivory/40 truncate">
-                  {user?.email || 'deepaksabari28@gmail.com'}
-                </span>
+                <span className="text-xs font-bold text-[#F5F0E8] truncate">{user?.full_name || 'Admin'}</span>
+                <span className="text-[9px] uppercase tracking-widest text-[#C9A84C] font-bold mt-0.5">Control Tower</span>
               </div>
             </div>
 
-            <nav className="flex flex-col gap-2">
-              <button
-                onClick={() => setActiveTab('analytics')}
-                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-lg text-xs font-poppins font-semibold transition-all border cursor-pointer text-left ${
-                  activeTab === 'analytics'
-                    ? 'bg-royal-gold/10 text-royal-gold border-royal-gold/30'
-                    : 'text-soft-ivory/50 hover:bg-royal-gold/5 hover:text-soft-ivory border-transparent'
-                }`}
-              >
-                <span className="w-4 h-4 flex items-center justify-center shrink-0">
-                  <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="7" height="9"></rect>
-                    <rect x="14" y="3" width="7" height="5"></rect>
-                    <rect x="14" y="12" width="7" height="9"></rect>
-                    <rect x="3" y="16" width="7" height="5"></rect>
-                  </svg>
-                </span>
-                Dashboard
-              </button>
-
-              <button
-                onClick={() => setActiveTab('products')}
-                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-lg text-xs font-poppins font-semibold transition-all border cursor-pointer text-left ${
-                  activeTab === 'products'
-                    ? 'bg-royal-gold/10 text-royal-gold border-royal-gold/30'
-                    : 'text-soft-ivory/50 hover:bg-royal-gold/5 hover:text-soft-ivory border-transparent'
-                }`}
-              >
-                <span className="w-4 h-4 flex items-center justify-center shrink-0">
-                  <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                  </svg>
-                </span>
-                Manage Products
-              </button>
-
-              <button
-                onClick={() => setActiveTab('orders')}
-                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-lg text-xs font-poppins font-semibold transition-all border cursor-pointer text-left ${
-                  activeTab === 'orders'
-                    ? 'bg-royal-gold/10 text-royal-gold border-royal-gold/30'
-                    : 'text-soft-ivory/50 hover:bg-royal-gold/5 hover:text-soft-ivory border-transparent'
-                }`}
-              >
-                <span className="w-4 h-4 flex items-center justify-center shrink-0">
-                  <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="9" cy="21" r="1"></circle>
-                    <circle cx="20" cy="21" r="1"></circle>
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                  </svg>
-                </span>
-                Manage Orders
-              </button>
-
-              <a
-                href="/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center gap-3.5 px-4 py-3 rounded-lg text-xs font-poppins font-semibold text-soft-ivory/50 hover:bg-royal-gold/5 hover:text-soft-ivory transition-all border border-transparent"
-              >
-                <span className="w-4 h-4 flex items-center justify-center shrink-0">
-                  <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                    <polyline points="15 3 21 3 21 9"></polyline>
-                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                  </svg>
-                </span>
-                Live Website
-              </a>
+            <nav className="flex flex-col gap-1.5">
+              {[
+                { id: 'overview', name: 'Overview', icon: <BarChart3 size={14} /> },
+                { id: 'products', name: 'Products', icon: <Package size={14} /> },
+                { id: 'orders', name: 'Orders', icon: <ShoppingBag size={14} /> },
+                { id: 'customers', name: 'Customers', icon: <Users size={14} /> },
+                { id: 'tracking', name: 'Tracking', icon: <Truck size={14} /> },
+                { id: 'payments', name: 'Payments', icon: <CreditCard size={14} /> },
+                { id: 'analytics', name: 'Analytics', icon: <PieChart size={14} /> },
+                { id: 'settings', name: 'Settings', icon: <Settings size={14} /> }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded text-xs font-accent uppercase tracking-wider transition-all border text-left cursor-pointer ${
+                    activeTab === tab.id
+                      ? 'bg-[#C9A84C]/10 text-[#C9A84C] border-[#C9A84C]/30 font-bold'
+                      : 'text-[#9A8F7E] hover:bg-[#C9A84C]/5 hover:text-[#F5F0E8] border-transparent'
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.name}
+                </button>
+              ))}
             </nav>
           </div>
-
-          <button
-            onClick={logout}
-            className="w-full flex items-center gap-3.5 px-4 py-3 rounded-lg text-xs font-poppins font-semibold text-red-400 hover:bg-red-500/5 transition-all border border-transparent cursor-pointer text-left"
-          >
-            <span className="w-4 h-4 flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
-            </span>
-            Sign Out
-          </button>
         </aside>
 
         {/* Content body container */}
-        <main className="flex-grow p-6 md:p-8 overflow-y-auto">
+        <main className="flex-grow p-6 md:p-8 overflow-y-auto max-w-full">
+          
           {/* Zoomed Screenshot Overlay Modal */}
           <AnimatePresence>
             {activeScreenshot && (
-              <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-matte-black/95 backdrop-blur-md">
+              <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-[#0A0A0A]/95 backdrop-blur-md">
                 <div className="absolute inset-0" onClick={() => setActiveScreenshot(null)} />
-                <div className="relative max-w-2xl max-h-[85vh] z-10 flex flex-col items-center gap-4">
+                <div className="relative max-w-lg max-h-[85vh] z-10 flex flex-col items-center gap-4 bg-[#111111] p-4 rounded border border-[#C9A84C]/20">
                   <button
                     onClick={() => setActiveScreenshot(null)}
-                    className="absolute top-[-40px] right-0 p-2 rounded-full border border-champagne-gold/20 text-soft-ivory hover:text-royal-gold"
+                    className="absolute top-4 right-4 p-2 rounded-full bg-[#0A0A0A]/80 border border-[#C9A84C]/20 text-[#F5F0E8] hover:text-[#C9A84C] cursor-pointer"
                   >
-                    <X size={18} />
+                    <X size={16} />
                   </button>
                   <img
                     src={activeScreenshot}
-                    alt="GPay Verification Receipt"
-                    className="object-contain rounded border border-champagne-gold/10 max-h-[75vh]"
+                    alt="Payment Slip Log"
+                    className="object-contain max-h-[70vh] rounded"
                   />
-                  <span className="font-poppins text-[10px] text-royal-gold uppercase tracking-widest bg-matte-black/60 px-3 py-1 rounded">
-                    Inspecting verification token receipt
-                  </span>
+                  <span className="font-accent text-[9px] text-[#C9A84C] uppercase tracking-widest">GPay verification token slip</span>
                 </div>
               </div>
             )}
           </AnimatePresence>
 
-          {/* Header Rounded banner */}
-          <div className="w-full bg-[#0d1024] border border-champagne-gold/10 px-8 py-6 rounded-2xl mb-8 flex items-center shadow-lg relative overflow-hidden select-none">
-            <h1 className="font-poppins text-3xl font-bold tracking-wide text-soft-ivory">
-              {activeTab === 'analytics' ? 'Dashboard' : activeTab === 'products' ? 'Manage Products' : 'Manage Orders'}
-            </h1>
-          </div>
-
-          {/* Dashboard view specific Stats Row */}
-          {activeTab === 'analytics' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 select-none">
-              {/* Card Revenue */}
-              <div className="bg-[#0d1024] border border-champagne-gold/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="font-poppins text-xs text-soft-ivory/80 font-medium mb-2">Total Revenue:</span>
-                <span className="font-poppins text-xl font-bold text-soft-ivory">${totalSales.toFixed(2)}</span>
-              </div>
-              
-              {/* Card Orders */}
-              <div className="bg-[#0d1024] border border-champagne-gold/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="font-poppins text-xs text-soft-ivory/80 font-medium mb-2">Total Orders:</span>
-                <span className="font-poppins text-xl font-bold text-soft-ivory">{totalOrdersCount}</span>
-              </div>
-              
-              {/* Card Products */}
-              <div className="bg-[#0d1024] border border-champagne-gold/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md">
-                <span className="font-poppins text-xs text-soft-ivory/80 font-medium mb-2">Active Products:</span>
-                <span className="font-poppins text-xl font-bold text-soft-ivory">{productsCount}</span>
-              </div>
-            </div>
-          )}
-
-          {/* LOADING INDICATOR */}
-          {loading && activeTab !== 'products' && (
-            <div className="flex justify-center items-center py-24">
-              <Loader2 className="animate-spin text-royal-gold" size={32} />
-            </div>
-          )}
-
-          {/* Tab 1: ANALYTICS PORTAL */}
-          {!loading && activeTab === 'analytics' && (
-            <div className="flex flex-col gap-10">
-            
-            {/* Custom Interactive SVG charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              {/* Sales Chart */}
-              <div className="luxury-card p-6 rounded-lg border border-champagne-gold/10">
-                <div className="flex items-center gap-2 mb-6">
-                  <TrendingUp size={16} className="text-royal-gold" />
-                  <h4 className="font-cinzel text-xs uppercase tracking-widest text-champagne-gold font-semibold">
-                    Sales Growth Projection
-                  </h4>
-                </div>
-                
-                {/* SVG Chart */}
-                <div className="w-full h-64 relative flex items-end">
-                  <svg className="w-full h-[85%] text-royal-gold" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="chartGlow" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#d4af37" stopOpacity="0.25" />
-                        <stop offset="100%" stopColor="#d4af37" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M 0,90 Q 25,60 50,75 T 100,20 L 100,100 L 0,100 Z"
-                      fill="url(#chartGlow)"
-                    />
-                    <path
-                      d="M 0,90 Q 25,60 50,75 T 100,20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    />
-                  </svg>
-                  {/* Grid labels */}
-                  <div className="absolute inset-0 flex flex-col justify-between text-[9px] font-poppins text-soft-ivory/30 pointer-events-none pb-8">
-                    <div className="border-b border-champagne-gold/5 w-full pb-1 text-right">Q2 Peak ($12.5k)</div>
-                    <div className="border-b border-champagne-gold/5 w-full pb-1 text-right">Mid Projection ($6.8k)</div>
-                    <div className="border-b border-champagne-gold/5 w-full pb-1 text-right">Q1 Baseline ($1.2k)</div>
+          {/* Payment Rejection Comment Modal */}
+          <AnimatePresence>
+            {rejectModalOpen && (
+              <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-[#0A0A0A]/90 backdrop-blur-md">
+                <div className="bg-[#111111] border border-red-500/20 max-w-md w-full p-6 rounded-lg flex flex-col gap-4 shadow-2xl">
+                  <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-red-400">Suspend Payment Verification</h3>
+                  <p className="text-xs text-[#9A8F7E] leading-relaxed">
+                    Provide the rationale for payment rejection. An automated email receipt will alert the client immediately.
+                  </p>
+                  <textarea
+                    rows={3}
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    placeholder="E.g. The GPay screenshot is blurry or transaction ID does not match our bank archives."
+                    className="w-full bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs text-white focus:border-red-500 outline-none resize-none font-body"
+                  />
+                  <div className="flex gap-3 justify-end mt-2">
+                    <button
+                      onClick={() => {
+                        setRejectModalOpen(false);
+                        setRejectReason('');
+                        setSelectedRejectOrderId(null);
+                      }}
+                      className="px-4 py-2 border border-[#C9A84C]/15 text-[#9A8F7E] hover:text-[#F5F0E8] text-xs font-accent uppercase tracking-widest rounded cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleConfirmRejectPayment}
+                      disabled={!rejectReason.trim()}
+                      className="px-5 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-accent uppercase tracking-widest rounded cursor-pointer disabled:opacity-40"
+                    >
+                      Reject Payment
+                    </button>
                   </div>
                 </div>
-                <div className="flex justify-between text-[9px] font-poppins text-soft-ivory/40 mt-4 uppercase tracking-widest">
-                  <span>Jan</span>
-                  <span>Feb</span>
-                  <span>Mar</span>
-                  <span>Apr</span>
-                  <span>May</span>
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* Tab specific content switches */}
+
+          {/* 1. OVERVIEW DASHBOARD */}
+          {activeTab === 'overview' && (
+            <div className="flex flex-col gap-8">
+              
+              {/* KPI cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 select-none">
+                <div className="bg-[#111111] border border-[#C9A84C]/10 p-6 rounded-xl flex items-center justify-between shadow-lg">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] uppercase tracking-widest text-[#9A8F7E] font-bold">Total Revenue</span>
+                    <span className="font-display text-2xl font-bold text-[#C9A84C]">₹{totalSales.toLocaleString()}</span>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-[#C9A84C]/10 flex items-center justify-center text-[#C9A84C]">
+                    <TrendingUp size={18} />
+                  </div>
+                </div>
+
+                <div className="bg-[#111111] border border-[#C9A84C]/10 p-6 rounded-xl flex items-center justify-between shadow-lg">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] uppercase tracking-widest text-[#9A8F7E] font-bold">Total Orders</span>
+                    <span className="font-display text-2xl font-bold text-[#F5F0E8]">{totalOrdersCount}</span>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-[#B8860B]/10 flex items-center justify-center text-[#B8860B]">
+                    <ShoppingBag size={18} />
+                  </div>
+                </div>
+
+                <div className="bg-[#111111] border border-[#C9A84C]/10 p-6 rounded-xl flex items-center justify-between shadow-lg">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] uppercase tracking-widest text-[#9A8F7E] font-bold">New Customers</span>
+                    <span className="font-display text-2xl font-bold text-[#F5F0E8]">{customers.length}</span>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                    <Users size={18} />
+                  </div>
+                </div>
+
+                <div className={`bg-[#111111] border p-6 rounded-xl flex items-center justify-between shadow-lg transition-colors ${
+                  pendingPayments > 0 ? 'border-red-500/20 bg-red-950/5' : 'border-[#C9A84C]/10'
+                }`}>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] uppercase tracking-widest text-[#9A8F7E] font-bold">Pending Payments</span>
+                    <span className={`font-display text-2xl font-bold ${pendingPayments > 0 ? 'text-red-400 animate-pulse' : 'text-[#F5F0E8]'}`}>
+                      {pendingPayments}
+                    </span>
+                  </div>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    pendingPayments > 0 ? 'bg-red-500/20 text-red-400' : 'bg-[#9A8F7E]/10 text-[#9A8F7E]'
+                  }`}>
+                    <CreditCard size={18} />
+                  </div>
                 </div>
               </div>
 
-              {/* Category Chart */}
-              <div className="luxury-card p-6 rounded-lg border border-champagne-gold/10">
-                <h4 className="font-cinzel text-xs uppercase tracking-widest text-champagne-gold font-semibold mb-8">
-                  Categories Volume Share
-                </h4>
+              {/* Quick Action / Mini grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start select-none">
                 
-                <div className="flex flex-col gap-5 mt-2">
-                  {[
-                    { cat: 'Royal Box', pct: 60, val: '$6,450.00', color: 'bg-royal-gold' },
-                    { cat: 'Crystal Craft', pct: 25, val: '$2,680.00', color: 'bg-champagne-gold' },
-                    { cat: 'Glass Art', pct: 10, val: '$1,075.00', color: 'bg-[#faf7f2]/30' },
-                    { cat: 'Personalized', pct: 5, val: '$530.00', color: 'bg-deep-bronze' }
-                  ].map((row) => (
-                    <div key={row.cat} className="flex flex-col gap-1.5 font-poppins text-xs">
-                      <div className="flex justify-between items-center text-soft-ivory/80">
-                        <span>{row.cat} ({row.pct}%)</span>
-                        <span className="font-semibold">{row.val}</span>
-                      </div>
-                      <div className="w-full h-2 bg-matte-black/60 rounded overflow-hidden">
-                        <div className={`h-full ${row.color}`} style={{ width: `${row.pct}%` }} />
-                      </div>
+                {/* Pending payouts / orders (Left - 7 cols) */}
+                <div className="lg:col-span-8 bg-[#111111] border border-[#C9A84C]/10 p-6 rounded-xl flex flex-col gap-4">
+                  <div className="flex justify-between items-center border-b border-[#C9A84C]/5 pb-3">
+                    <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C]">Pending Payment Verification</h3>
+                    <button onClick={() => setActiveTab('payments')} className="text-[10px] font-accent uppercase tracking-wider text-[#9A8F7E] hover:text-[#C9A84C]">View All</button>
+                  </div>
+
+                  {orders.filter(o => o.payment_status === 'pending').length === 0 ? (
+                    <div className="text-center py-8 text-xs text-[#9A8F7E]/50">
+                      No pending payment screenshots require review.
                     </div>
-                  ))}
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      {orders.filter(o => o.payment_status === 'pending').map(order => (
+                        <div key={order.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-[#0A0A0A] border border-[#C9A84C]/5 rounded gap-4">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-accent text-[9px] font-bold tracking-wider text-[#9A8F7E]">{order.order_number}</span>
+                            <span className="text-xs text-white font-bold">{order.shipping_name} &bull; ₹{order.total.toLocaleString()}</span>
+                            <span className="text-[9.5px] text-[#9A8F7E]/75">{formatDate(order.created_at)}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {order.payment_screenshot_url && (
+                              <button
+                                onClick={() => setActiveScreenshot(order.payment_screenshot_url || null)}
+                                className="px-3 py-2 border border-[#C9A84C]/20 hover:border-[#C9A84C] text-[9px] font-accent uppercase tracking-widest rounded cursor-pointer"
+                              >
+                                View Slip
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleVerifyPayment(order.id)}
+                              className="px-3 py-2 bg-[#C9A84C] text-[#0A0A0A] text-[9px] font-accent uppercase tracking-widest font-extrabold rounded cursor-pointer"
+                            >
+                              Verify
+                            </button>
+                            <button
+                              onClick={() => handleRejectPaymentClick(order.id)}
+                              className="px-3 py-2 bg-red-950 border border-red-500/25 text-red-300 text-[9px] font-accent uppercase tracking-widest rounded cursor-pointer"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
+                {/* Quick actions (Right - 4 cols) */}
+                <div className="lg:col-span-4 bg-[#111111] border border-[#C9A84C]/10 p-6 rounded-xl flex flex-col gap-4 select-none">
+                  <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C] border-b border-[#C9A84C]/5 pb-3">Quick Studio Actions</h3>
+                  
+                  <div className="flex flex-col gap-2.5">
+                    <button
+                      onClick={() => {
+                        setActiveTab('products');
+                        setShowProductForm(true);
+                      }}
+                      className="w-full py-3 bg-[#C9A84C] text-[#0A0A0A] font-accent text-[9px] font-extrabold uppercase tracking-widest rounded hover:bg-[#F5F0E8] transition-colors cursor-pointer text-center"
+                    >
+                      Add New Product
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('tracking')}
+                      className="w-full py-3 border border-[#C9A84C]/25 text-[#C9A84C] hover:border-[#C9A84C] hover:bg-[#C9A84C]/5 font-accent text-[9px] font-bold uppercase tracking-widest rounded transition-colors cursor-pointer text-center"
+                    >
+                      Update Logistics Pipeline
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('settings')}
+                      className="w-full py-3 border border-[#C9A84C]/25 text-[#9A8F7E] hover:border-[#C9A84C] hover:text-[#F5F0E8] hover:bg-[#C9A84C]/5 font-accent text-[9px] font-bold uppercase tracking-widest rounded transition-colors cursor-pointer text-center"
+                    >
+                      Manage UPI Scanner
+                    </button>
+                  </div>
+                </div>
+
               </div>
 
             </div>
+          )}
 
-          </div>
-        )}
-
-        {/* Tab 2: PRODUCT MANAGER */}
-        {!loading && activeTab === 'products' && (
-          <div className="flex flex-col gap-8">
-            
-            {/* Header / Add Toggler */}
-            <div className="flex justify-between items-center">
-              <h3 className="font-cinzel text-sm uppercase tracking-widest text-champagne-gold font-semibold">
-                Boutique Registry
-              </h3>
-              <button
-                onClick={() => {
-                  if (showProductForm) {
-                    resetForm();
-                  } else {
-                    setShowProductForm(true);
-                  }
-                }}
-                className="flex items-center gap-2 px-5 py-3 rounded bg-royal-gold text-matte-black font-poppins text-xs font-semibold uppercase tracking-wider hover:bg-champagne-gold transition-colors"
-              >
-                {showProductForm ? <X size={14} /> : <Plus size={14} />} {showProductForm ? 'Cancel Form' : 'Register New Gift'}
-              </button>
-            </div>
-
-            {/* Product Creation / Edit Form */}
-            <AnimatePresence>
-              {showProductForm && (
-                <motion.form
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  onSubmit={handleProductSubmit}
-                  className="glass-panel p-6 rounded-lg border border-champagne-gold/15 flex flex-col gap-5 overflow-hidden"
+          {/* 2. PRODUCTS MANAGER */}
+          {activeTab === 'products' && (
+            <div className="flex flex-col gap-8">
+              
+              <div className="flex justify-between items-center select-none border-b border-[#C9A84C]/10 pb-4">
+                <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C]">Boutique Products Registry</h3>
+                <button
+                  onClick={() => {
+                    if (showProductForm) {
+                      resetProductForm();
+                    } else {
+                      setShowProductForm(true);
+                    }
+                  }}
+                  className="flex items-center gap-2 px-5 py-3 rounded bg-[#C9A84C] text-[#0A0A0A] font-accent text-[9px] font-extrabold uppercase tracking-widest hover:bg-[#F5F0E8] transition-all cursor-pointer shadow-md"
                 >
-                  <h4 className="font-cinzel text-xs uppercase tracking-widest text-champagne-gold font-bold mb-2">
-                    {isEditing ? 'Modify Existing Masterpiece' : 'Register New Masterpiece'}
-                  </h4>
+                  {showProductForm ? <X size={13} /> : <Plus size={13} />} {showProductForm ? 'Cancel Form' : 'Register New Gift'}
+                </button>
+              </div>
 
-                  {/* Title & Price */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Form container */}
+              <AnimatePresence>
+                {showProductForm && (
+                  <motion.form
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    onSubmit={handleProductSubmit}
+                    className="bg-[#111111] border border-[#C9A84C]/15 p-6 rounded-lg flex flex-col gap-5 overflow-hidden shadow-xl"
+                  >
+                    <h4 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C] border-b border-[#C9A84C]/5 pb-3">
+                      {isEditing ? 'Modify product record' : 'Register new creation'}
+                    </h4>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Product Name</label>
+                        <input
+                          type="text"
+                          required
+                          value={pName}
+                          onChange={(e) => setPName(e.target.value)}
+                          placeholder="e.g. Hexagonal Geode Coasters"
+                          className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Price (₹ INR)</label>
+                        <input
+                          type="number"
+                          required
+                          value={pPrice}
+                          onChange={(e) => setPPrice(e.target.value)}
+                          placeholder="e.g. 1800"
+                          className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Original Price (₹ Strike-through)</label>
+                        <input
+                          type="number"
+                          value={pOriginalPrice}
+                          onChange={(e) => setPOriginalPrice(e.target.value)}
+                          placeholder="e.g. 2400"
+                          className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs"
+                        />
+                      </div>
+                    </div>
+
                     <div className="flex flex-col gap-1.5">
-                      <label className="font-poppins text-[10px] uppercase tracking-wider text-soft-ivory/50">Product Title</label>
-                      <input
-                        type="text"
+                      <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Description copy</label>
+                      <textarea
+                        rows={3}
                         required
-                        value={pTitle}
-                        onChange={(e) => setPTitle(e.target.value)}
-                        placeholder="e.g. Royal Keepsake"
-                        className="bg-matte-black/55 border border-champagne-gold/15 py-3 px-4 text-xs font-poppins rounded focus:outline-none focus:border-royal-gold/60 text-soft-ivory"
+                        value={pDescription}
+                        onChange={(e) => setPDescription(e.target.value)}
+                        placeholder="Detail materials used (real gold-leafing, geode crystals, velvet liners, lead-times)"
+                        className="w-full bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs font-body resize-none"
                       />
                     </div>
 
-                    <div className="flex flex-col gap-1.5">
-                      <label className="font-poppins text-[10px] uppercase tracking-wider text-soft-ivory/50">Price ($ USD)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        required
-                        value={pPrice}
-                        onChange={(e) => setPPrice(e.target.value)}
-                        placeholder="e.g. 299.00"
-                        className="bg-matte-black/55 border border-champagne-gold/15 py-3 px-4 text-xs font-poppins rounded focus:outline-none focus:border-royal-gold/60 text-soft-ivory"
-                      />
-                    </div>
-                  </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Category</label>
+                        <select
+                          value={pCategory}
+                          onChange={(e) => setPCategory(e.target.value)}
+                          className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs"
+                        >
+                          <option value="cat-frames">Luxury Frames</option>
+                          <option value="cat-hampers">Premium Hampers</option>
+                          <option value="cat-art">Resin Art Masterpieces</option>
+                          <option value="cat-accessories">Custom Accessories</option>
+                          <option value="cat-keepsakes">Bespoke Keepsakes</option>
+                        </select>
+                      </div>
 
-                  {/* Description */}
-                  <div className="flex flex-col gap-1.5">
-                    <label className="font-poppins text-[10px] uppercase tracking-wider text-soft-ivory/50">Product Description</label>
-                    <textarea
-                      required
-                      rows={3}
-                      value={pDescription}
-                      onChange={(e) => setPDescription(e.target.value)}
-                      placeholder="Meticulously outline product dimensions, wood textures, velvet qualities..."
-                      className="bg-matte-black/55 border border-champagne-gold/15 py-3 px-4 text-xs font-poppins rounded focus:outline-none focus:border-royal-gold/60 text-soft-ivory resize-none"
-                    />
-                  </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Stock Quantity</label>
+                        <input
+                          type="number"
+                          required
+                          value={pStock}
+                          onChange={(e) => setPStock(e.target.value)}
+                          className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs"
+                        />
+                      </div>
 
-                  {/* Category & Stock */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="font-poppins text-[10px] uppercase tracking-wider text-soft-ivory/50">Category Group</label>
-                      <select
-                        value={pCategory}
-                        onChange={(e) => setPCategory(e.target.value)}
-                        className="bg-matte-black/55 border border-champagne-gold/15 py-3 px-4 text-xs font-poppins rounded focus:outline-none focus:border-royal-gold/60 text-soft-ivory cursor-pointer"
-                      >
-                        <option value="Royal Box">Royal Box</option>
-                        <option value="Crystal Craft">Crystal Craft</option>
-                        <option value="Glass Art">Glass Art</option>
-                        <option value="Personalized">Personalized</option>
-                      </select>
+                      <div className="flex flex-col justify-end gap-1.5 select-none h-full pb-2">
+                        <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-[#F5F0E8]">
+                          <input
+                            type="checkbox"
+                            checked={pCustomizable}
+                            onChange={(e) => setPCustomizable(e.target.checked)}
+                            className="w-4 h-4 rounded border-[#C9A84C]/25 text-[#C9A84C] bg-black focus:ring-0 focus:ring-offset-0"
+                          />
+                          Is Product Customizable?
+                        </label>
+                      </div>
                     </div>
 
-                    <div className="flex flex-col gap-1.5">
-                      <label className="font-poppins text-[10px] uppercase tracking-wider text-soft-ivory/50">Boutique Stock Count</label>
-                      <input
-                        type="number"
-                        required
-                        value={pStock}
-                        onChange={(e) => setPStock(e.target.value)}
-                        className="bg-matte-black/55 border border-champagne-gold/15 py-3 px-4 text-xs font-poppins rounded focus:outline-none focus:border-royal-gold/60 text-soft-ivory"
-                      />
-                    </div>
-                  </div>
+                    {/* Customization builder section */}
+                    {pCustomizable && (
+                      <div className="p-4 rounded bg-[#0A0A0A] border border-[#C9A84C]/10 flex flex-col gap-3">
+                        <div className="flex justify-between items-center border-b border-[#C9A84C]/5 pb-2">
+                          <span className="text-[9.5px] uppercase tracking-widest text-[#C9A84C] font-bold">Customization Options</span>
+                          <button
+                            type="button"
+                            onClick={addCustomField}
+                            className="px-2.5 py-1 bg-[#C9A84C]/10 border border-[#C9A84C]/35 text-[#C9A84C] text-[9px] font-accent uppercase tracking-widest rounded font-bold cursor-pointer"
+                          >
+                            + Add Option Field
+                          </button>
+                        </div>
 
-                  {/* Image upload */}
-                  <div className="flex flex-col gap-1.5">
-                    <label className="font-poppins text-[10px] uppercase tracking-wider text-soft-ivory/50">Upload Product Photo</label>
-                    <div className="relative border border-dashed border-champagne-gold/20 hover:border-royal-gold/50 rounded-lg p-5 transition-colors bg-matte-black/30 flex flex-col items-center justify-center text-center cursor-pointer">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                      />
-                      <Upload className="text-royal-gold/60 mb-1" size={20} />
-                      <span className="font-poppins text-xs text-soft-ivory/80 font-medium">Click to select new image</span>
-                      <span className="font-poppins text-[9px] text-soft-ivory/40">Base64 embedded image (Max 2MB)</span>
-                    </div>
-                    {uploadError && <span className="text-[10px] text-red-400 font-poppins">{uploadError}</span>}
-                    
-                    {pImageBase64 && (
-                      <div className="relative w-28 h-28 rounded border border-champagne-gold/10 overflow-hidden bg-matte-black/50 mt-2">
-                        <img src={pImageBase64} alt="Upload preview" className="object-cover w-full h-full" />
+                        {pCustomFields.length === 0 ? (
+                          <div className="text-center py-4 text-[10px] text-[#9A8F7E]/40 italic">
+                            No options configured. (E.g. Name Engraving, Photo Upload).
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-3">
+                            {pCustomFields.map((f, i) => (
+                              <div key={i} className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                                <div className="sm:col-span-5 flex flex-col gap-1">
+                                  <input
+                                    type="text"
+                                    required
+                                    value={f.name}
+                                    onChange={(e) => updateCustomField(i, 'name', e.target.value)}
+                                    placeholder="Option Label (e.g. Engraving Message)"
+                                    className="bg-black border border-[#C9A84C]/10 p-2.5 rounded text-xs"
+                                  />
+                                </div>
+                                <div className="sm:col-span-3">
+                                  <select
+                                    value={f.type}
+                                    onChange={(e) => updateCustomField(i, 'type', e.target.value)}
+                                    className="bg-black border border-[#C9A84C]/10 p-2.5 rounded text-xs w-full"
+                                  >
+                                    <option value="text">Text Input</option>
+                                    <option value="file">Photo Upload</option>
+                                    <option value="select">Select Dropdown</option>
+                                  </select>
+                                </div>
+                                <div className="sm:col-span-2 select-none text-center">
+                                  <label className="flex items-center gap-1.5 justify-center text-[10px] uppercase font-bold text-[#9A8F7E] cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={f.required}
+                                      onChange={(e) => updateCustomField(i, 'required', e.target.checked)}
+                                      className="w-3.5 h-3.5"
+                                    /> Required?
+                                  </label>
+                                </div>
+                                <div className="sm:col-span-2 text-right">
+                                  <button
+                                    type="button"
+                                    onClick={() => removeCustomField(i)}
+                                    className="p-2 border border-red-500/20 text-red-400 hover:bg-red-500/5 rounded text-xs cursor-pointer"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
-                  </div>
 
-                  {/* Submit buttons */}
-                  <div className="flex gap-4 mt-2 justify-end">
-                    <button
-                      type="button"
-                      onClick={resetForm}
-                      className="px-6 py-3 border border-champagne-gold/15 rounded text-xs font-poppins uppercase tracking-wider text-soft-ivory hover:bg-champagne-gold/5"
-                    >
-                      Clear
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-8 py-3 bg-royal-gold text-matte-black rounded text-xs font-poppins uppercase tracking-wider font-semibold hover:bg-champagne-gold"
-                    >
-                      {isEditing ? 'Update Registry' : 'Commit Registry'}
-                    </button>
-                  </div>
+                    {/* SEO toggles */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-[#C9A84C]/5 pt-4">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">SEO Title</label>
+                        <input
+                          type="text"
+                          value={pMetaTitle}
+                          onChange={(e) => setPMetaTitle(e.target.value)}
+                          placeholder="Google search snippet heading"
+                          className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs"
+                        />
+                      </div>
 
-                </motion.form>
-              )}
-            </AnimatePresence>
-
-            {/* Products grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {products.map((product) => (
-                <div
-                  key={product.id}
-                  className="luxury-card p-5 rounded-lg border border-champagne-gold/5 flex items-center justify-between gap-6"
-                >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="relative w-16 h-16 rounded border border-champagne-gold/10 overflow-hidden shrink-0">
-                      <img src={product.images[0]} alt={product.title} className="object-cover w-full h-full" />
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">SEO Description</label>
+                        <input
+                          type="text"
+                          value={pMetaDescription}
+                          onChange={(e) => setPMetaDescription(e.target.value)}
+                          placeholder="Search snippet summary text"
+                          className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs"
+                        />
+                      </div>
                     </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="font-poppins text-[9px] text-royal-gold uppercase tracking-wider">{product.category}</span>
-                      <h4 className="font-cinzel text-sm font-bold text-soft-ivory truncate mt-0.5">{product.title}</h4>
-                      <span className="font-poppins text-xs text-champagne-gold font-medium mt-1">${product.price.toFixed(2)} &bull; Stock: {product.stock}</span>
+
+                    {/* Form Toggles */}
+                    <div className="flex flex-wrap gap-6 items-center select-none pt-2 border-t border-[#C9A84C]/5">
+                      <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-[#F5F0E8]">
+                        <input
+                          type="checkbox"
+                          checked={pFeatured}
+                          onChange={(e) => setPFeatured(e.target.checked)}
+                          className="w-4 h-4"
+                        />
+                        Display on Bestsellers Grid
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-[#F5F0E8]">
+                        <input
+                          type="checkbox"
+                          checked={pActive}
+                          onChange={(e) => setPActive(e.target.checked)}
+                          className="w-4 h-4"
+                        />
+                        Publish Active in Boutique
+                      </label>
+                    </div>
+
+                    {/* Image upload */}
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Product Photo</label>
+                      <div className="relative border border-dashed border-[#C9A84C]/25 hover:border-[#C9A84C] rounded p-6 bg-[#0A0A0A]/40 flex flex-col items-center justify-center text-center cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleProductImageUpload}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        />
+                        <Upload size={18} className="text-[#C9A84C] mb-2" />
+                        <span className="font-body text-xs text-[#F5F0E8] font-bold">Select product image file</span>
+                        <span className="text-[9px] text-[#9A8F7E]/40 mt-1">PNG, JPG, WEBP formats up to 5MB</span>
+                      </div>
+                      {uploadError && <span className="text-[10px] text-red-400 font-bold">{uploadError}</span>}
+                      
+                      {pImages.length > 0 && (
+                        <div className="flex gap-3 mt-3">
+                          {pImages.map((img, idx) => (
+                            <div key={idx} className="relative w-16 h-16 rounded border border-[#C9A84C]/15 overflow-hidden bg-[#0A0A0A]">
+                              <img src={img} alt="Product upload preview" className="object-cover w-full h-full" />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex gap-3 justify-end border-t border-[#C9A84C]/5 pt-4">
+                      <button
+                        type="button"
+                        onClick={resetProductForm}
+                        className="px-5 py-3 border border-[#C9A84C]/20 hover:border-[#C9A84C] text-[#F5F0E8] rounded font-accent text-[9px] uppercase tracking-widest font-extrabold cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-8 py-3 bg-[#C9A84C] text-[#0A0A0A] rounded font-accent text-[9px] uppercase tracking-widest font-extrabold hover:bg-[#F5F0E8] transition-colors cursor-pointer"
+                      >
+                        {isEditing ? 'Update Registry' : 'Publish Product'}
+                      </button>
+                    </div>
+                  </motion.form>
+                )}
+              </AnimatePresence>
+
+              {/* Products Table/List */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {products.map(prod => (
+                  <div
+                    key={prod.id}
+                    className="bg-[#111111] border border-[#C9A84C]/10 p-5 rounded-lg flex items-center justify-between gap-6 shadow-md"
+                  >
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="relative w-16 h-16 rounded border border-[#C9A84C]/10 overflow-hidden shrink-0 bg-[#0A0A0A]">
+                        <img src={prod.images?.[0] || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=300'} alt={prod.name} className="object-cover w-full h-full" />
+                      </div>
+                      <div className="flex flex-col min-w-0 font-body">
+                        <span className="font-accent text-[8px] text-[#C9A84C] uppercase tracking-wider font-bold">
+                          {prod.category_id === 'cat-frames' ? 'Luxury Frames' : prod.category_id === 'cat-hampers' ? 'Premium Hampers' : 'Resin Art'}
+                        </span>
+                        <h4 className="font-display text-base font-bold text-[#F5F0E8] truncate mt-0.5">{prod.name}</h4>
+                        <span className="text-xs text-[#C9A84C] font-bold mt-1">₹{prod.price?.toLocaleString()} &bull; Qty: {prod.stock}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => handleEditProductInit(prod)}
+                        className="p-2 bg-[#0A0A0A] border border-[#C9A84C]/20 hover:border-[#C9A84C] text-[#C9A84C] rounded transition-colors cursor-pointer"
+                        title="Modify catalog"
+                      >
+                        <Edit2 size={13} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(prod.id)}
+                        className="p-2 bg-[#0A0A0A] border border-red-500/10 hover:border-red-400 text-red-400 rounded transition-colors cursor-pointer"
+                        title="Delete product"
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2.5 shrink-0">
-                    <button
-                      onClick={() => handleEditInit(product)}
-                      className="p-2 border border-champagne-gold/10 hover:border-royal-gold hover:text-royal-gold text-soft-ivory/50 rounded transition-colors"
-                      title="Edit Product"
-                    >
-                      <Edit2 size={13} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProduct(product.id)}
-                      className="p-2 border border-champagne-gold/10 hover:border-red-400 hover:text-red-400 text-soft-ivory/50 rounded transition-colors"
-                      title="Delete Product"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-          </div>
-        )}
-
-        {/* Tab 3: ORDER MANAGER */}
-        {!loading && activeTab === 'orders' && (
-          <div className="flex flex-col gap-8">
-            <h3 className="font-cinzel text-sm uppercase tracking-widest text-champagne-gold font-semibold">
-              Commission Registry
-            </h3>
-
-            {orders.length === 0 ? (
-              <div className="glass-panel p-12 text-center border border-champagne-gold/5 font-poppins text-xs text-soft-ivory/40">
-                No client commissions received yet.
+                ))}
               </div>
-            ) : (
-              <div className="flex flex-col gap-6">
-                {orders.map((order) => {
-                  const isExpanded = expandedOrderId === order.id;
 
-                  return (
-                    <div
-                      key={order.id}
-                      className={`luxury-card rounded-lg border transition-all ${
-                        isExpanded ? 'border-royal-gold/40 shadow-[0_0_15px_rgba(212,175,55,0.05)]' : 'border-champagne-gold/5'
-                      }`}
-                    >
-                      {/* Top Header Row */}
-                      <div className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                        
-                        <div className="flex flex-col gap-1 min-w-0">
-                          <span className="font-mono text-[9px] uppercase tracking-widest text-soft-ivory/30">Ref ID: {order.id}</span>
-                          <h4 className="font-cinzel text-sm font-bold text-soft-ivory truncate mt-0.5">
-                            Client: {order.shipping_name}
-                          </h4>
-                          <span className="font-poppins text-xs text-soft-ivory/60 mt-1">
-                            {order.shipping_email} &bull; {order.shipping_phone}
+            </div>
+          )}
+
+          {/* 3. ORDER MANAGEMENT */}
+          {activeTab === 'orders' && (
+            <div className="flex flex-col gap-8">
+              <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C] border-b border-[#C9A84C]/10 pb-4">
+                Active Client Orders
+              </h3>
+
+              {orders.length === 0 ? (
+                <div className="bg-[#111111] p-12 text-center rounded-lg border border-[#C9A84C]/5 text-xs text-[#9A8F7E]/50">
+                  No orders found in registry database.
+                </div>
+              ) : (
+                <div className="flex flex-col gap-6">
+                  {orders.map(order => {
+                    const isExpanded = expandedOrderId === order.id;
+
+                    return (
+                      <div
+                        key={order.id}
+                        className={`bg-[#111111] rounded-lg border transition-all duration-300 shadow-lg ${
+                          isExpanded ? 'border-[#C9A84C] shadow-[0_0_15px_rgba(201,168,76,0.15)]' : 'border-[#C9A84C]/10 hover:border-[#C9A84C]/35'
+                        }`}
+                      >
+                        {/* Summary panel */}
+                        <div className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                          <div className="flex flex-col gap-1 min-w-0">
+                            <span className="font-accent text-[9px] uppercase tracking-wider text-[#9A8F7E] font-bold">Order: {order.order_number}</span>
+                            <h4 className="font-display text-lg font-bold text-white truncate mt-0.5">{order.shipping_name}</h4>
+                            <span className="text-xs text-[#9A8F7E] mt-0.5">{order.shipping_email} &bull; {order.shipping_phone}</span>
+                          </div>
+
+                          <div className="flex items-center gap-5 shrink-0 select-none">
+                            <div className="text-left md:text-right">
+                              <span className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Paid Sum</span>
+                              <div className="font-body text-base font-bold text-[#C9A84C] mt-0.5">₹{order.total?.toLocaleString()}</div>
+                            </div>
+
+                            <div className="flex flex-col gap-1">
+                              <span className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold text-left md:text-right">Receipt</span>
+                              {order.payment_screenshot_url ? (
+                                <button
+                                  onClick={() => setActiveScreenshot(order.payment_screenshot_url || null)}
+                                  className="px-3 py-1.5 bg-[#0A0A0A] border border-[#C9A84C]/25 text-[#C9A84C] text-[9px] font-accent uppercase tracking-widest rounded hover:border-[#C9A84C] transition-colors cursor-pointer"
+                                >
+                                  View Slip
+                                </button>
+                              ) : (
+                                <span className="text-[10px] text-red-400 font-bold uppercase">No Slip</span>
+                              )}
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => handleExpandOrder(order.id)}
+                            className="w-full md:w-auto px-5 py-3 border border-[#C9A84C]/25 hover:border-[#C9A84C] text-[#C9A84C] hover:text-white rounded font-accent text-[9px] uppercase tracking-widest font-extrabold transition-all cursor-pointer flex items-center justify-center gap-2 shadow-md bg-[#0A0A0A]"
+                          >
+                            {isExpanded ? 'Collapse' : 'Manage Pipeline'} <ArrowRight size={12} className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
+                          </button>
+                        </div>
+
+                        {/* Collapsible panel */}
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="border-t border-[#C9A84C]/10 bg-[#0A0A0A]/40 overflow-hidden"
+                            >
+                              <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                
+                                {/* Ordered items (5 cols) */}
+                                <div className="lg:col-span-5 flex flex-col gap-4">
+                                  <h5 className="font-accent text-[10px] uppercase tracking-widest text-[#C9A84C] font-bold border-b border-[#C9A84C]/5 pb-2">Ordered Creations</h5>
+                                  {itemsLoading ? (
+                                    <div className="flex items-center gap-2 py-4 text-xs text-[#9A8F7E]/50 font-body">
+                                      <Loader2 className="animate-spin text-[#C9A84C]" size={12} /> Loading items...
+                                    </div>
+                                  ) : (
+                                    <div className="flex flex-col gap-4 text-xs font-body text-[#9A8F7E]">
+                                      {expandedOrderItems.map(item => (
+                                        <div key={item.id} className="flex flex-col gap-1.5 py-2 border-b border-[#C9A84C]/5 last:border-0 pb-3">
+                                          <div className="flex justify-between items-start">
+                                            <span className="font-bold text-white">{item.product_name} <strong className="text-[#C9A84C]">x{item.quantity}</strong></span>
+                                            <span className="font-bold text-[#C9A84C]">₹{(item.price * item.quantity).toLocaleString()}</span>
+                                          </div>
+                                          {item.customization && (
+                                            <div className="p-2 bg-black/50 border border-[#C9A84C]/10 rounded text-[9px] uppercase tracking-wider text-[#9A8F7E]/80">
+                                              {item.customization.engravingText && <div>Engraving: <strong className="text-white normal-case italic">"{item.customization.engravingText}"</strong></div>}
+                                              {item.customization.variantSize && <div>Size Swatch: <strong className="text-white">{item.customization.variantSize}</strong></div>}
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                      
+                                      <div className="flex flex-col gap-1.5 border-t border-[#C9A84C]/5 pt-4">
+                                        <span className="text-[9px] uppercase tracking-widest text-[#C9A84C] font-bold">Delivery Location Coordinates</span>
+                                        <span className="leading-relaxed mt-0.5 text-white">{order.shipping_address}</span>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Logistics progress uploader (7 cols) */}
+                                <div className="lg:col-span-7 flex flex-col gap-4 border-l border-[#C9A84C]/5 lg:pl-8">
+                                  <h5 className="font-accent text-[10px] uppercase tracking-widest text-[#C9A84C] font-bold border-b border-[#C9A84C]/5 pb-2">Logistics Control</h5>
+                                  
+                                  <div className="flex flex-col gap-4 font-body text-xs text-[#9A8F7E]">
+                                    
+                                    {/* Order Status triggers */}
+                                    <div className="flex flex-wrap items-center gap-3">
+                                      <span>Current Status:</span>
+                                      <span className="bg-[#C9A84C]/10 border border-[#C9A84C]/25 text-[#C9A84C] px-2.5 py-1 rounded text-[9px] font-accent uppercase tracking-widest font-extrabold">
+                                        {getStatusText(order.order_status)}
+                                      </span>
+                                      <span>&bull;</span>
+                                      <span>Payment status:</span>
+                                      <span className={`px-2.5 py-1 rounded text-[9px] font-accent uppercase tracking-widest font-extrabold border ${
+                                        order.payment_status === 'verified' 
+                                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' 
+                                          : 'bg-amber-500/10 text-amber-400 border-amber-500/25'
+                                      }`}>
+                                        {order.payment_status}
+                                      </span>
+                                    </div>
+
+                                    {/* Verification action row */}
+                                    {order.payment_status === 'pending' && (
+                                      <div className="p-4 rounded bg-amber-500/5 border border-amber-500/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 select-none">
+                                        <div className="flex flex-col gap-0.5">
+                                          <strong className="text-amber-400 text-xs flex items-center gap-1.5 uppercase font-accent tracking-wider"><AlertCircle size={13} /> Action Required</strong>
+                                          <span className="text-[10px] text-[#9A8F7E] mt-0.5">Validate the transaction screenshot first before advancing the pipeline.</span>
+                                        </div>
+                                        <div className="flex gap-2">
+                                          <button
+                                            onClick={() => handleVerifyPayment(order.id)}
+                                            className="px-3.5 py-2 bg-emerald-500 text-black font-accent text-[9px] font-extrabold uppercase tracking-widest rounded cursor-pointer"
+                                          >
+                                            Verify GPay
+                                          </button>
+                                          <button
+                                            onClick={() => handleRejectPaymentClick(order.id)}
+                                            className="px-3.5 py-2 bg-red-950 border border-red-500/25 text-red-300 font-accent text-[9px] uppercase tracking-widest rounded cursor-pointer"
+                                          >
+                                            Reject Slip
+                                          </button>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Logistics advancement input */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                      <div className="flex flex-col gap-1.5">
+                                        <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Courier Name</label>
+                                        <input
+                                          type="text"
+                                          value={courierName}
+                                          onChange={(e) => setCourierName(e.target.value)}
+                                          placeholder="E.g. Blue Dart"
+                                          className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-2.5 rounded text-xs text-white"
+                                        />
+                                      </div>
+
+                                      <div className="flex flex-col gap-1.5">
+                                        <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">AWB Tracking Number</label>
+                                        <input
+                                          type="text"
+                                          value={trackingNumber}
+                                          onChange={(e) => setTrackingNumber(e.target.value)}
+                                          placeholder="E.g. AWB12345678"
+                                          className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-2.5 rounded text-xs text-white"
+                                        />
+                                      </div>
+                                    </div>
+
+                                    {/* Internal notes */}
+                                    <div className="flex flex-col gap-1.5">
+                                      <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Internal Workshop Notes</label>
+                                      <input
+                                        type="text"
+                                        value={internalNotes}
+                                        onChange={(e) => setInternalNotes(e.target.value)}
+                                        placeholder="Admin annotations (e.g. engraving names corrected, sandlewood box verified)"
+                                        className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-2.5 rounded text-xs text-white"
+                                      />
+                                    </div>
+
+                                    {/* Pipeline advances dropdown */}
+                                    <div className="flex flex-col gap-2 mt-2 select-none">
+                                      <span className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Advance Pipeline Node</span>
+                                      <div className="flex flex-wrap gap-2">
+                                        {STEPS.map(step => {
+                                          const isCurrent = step.key === order.order_status;
+                                          return (
+                                            <button
+                                              key={step.key}
+                                              type="button"
+                                              disabled={isCurrent}
+                                              onClick={() => handleUpdatePipeline(order.id, step.key)}
+                                              className={`px-3 py-2 border rounded text-[9px] font-accent uppercase tracking-widest transition-all cursor-pointer ${
+                                                isCurrent 
+                                                  ? 'bg-[#C9A84C] border-[#C9A84C] text-[#0A0A0A] font-extrabold' 
+                                                  : 'bg-black border-[#C9A84C]/15 text-[#9A8F7E] hover:border-[#C9A84C]'
+                                              }`}
+                                            >
+                                              {step.label}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+
+                                  </div>
+                                </div>
+
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+            </div>
+          )}
+
+          {/* 4. CUSTOMER MANAGEMENT */}
+          {activeTab === 'customers' && (
+            <div className="flex flex-col gap-8">
+              <div className="flex justify-between items-center select-none border-b border-[#C9A84C]/10 pb-4">
+                <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C]">Registered Patrons</h3>
+                <button
+                  onClick={handleExportCSV}
+                  className="px-4 py-2 border border-[#C9A84C]/25 text-[#C9A84C] hover:border-[#C9A84C] hover:bg-[#C9A84C]/5 font-accent text-[9px] font-extrabold uppercase tracking-widest rounded flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Download size={12} /> Export CSV
+                </button>
+              </div>
+
+              {customers.length === 0 ? (
+                <div className="bg-[#111111] p-12 text-center rounded border border-[#C9A84C]/5 text-xs text-[#9A8F7E]/50">
+                  No customers registered in local registry database.
+                </div>
+              ) : (
+                <div className="bg-[#111111] border border-[#C9A84C]/10 rounded-lg overflow-hidden shadow-xl select-none">
+                  <table className="w-full text-left font-body text-xs">
+                    <thead>
+                      <tr className="border-b border-[#C9A84C]/15 bg-black/30 font-accent text-[9px] uppercase tracking-widest text-[#C9A84C]">
+                        <th className="p-4">Patron</th>
+                        <th className="p-4">Contact</th>
+                        <th className="p-4 text-center">Orders Count</th>
+                        <th className="p-4 text-right">Lifetime Spent</th>
+                        <th className="p-4 text-right">Joined Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {customers.map((c, i) => (
+                        <tr key={i} className="border-b border-[#C9A84C]/5 last:border-0 hover:bg-black/20 transition-colors">
+                          <td className="p-4 flex items-center gap-3">
+                            <div className="w-8 h-8 rounded bg-[#C9A84C]/10 border border-[#C9A84C]/25 flex items-center justify-center text-[#C9A84C] font-bold">
+                              {c.full_name?.charAt(0) || 'P'}
+                            </div>
+                            <span className="font-bold text-white">{c.full_name}</span>
+                          </td>
+                          <td className="p-4 text-[#9A8F7E] font-mono">
+                            <div>{c.email}</div>
+                            <div className="mt-0.5 text-[10px]">{c.phone || 'No phone'}</div>
+                          </td>
+                          <td className="p-4 text-center font-bold text-white">{c.ordersCount}</td>
+                          <td className="p-4 text-right font-bold text-[#C9A84C]">₹{c.totalSpent.toLocaleString()}</td>
+                          <td className="p-4 text-right text-[#9A8F7E]">{formatDate(c.joined)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+            </div>
+          )}
+
+          {/* 5. TRACKING MANAGEMENT */}
+          {activeTab === 'tracking' && (
+            <div className="flex flex-col gap-8">
+              <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C] border-b border-[#C9A84C]/10 pb-4">
+                Logistics Pipeline Control
+              </h3>
+
+              <div className="bg-[#111111] border border-[#C9A84C]/10 rounded-lg p-6 shadow-xl flex flex-col gap-4">
+                <p className="text-xs text-[#9A8F7E] leading-relaxed">
+                  Select any active order ID to modify its current packaging, crafting, or courier dispatch progress index.
+                </p>
+
+                {orders.length === 0 ? (
+                  <div className="text-center py-6 text-xs text-[#9A8F7E]/40 italic">
+                    No active orders logged.
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {orders.map(order => (
+                      <div key={order.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-[#0A0A0A]/60 border border-[#C9A84C]/10 rounded gap-4 font-body select-none">
+                        <div className="flex flex-col">
+                          <span className="font-accent text-[9px] font-bold text-[#C9A84C] tracking-wider">{order.order_number} &bull; {order.shipping_name}</span>
+                          <span className="text-[10px] text-[#9A8F7E] mt-0.5">Location: {order.shipping_address?.split('.')[0]}</span>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <span className="text-[10px] text-[#9A8F7E]">Pipeline Node:</span>
+                          <span className="bg-[#C9A84C]/10 border border-[#C9A84C]/25 text-[#C9A84C] px-2.5 py-1 rounded text-[9px] font-accent uppercase tracking-widest font-extrabold">
+                            {getStatusText(order.order_status)}
+                          </span>
+                          <button
+                            onClick={() => {
+                              setActiveTab('orders');
+                              handleExpandOrder(order.id);
+                            }}
+                            className="px-3.5 py-2 border border-[#C9A84C]/25 hover:border-[#C9A84C] text-[#C9A84C] hover:bg-[#C9A84C]/5 text-[9px] font-accent uppercase tracking-widest font-bold rounded transition-colors cursor-pointer"
+                          >
+                            Advance
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+            </div>
+          )}
+
+          {/* 6. PAYMENTS REVIEW */}
+          {activeTab === 'payments' && (
+            <div className="flex flex-col gap-8">
+              <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C] border-b border-[#C9A84C]/10 pb-4">
+                Manual Payments Auditing
+              </h3>
+
+              <div className="bg-[#111111] border border-[#C9A84C]/10 rounded-lg p-6 shadow-xl flex flex-col gap-4">
+                <p className="text-xs text-[#9A8F7E] leading-relaxed">
+                  Review transaction slips uploaded by clients via GPay. Rejecting a slip will put the order back to pending state and request re-upload.
+                </p>
+
+                {orders.length === 0 ? (
+                  <div className="text-center py-6 text-xs text-[#9A8F7E]/40 italic">
+                    No payments registered.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {orders.map(order => (
+                      <div key={order.id} className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-4 rounded flex flex-col gap-4 font-body shadow-md select-none">
+                        <div className="flex justify-between items-start border-b border-[#C9A84C]/5 pb-2">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-accent text-[9px] font-bold text-[#C9A84C] tracking-wider">{order.order_number}</span>
+                            <span className="text-xs text-white font-bold">{order.shipping_name}</span>
+                          </div>
+                          <span className={`px-2 py-0.5 rounded text-[8px] uppercase tracking-widest font-bold border ${
+                            order.payment_status === 'verified' 
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' 
+                              : 'bg-amber-500/10 text-amber-400 border-amber-500/25'
+                          }`}>
+                            {order.payment_status}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-5 shrink-0">
-                          <div className="flex flex-col items-start md:items-end text-left md:text-right">
-                            <span className="font-poppins text-[10px] text-soft-ivory/30 uppercase tracking-widest">Amount Paid</span>
-                            <span className="font-poppins text-sm font-bold text-royal-gold">${order.total_amount.toFixed(2)}</span>
-                          </div>
-
-                          <div className="flex flex-col gap-1">
-                            <span className="font-poppins text-[9px] text-soft-ivory/30 uppercase tracking-widest text-right">Receipt</span>
-                            {order.screenshot_url ? (
-                              <button
-                                onClick={() => setActiveScreenshot(order.screenshot_url || null)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 border border-royal-gold/30 hover:border-royal-gold bg-matte-black/60 rounded text-[9px] font-poppins text-royal-gold uppercase tracking-wider font-semibold transition-colors"
-                              >
-                                <Eye size={10} /> View Slip
-                              </button>
-                            ) : (
-                              <span className="text-[9px] font-poppins text-red-400 uppercase font-medium">Missing</span>
-                            )}
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => handleExpandOrder(order.id)}
-                          className="w-full md:w-auto px-5 py-3 border border-champagne-gold/15 hover:border-royal-gold rounded text-xs font-poppins text-soft-ivory hover:text-royal-gold transition-colors flex items-center justify-center gap-2"
-                        >
-                          {isExpanded ? 'Collapse' : 'Manage Pipeline'} <ArrowRight size={12} className={`transform transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                        </button>
-
-                      </div>
-
-                      {/* Collapsible status controls */}
-                      <AnimatePresence>
-                        {isExpanded && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="border-t border-champagne-gold/10 bg-matte-black/25 overflow-hidden"
+                        {order.payment_screenshot_url ? (
+                          <div 
+                            onClick={() => setActiveScreenshot(order.payment_screenshot_url || null)}
+                            className="relative group w-full h-32 rounded border border-[#C9A84C]/15 bg-black overflow-hidden flex items-center justify-center cursor-zoom-in"
                           >
-                            <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
-                              
-                              {/* Order items details (5 cols) */}
-                              <div className="lg:col-span-5 flex flex-col gap-4">
-                                <h5 className="font-cinzel text-xs uppercase tracking-widest text-champagne-gold font-bold">Ordered Products</h5>
-                                {itemsLoading ? (
-                                  <div className="flex items-center gap-2 py-4 text-xs font-poppins text-soft-ivory/40">
-                                    <Loader2 className="animate-spin text-royal-gold" size={12} /> Loading items...
-                                  </div>
-                                ) : (
-                                  <div className="flex flex-col gap-3 font-poppins text-xs text-soft-ivory/60">
-                                    {expandedOrderItems.map(item => (
-                                      <div key={item.id} className="flex justify-between items-center py-1.5 border-b border-champagne-gold/5 last:border-0">
-                                        <span>{item.product?.title || 'Custom Craft'} <strong className="text-royal-gold/80">x{item.quantity}</strong></span>
-                                        <span className="font-semibold">${(item.price * item.quantity).toFixed(2)}</span>
-                                      </div>
-                                    ))}
-                                    <div className="flex flex-col gap-1 border-t border-champagne-gold/5 pt-3 mt-1">
-                                      <span className="text-[10px] text-soft-ivory/30 uppercase tracking-widest">Delivery Address</span>
-                                      <span className="text-[11px] leading-relaxed mt-0.5">{order.shipping_address}</span>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Status actions (7 cols) */}
-                              <div className="lg:col-span-7 flex flex-col gap-4 border-l border-champagne-gold/5 lg:pl-8">
-                                <h5 className="font-cinzel text-xs uppercase tracking-widest text-champagne-gold font-bold">Update Logistics Status</h5>
-                                
-                                <div className="flex flex-col gap-3">
-                                  
-                                  {/* Current Status Badge */}
-                                  <div className="flex items-center gap-2 text-xs font-poppins">
-                                    <span className="text-soft-ivory/40">Current Status:</span>
-                                    <span className="bg-royal-gold/10 border border-royal-gold/30 text-royal-gold px-2.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">
-                                      {order.status}
-                                    </span>
-                                  </div>
-
-                                  {/* Comment logging input */}
-                                  <div className="flex flex-col gap-1">
-                                    <label className="font-poppins text-[9px] uppercase tracking-wider text-soft-ivory/40">Update Log comment (optional)</label>
-                                    <input
-                                      type="text"
-                                      value={statusComment}
-                                      onChange={(e) => setStatusComment(e.target.value)}
-                                      placeholder="e.g. Quality inspection completed successfully. Polishing gold leaf."
-                                      className="bg-matte-black/60 border border-champagne-gold/10 py-2.5 px-3 text-xs font-poppins rounded text-soft-ivory focus:outline-none focus:border-royal-gold/50"
-                                    />
-                                  </div>
-
-                                  {/* Dropdown status update triggers */}
-                                  <div className="flex flex-wrap gap-2 mt-1">
-                                    {STEPS.map((step) => {
-                                      const isCurrent = step === order.status;
-                                      return (
-                                        <button
-                                          key={step}
-                                          type="button"
-                                          disabled={isCurrent}
-                                          onClick={() => handleStatusChange(order.id, step)}
-                                          className={`px-3.5 py-2 rounded text-[9px] font-poppins uppercase tracking-wider border transition-colors ${
-                                            isCurrent
-                                              ? 'bg-royal-gold/10 text-royal-gold border-royal-gold/30 font-semibold'
-                                              : 'bg-matte-black/60 border-champagne-gold/10 text-soft-ivory/60 hover:border-royal-gold/40 hover:text-soft-ivory'
-                                          }`}
-                                        >
-                                          {step}
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
-
-                                </div>
-                              </div>
-
+                            <img src={order.payment_screenshot_url} alt="Slip log" className="object-contain max-h-full max-w-full" />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-[#C9A84C] font-accent text-[8.5px] font-bold uppercase tracking-widest">
+                              <Eye size={11} /> Inspect Receipt
                             </div>
-                          </motion.div>
+                          </div>
+                        ) : (
+                          <div className="w-full h-32 bg-black/40 border border-red-500/15 rounded flex items-center justify-center text-red-400 text-[9.5px] font-bold uppercase tracking-wider">
+                            Screenshot slip missing
+                          </div>
                         )}
-                      </AnimatePresence>
 
-                    </div>
-                  );
-                })}
+                        <div className="flex gap-2 justify-end">
+                          <button
+                            disabled={order.payment_status === 'verified'}
+                            onClick={() => handleVerifyPayment(order.id)}
+                            className="px-3.5 py-1.5 bg-[#C9A84C] text-[#0A0A0A] text-[9px] font-accent uppercase tracking-widest font-extrabold rounded cursor-pointer disabled:opacity-40"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            disabled={order.payment_status === 'rejected'}
+                            onClick={() => handleRejectPaymentClick(order.id)}
+                            className="px-3.5 py-1.5 bg-red-950 border border-red-500/20 text-red-300 text-[9px] font-accent uppercase tracking-widest rounded cursor-pointer disabled:opacity-40"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
 
-          </div>
-        )}
+            </div>
+          )}
+
+          {/* 7. ANALYTICS DETAIL */}
+          {activeTab === 'analytics' && isMounted && (
+            <div className="flex flex-col gap-8">
+              
+              {/* Sales area chart */}
+              <div className="bg-[#111111] border border-[#C9A84C]/10 p-6 rounded-lg shadow-xl">
+                <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C] mb-6 border-b border-[#C9A84C]/5 pb-3">
+                  Historical Gifting Sales (₹ INR)
+                </h3>
+                
+                <div className="w-full h-72">
+                  {salesHistoryData.length === 0 ? (
+                    <div className="h-full flex items-center justify-center text-xs text-[#9A8F7E]/40 italic">
+                      Insufficient order data to render trend projections.
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={salesHistoryData}>
+                        <defs>
+                          <linearGradient id="areaGlow" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#C9A84C" stopOpacity={0.25}/>
+                            <stop offset="95%" stopColor="#C9A84C" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <XAxis dataKey="date" stroke="#9A8F7E" fontSize={10} tickLine={false} />
+                        <YAxis stroke="#9A8F7E" fontSize={10} tickLine={false} />
+                        <Tooltip contentStyle={{ backgroundColor: '#111111', borderColor: '#C9A84C' }} labelStyle={{ color: '#F5F0E8' }} />
+                        <Area type="monotone" dataKey="amount" stroke="#C9A84C" fillOpacity={1} fill="url(#areaGlow)" strokeWidth={2} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+              </div>
+
+              {/* Share grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 select-none">
+                
+                {/* Categories bar chart */}
+                <div className="bg-[#111111] border border-[#C9A84C]/10 p-6 rounded-lg shadow-xl">
+                  <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C] mb-6 border-b border-[#C9A84C]/5 pb-3">
+                    Collection Volume Index
+                  </h3>
+                  <div className="w-full h-60">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={categoriesData}>
+                        <XAxis dataKey="name" stroke="#9A8F7E" fontSize={10} tickLine={false} />
+                        <YAxis stroke="#9A8F7E" fontSize={10} tickLine={false} />
+                        <Tooltip contentStyle={{ backgroundColor: '#111111', borderColor: '#C9A84C' }} />
+                        <Bar dataKey="value" fill="#C9A84C" radius={[4, 4, 0, 0]}>
+                          {categoriesData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Analytical summaries */}
+                <div className="bg-[#111111] border border-[#C9A84C]/10 p-6 rounded-lg shadow-xl flex flex-col gap-5">
+                  <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C] border-b border-[#C9A84C]/5 pb-3">
+                    Boutique Performance Index
+                  </h3>
+                  
+                  <div className="flex flex-col gap-4 font-body text-xs text-[#9A8F7E]">
+                    <div className="flex justify-between items-center py-2 border-b border-[#C9A84C]/5">
+                      <span>Average Order Value:</span>
+                      <strong className="text-white">₹{orders.length > 0 ? Math.round(totalSales / orders.length).toLocaleString() : 0}</strong>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-[#C9A84C]/5">
+                      <span>Active Catalog Products:</span>
+                      <strong className="text-white">{productsCount} Items</strong>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-[#C9A84C]/5">
+                      <span>Total Registered Accounts:</span>
+                      <strong className="text-white">{customers.length} Patrons</strong>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          )}
+
+          {/* 8. SETTINGS MANAGER */}
+          {activeTab === 'settings' && (
+            <div className="flex flex-col gap-8 max-w-2xl">
+              <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C] border-b border-[#C9A84C]/10 pb-4">
+                Boutique Configuration Panel
+              </h3>
+
+              <form onSubmit={handleSaveSettings} className="bg-[#111111] border border-[#C9A84C]/10 p-6 rounded-lg flex flex-col gap-5 shadow-xl font-body">
+                
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Manual GPay UPI ID</label>
+                  <input
+                    type="text"
+                    required
+                    value={setUpiId}
+                    onChange={(e) => setSetUpiId(e.target.value)}
+                    placeholder="E.g. artinova@upi"
+                    className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs text-white"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">GPay QR Image Scanner URL (Base64 or HTTPS)</label>
+                  <input
+                    type="text"
+                    required
+                    value={setQrUrl}
+                    onChange={(e) => setSetQrUrl(e.target.value)}
+                    placeholder="URL to GPay QR Code image file"
+                    className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs text-white"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">WhatsApp Business Number (Gifting line)</label>
+                  <input
+                    type="text"
+                    required
+                    value={setWaNumber}
+                    onChange={(e) => setSetWaNumber(e.target.value)}
+                    placeholder="E.g. +91 99942 03670"
+                    className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs text-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">GST Standard Rate (%)</label>
+                    <input
+                      type="number"
+                      required
+                      value={setGstRate}
+                      onChange={(e) => setSetGstRate(e.target.value)}
+                      placeholder="18"
+                      className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs text-white"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[9px] uppercase tracking-widest text-[#9A8F7E] font-bold">Free Shipping Threshold Amount (₹)</label>
+                    <input
+                      type="number"
+                      required
+                      value={setThreshold}
+                      onChange={(e) => setSetThreshold(e.target.value)}
+                      placeholder="999"
+                      className="bg-[#0A0A0A] border border-[#C9A84C]/10 p-3 rounded text-xs text-white"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="mt-4 w-full py-4 bg-[#C9A84C] text-[#0A0A0A] font-accent text-[9px] font-extrabold uppercase tracking-widest rounded hover:bg-[#F5F0E8] transition-colors cursor-pointer text-center shadow-lg"
+                >
+                  Save Configuration Registry
+                </button>
+
+              </form>
+
+            </div>
+          )}
 
         </main>
       </div>

@@ -1,17 +1,37 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
-import { useApp } from '../../context/AppContext';
-import { Trash2, ShoppingBag, ArrowRight, Heart } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useEffect } from 'react';
+import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '../../store/authStore';
+import { useCartStore } from '../../store/cartStore';
+import { Trash2, ShoppingBag, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export default function CartPage() {
-  const { cart, updateItemQty, removeItemFromCart, user, setLoginModalOpen } = useApp();
   const router = useRouter();
+  const { user, setLoginModalOpen } = useAuthStore();
+  const { 
+    items, 
+    giftNote, 
+    setGiftNote, 
+    updateQty, 
+    removeItem, 
+    getSubtotal, 
+    getGST, 
+    getShipping, 
+    getTotal, 
+    fetchCart 
+  } = useCartStore();
 
-  const subtotal = cart.reduce((acc, item) => acc + (item.product?.price || 0) * item.quantity, 0);
+  useEffect(() => {
+    const uId = user?.id || 'guest';
+    fetchCart(uId);
+  }, [user]);
+
+  const subtotal = getSubtotal();
+  const gst = getGST();
+  const shipping = getShipping();
+  const total = getTotal();
 
   const handleCheckoutRedirect = () => {
     if (!user) {
@@ -21,142 +41,225 @@ export default function CartPage() {
     }
   };
 
+  const uId = user?.id || 'guest';
+
+  // Free shipping progress calculation
+  const freeShippingLimit = 999;
+  const progressPct = Math.min((subtotal / freeShippingLimit) * 100, 100);
+  const remainingForFree = freeShippingLimit - subtotal;
+
   return (
-    <div className="min-h-screen py-16 px-6 bg-ambient-glow">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen pt-32 pb-24 px-6 bg-[#0A0A0A] text-[#F5F0E8] font-body relative">
+      {/* Background glow */}
+      <div className="absolute top-1/4 left-1/4 w-[450px] h-[450px] bg-[#C9A84C]/5 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="max-w-5xl mx-auto relative z-10">
         
+        {/* Back Link */}
+        <NextLink
+          href="/shop"
+          className="inline-flex items-center gap-2 text-xs font-accent uppercase tracking-widest text-[#9A8F7E] hover:text-[#C9A84C] mb-8 transition-colors select-none"
+        >
+          <ArrowLeft size={13} /> Back to Boutique
+        </NextLink>
+
         {/* Title */}
-        <div className="flex flex-col gap-2 mb-12">
-          <span className="font-poppins text-[10px] text-royal-gold uppercase tracking-[0.25em] font-semibold">Shopping Cart</span>
-          <h1 className="font-cinzel text-3xl md:text-5xl font-bold tracking-wide text-soft-ivory">
+        <div className="flex flex-col gap-2 mb-10 text-center sm:text-left select-none">
+          <span className="font-accent text-[9px] text-[#C9A84C] uppercase tracking-[0.25em]">Shopping Trunk</span>
+          <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-wide text-[#F5F0E8] leading-none">
             My Luxury Selections
           </h1>
-          <div className="w-12 h-[1px] bg-royal-gold/60 mt-1" />
+          <div className="w-12 h-[1px] bg-[#C9A84C] mt-2 self-center sm:self-start" />
         </div>
 
-        {cart.length === 0 ? (
-          <div className="text-center py-20 glass-panel rounded-lg border border-champagne-gold/5 flex flex-col items-center gap-6">
-            <div className="p-5 rounded-full border border-champagne-gold/10 text-royal-gold">
-              <ShoppingBag size={32} />
+        {items.length === 0 ? (
+          /* Empty State */
+          <div className="text-center py-20 bg-[#111111] border border-[#C9A84C]/15 rounded-lg flex flex-col items-center gap-5 p-8 max-w-xl mx-auto shadow-xl">
+            <div className="w-16 h-16 rounded-full border border-dashed border-[#C9A84C]/30 flex items-center justify-center text-[#C9A84C] opacity-50">
+              <ShoppingBag size={24} />
             </div>
-            <div className="flex flex-col gap-2">
-              <h3 className="font-cinzel text-lg text-champagne-gold">Your cart is empty</h3>
-              <p className="font-poppins text-xs text-soft-ivory/50">
-                You haven&apos;t added any handcrafted gifts to your cart yet.
+            <div className="flex flex-col gap-1.5">
+              <h3 className="font-display italic text-lg text-[#9A8F7E]">Your trunk is currently empty.</h3>
+              <p className="font-body text-xs text-[#9A8F7E]/65 max-w-xs leading-relaxed">
+                Add premium geode art clocks, customized frames, or luxury hampers to start checking out.
               </p>
             </div>
-            <Link
-              href="/shop"
-              className="font-poppins text-xs uppercase tracking-[0.2em] bg-royal-gold text-matte-black px-8 py-3.5 rounded hover:bg-champagne-gold transition-colors font-semibold"
-            >
-              Browse Boutique
-            </Link>
+            <NextLink href="/shop" className="btn-solid-gold py-3 mt-2">
+              Explore Collections
+            </NextLink>
           </div>
         ) : (
+          /* Symmetrical Split Layout */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* Items Column (Left - 8 cols) */}
+            {/* Left Column: Items (8 cols) */}
             <div className="lg:col-span-8 flex flex-col gap-4">
-              {cart.map((item) => (
+              
+              {/* Free Shipping Progress Indicator */}
+              <div className="p-4 rounded-lg bg-[#111111] border border-[#C9A84C]/10 select-none flex flex-col gap-2.5">
+                <div className="flex justify-between text-[10px] font-accent uppercase tracking-widest text-[#9A8F7E]">
+                  {subtotal >= freeShippingLimit ? (
+                    <span className="text-emerald-400 font-extrabold">✓ Your order qualifies for free delivery!</span>
+                  ) : (
+                    <span>Add <strong className="text-[#C9A84C]">₹{remainingForFree.toLocaleString()}</strong> more for free shipping</span>
+                  )}
+                  <span>Threshold: ₹999</span>
+                </div>
+                <div className="w-full h-1.5 bg-[#0A0A0A] rounded-full overflow-hidden border border-[#C9A84C]/5">
+                  <div 
+                    className="h-full bg-gradient-to-r from-[#B8860B] to-[#C9A84C] rounded-full transition-all duration-500"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+              </div>
+
+              {items.map((item) => (
                 <div
                   key={item.id}
-                  className="glass-panel p-5 rounded-lg flex items-center justify-between gap-6 border border-champagne-gold/5"
+                  className="bg-[#111111] border border-[#C9A84C]/10 p-5 rounded-lg flex flex-col gap-3.5 relative group"
                 >
-                  {/* Thumbnail */}
-                  <div className="relative w-20 h-20 rounded border border-champagne-gold/10 overflow-hidden shrink-0">
-                    <img
-                      src={item.product?.images[0] || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500'}
-                      alt={item.product?.title}
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-
-                  {/* Title & Price */}
-                  <div className="flex-grow flex flex-col min-w-0">
-                    <span className="font-poppins text-[9px] uppercase tracking-wider text-royal-gold">
-                      {item.product?.category}
-                    </span>
-                    <h3 className="font-cinzel text-sm font-bold text-soft-ivory truncate mt-1">
-                      {item.product?.title}
-                    </h3>
-                    <span className="font-poppins text-xs text-champagne-gold font-medium mt-1">
-                      ${(item.product?.price || 0).toFixed(2)} each
-                    </span>
-                  </div>
-
-                  {/* Qty and Actions */}
-                  <div className="flex items-center gap-6 shrink-0">
-                    {/* Qty adjustments */}
-                    <div className="flex items-center border border-champagne-gold/10 rounded bg-matte-black/30 h-10">
-                      <button
-                        onClick={() => updateItemQty(item.product_id, item.quantity - 1)}
-                        className="px-3 text-soft-ivory/50 hover:text-champagne-gold text-sm"
-                      >
-                        -
-                      </button>
-                      <span className="w-8 text-center text-xs font-poppins font-medium">{item.quantity}</span>
-                      <button
-                        onClick={() => updateItemQty(item.product_id, item.quantity + 1)}
-                        className="px-3 text-soft-ivory/50 hover:text-champagne-gold text-sm"
-                      >
-                        +
-                      </button>
+                  <div className="flex items-center justify-between gap-6">
+                    {/* Thumbnail */}
+                    <div className="relative w-20 h-20 rounded border border-[#C9A84C]/10 overflow-hidden bg-[#0A0A0A] shrink-0">
+                      <img
+                        src={item.product?.images?.[0] || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=300'}
+                        alt={item.product?.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
 
-                    {/* Delete */}
-                    <button
-                      onClick={() => removeItemFromCart(item.product_id)}
-                      className="p-2 text-soft-ivory/30 hover:text-red-400 transition-colors"
-                      title="Remove product"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    {/* Title Details */}
+                    <div className="flex-grow flex flex-col min-w-0">
+                      <span className="font-accent text-[9px] uppercase tracking-wider text-[#C9A84C] font-bold">
+                        Boutique Creation
+                      </span>
+                      <h3 className="font-display text-base font-bold text-[#F5F0E8] truncate mt-1">
+                        {item.product?.name}
+                      </h3>
+                      <span className="font-body text-xs text-[#9A8F7E] mt-1.5">
+                        ₹{item.product?.price?.toLocaleString()} each
+                      </span>
+                    </div>
+
+                    {/* Quantity Adjustment */}
+                    <div className="flex items-center gap-4 shrink-0">
+                      <div className="flex items-center border border-[#C9A84C]/25 rounded bg-[#0A0A0A] h-10 select-none">
+                        <button
+                          onClick={() => updateQty(uId, item.product_id, item.quantity - 1)}
+                          className="px-3 text-[#9A8F7E] hover:text-[#C9A84C] text-sm font-bold cursor-pointer"
+                        >
+                          -
+                        </button>
+                        <span className="w-8 text-center text-xs font-bold">{item.quantity}</span>
+                        <button
+                          onClick={() => updateQty(uId, item.product_id, item.quantity + 1)}
+                          className="px-3 text-[#9A8F7E] hover:text-[#C9A84C] text-sm font-bold cursor-pointer"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      {/* Remove Button */}
+                      <button
+                        onClick={() => removeItem(uId, item.product_id)}
+                        className="p-2 text-[#9A8F7E]/40 hover:text-red-400 transition-colors cursor-pointer"
+                        title="Remove product"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
                   </div>
 
+                  {/* Customization Details Summary */}
+                  {item.customization && (Object.keys(item.customization).length > 0) && (
+                    <div className="p-3.5 rounded bg-[#0A0A0A]/50 border border-[#C9A84C]/10 flex flex-col gap-1.5 text-[10px] font-accent uppercase tracking-wider text-[#9A8F7E]">
+                      {item.customization.engravingText && (
+                        <div>
+                          <span className="text-[#C9A84C] font-bold">Message Engraving: </span>
+                          <span className="italic font-body normal-case text-white">&ldquo;{item.customization.engravingText}&rdquo;</span>
+                        </div>
+                      )}
+                      {item.customization.variantSize && (
+                        <div>
+                          <span className="text-[#C9A84C] font-bold">Selected Size Swatch: </span>
+                          <span>{item.customization.variantSize}</span>
+                        </div>
+                      )}
+                      {item.customization.photoUrl && (
+                        <div>
+                          <span className="text-[#C9A84C] font-bold">Memory Photo: </span>
+                          <span className="text-emerald-400 font-extrabold">Image Attached ✓</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
+
+              {/* Gift Message Card */}
+              <div className="bg-[#111111] border border-[#C9A84C]/10 p-6 rounded-lg flex flex-col gap-3 select-none">
+                <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C]">
+                  Bespoke Gift Greeting Message
+                </h3>
+                <p className="font-body text-[10px] text-[#9A8F7E]/65 leading-relaxed">
+                  Would you like us to enclose a personalized calligraphy greeting card? Type your message below. We wrap it inside our signature wax stamp envelopes.
+                </p>
+                <textarea
+                  value={giftNote}
+                  onChange={(e) => setGiftNote(e.target.value)}
+                  rows={3}
+                  placeholder="E.g. Wishing you a beautiful journey ahead. Cheers to endless geode memories!"
+                  className="w-full bg-[#0A0A0A] border border-[#C9A84C]/10 rounded p-3 text-xs font-body text-[#F5F0E8] placeholder-[#9A8F7E]/30 focus:border-[#C9A84C] outline-none resize-none"
+                />
+              </div>
             </div>
 
-            {/* Summary Column (Right - 4 cols) */}
-            <div className="lg:col-span-4 glass-card p-6 rounded-lg flex flex-col gap-6 border border-champagne-gold/10">
-              <h3 className="font-cinzel text-sm uppercase tracking-widest text-champagne-gold font-semibold">
+            {/* Right Column: Checkout Pricing Summary (4 cols) */}
+            <div className="lg:col-span-4 bg-[#111111] border border-[#C9A84C]/15 p-6 rounded-lg flex flex-col gap-5 shadow-2xl">
+              <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C]">
                 Order Summary
               </h3>
               
-              <div className="h-[1px] bg-champagne-gold/10" />
+              <div className="h-[1px] bg-[#C9A84C]/10" />
 
-              <div className="flex justify-between items-center text-xs font-poppins text-soft-ivory/60">
-                <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center text-xs font-poppins text-soft-ivory/60">
-                <span>Luxury Wrapping</span>
-                <span className="text-emerald-400 uppercase text-[9px] tracking-wider font-semibold">Complimentary</span>
-              </div>
-              <div className="flex justify-between items-center text-xs font-poppins text-soft-ivory/60">
-                <span>Delivery Charge</span>
-                <span className="text-emerald-400 uppercase text-[9px] tracking-wider font-semibold">Complimentary</span>
+              <div className="flex flex-col gap-3 font-body text-xs text-[#9A8F7E]/80">
+                <div className="flex justify-between">
+                  <span>Trunk Subtotal</span>
+                  <span>₹{subtotal.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>GST (18% inclusive)</span>
+                  <span>₹{gst.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Delivery Charges</span>
+                  {shipping === 0 ? (
+                    <span className="text-emerald-400 font-accent text-[9.5px] uppercase tracking-wider font-bold">Free Shipping</span>
+                  ) : (
+                    <span>₹{shipping}</span>
+                  )}
+                </div>
               </div>
 
-              <div className="h-[1px] bg-champagne-gold/10" />
+              <div className="h-[1px] bg-[#C9A84C]/10" />
 
-              <div className="flex justify-between items-end">
-                <span className="font-cinzel text-xs uppercase tracking-widest text-champagne-gold">Total Amount</span>
-                <span className="font-poppins text-lg font-bold text-royal-gold">
-                  ${subtotal.toFixed(2)}
+              <div className="flex justify-between items-end select-none">
+                <span className="font-accent text-xs font-bold uppercase tracking-widest text-[#C9A84C]">Total Amount</span>
+                <span className="font-display text-2xl font-bold text-[#C9A84C]">
+                  ₹{total.toLocaleString()}
                 </span>
               </div>
 
               <button
                 onClick={handleCheckoutRedirect}
-                className="w-full mt-4 py-4 bg-royal-gold text-matte-black font-poppins text-xs font-semibold uppercase tracking-[0.2em] rounded hover:bg-champagne-gold hover:shadow-[0_0_12px_rgba(214,175,55,0.35)] transition-all duration-300 flex items-center justify-center gap-2"
+                className="w-full mt-4 py-4 bg-[#C9A84C] text-[#0A0A0A] font-accent text-xs font-extrabold uppercase tracking-[0.2em] hover:bg-[#F5F0E8] transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(201,168,76,0.35)] cursor-pointer"
               >
                 Proceed to Checkout <ArrowRight size={14} />
               </button>
 
               {!user && (
-                <span className="font-poppins text-[10px] text-royal-gold/60 text-center leading-relaxed">
-                  * Authentication is required prior to checkout. Guest carts are preserved.
+                <span className="font-body text-[9.5px] text-[#C9A84C]/75 text-center leading-relaxed select-none">
+                  * Authentication is required to place order logs. Guest cart trunks are preserved.
                 </span>
               )}
             </div>
