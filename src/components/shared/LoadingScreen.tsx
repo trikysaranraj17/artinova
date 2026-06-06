@@ -76,9 +76,18 @@ export default function LoadingScreen() {
         {/* Cinematic Vignette */}
         <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_40%,#0A0A0A_100%)] pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col items-center px-6">
+        <div className="relative z-10 flex flex-col items-center px-6 gap-3">
+          <motion.img 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            src="/logo.jpg" 
+            alt="ARTINOVA Logo" 
+            className="h-16 w-auto object-contain border border-[#C9A84C]/25 rounded-md mb-2 shadow-[0_0_20px_rgba(201,168,76,0.15)]"
+          />
+          
           {/* Logo Staggered Letters */}
-          <div className="flex overflow-hidden mb-4">
+          <div className="flex overflow-hidden mb-2">
             {logoText.split("").map((char, index) => (
               <motion.span
                 key={index}
@@ -89,7 +98,7 @@ export default function LoadingScreen() {
                   ease: [0.16, 1, 0.3, 1],
                   delay: index * 0.08
                 }}
-                className="font-display text-4xl sm:text-6xl font-bold tracking-[0.25em] text-[#F5F0E8] select-none"
+                className="font-display text-3xl sm:text-5xl font-bold tracking-[0.25em] text-[#F5F0E8] select-none"
                 style={{ textShadow: '0 0 15px rgba(201, 168, 76, 0.2)' }}
               >
                 {char}

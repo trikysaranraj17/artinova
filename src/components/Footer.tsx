@@ -16,9 +16,13 @@ export default function Footer() {
         
         {/* Column 1: Brand & Socials */}
         <div className="flex flex-col items-center md:items-start gap-4">
-          <span className="font-display text-2xl font-bold tracking-[0.25em] text-[#F5F0E8] select-none">
-            ARTINOVA
-          </span>
+          <NextLink href="/" className="select-none">
+            <img 
+              src="/logo.jpg" 
+              alt="ARTINOVA Logo" 
+              className="h-10 w-auto object-contain border border-[#C9A84C]/10 rounded-sm" 
+            />
+          </NextLink>
           <p className="font-body italic text-xs text-[#9A8F7E] max-w-xs leading-relaxed">
             "Crafting Emotions Into Luxury Gifts"
           </p>
@@ -86,13 +90,7 @@ export default function Footer() {
               Home
             </NextLink>
             <NextLink href="/shop" className="font-body text-xs text-[#9A8F7E] hover:text-[#C9A84C] transition-colors">
-              Shop
-            </NextLink>
-            <NextLink href="/shop?tab=collections" className="font-body text-xs text-[#9A8F7E] hover:text-[#C9A84C] transition-colors">
               Collections
-            </NextLink>
-            <NextLink href="/#about" className="font-body text-xs text-[#9A8F7E] hover:text-[#C9A84C] transition-colors">
-              About
             </NextLink>
             <NextLink href="/contact" className="font-body text-xs text-[#9A8F7E] hover:text-[#C9A84C] transition-colors">
               Contact

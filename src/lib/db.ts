@@ -150,165 +150,7 @@ const MOCK_COLLECTIONS: Collection[] = [
   { id: 'col-hampers', name: 'Luxury Hampers', slug: 'luxury-hampers', description: 'Grand gift trunks containing fine sandlewood and custom keepsakes.', is_featured: true }
 ];
 
-const MOCK_PRODUCTS: Product[] = [
-  {
-    id: 'prod-clock',
-    name: 'The Royal Resin Wall Clock',
-    slug: 'the-royal-resin-wall-clock',
-    description: 'A grand 14-inch custom wall clock detailed with deep emerald resin pigment, natural geode crystals, gold leaf strokes, and silent brass mechanisms. Completely handcrafted.',
-    price: 4500,
-    original_price: 5900,
-    category_id: 'cat-art',
-    stock: 15,
-    is_customizable: true,
-    customization_fields: [
-      { name: 'Family Name / Message', type: 'text', required: true },
-      { name: 'Gold Leaf Coverage', type: 'select', options: ['Minimalist Shimmer', 'Standard Accent', 'Heavy Gilding'], required: true }
-    ],
-    is_featured: true,
-    is_active: true,
-    rating: 4.9,
-    review_count: 32,
-    images: ['https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=600']
-  },
-  {
-    id: 'prod-frame',
-    name: 'Eternal Love Customized Photo Frame',
-    slug: 'eternal-love-photo-frame',
-    description: 'Preserve your favorite memory inside our signature glass frame bordered with antique gold-leafing, real dried botanical flowers, and customized typography.',
-    price: 1200,
-    original_price: 1800,
-    category_id: 'cat-frames',
-    stock: 30,
-    is_customizable: true,
-    customization_fields: [
-      { name: 'Engraved Message', type: 'text', required: false },
-      { name: 'Upload Photo', type: 'file', required: true }
-    ],
-    is_featured: true,
-    is_active: true,
-    rating: 4.8,
-    review_count: 54,
-    images: ['https://images.unsplash.com/photo-1537243912501-8b27429117f7?w=600']
-  },
-  {
-    id: 'prod-coasters',
-    name: 'Gold-Leafed Resin Coasters Set',
-    slug: 'gold-leafed-resin-coasters-set',
-    description: 'Set of 4 glassmorphic hexagonal coasters cast with crystal-clear polymer resin, embedded real gold foil flakes, and anti-scratch velvet backing pads.',
-    price: 1800,
-    original_price: 2400,
-    category_id: 'cat-accessories',
-    stock: 25,
-    is_customizable: true,
-    customization_fields: [
-      { name: 'Monogram Letter', type: 'text', required: true }
-    ],
-    is_featured: true,
-    is_active: true,
-    rating: 5.0,
-    review_count: 18,
-    images: ['https://images.unsplash.com/photo-1618220179428-22790b461013?w=600']
-  },
-  {
-    id: 'prod-wedding-hamper',
-    name: 'Champagne Toast Luxury Gifting Hamper',
-    slug: 'champagne-toast-luxury-hamper',
-    description: 'A grand velvet gift trunk including two personalized champagne goblets, a customized photo keepsake accordion, organic soy wax candles, and hand-wrapped dark chocolates.',
-    price: 8900,
-    original_price: 11000,
-    category_id: 'cat-hampers',
-    stock: 8,
-    is_customizable: true,
-    customization_fields: [
-      { name: 'Groom & Bride Names', type: 'text', required: true },
-      { name: 'Greeting Message', type: 'text', required: false }
-    ],
-    is_featured: true,
-    is_active: true,
-    rating: 4.95,
-    review_count: 41,
-    images: ['https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600']
-  },
-  {
-    id: 'prod-keepsake-box',
-    name: 'Executive Leather Keepsake Box',
-    slug: 'executive-leather-keepsake-box',
-    description: 'A dark textured leather box lined with emerald green velvet, detailed with brass hinges, and customized with a metal-plated gold monogram engraving on the lid.',
-    price: 3200,
-    original_price: 4200,
-    category_id: 'cat-keepsakes',
-    stock: 20,
-    is_customizable: true,
-    customization_fields: [
-      { name: 'Monogram (Max 3 Characters)', type: 'text', required: true }
-    ],
-    is_featured: false,
-    is_active: true,
-    rating: 4.7,
-    review_count: 12,
-    images: ['https://images.unsplash.com/photo-1589256469067-ea99122bbec4?w=600']
-  },
-  {
-    id: 'prod-accordion',
-    name: 'Bespoke Anniversary Photo Accordion',
-    slug: 'bespoke-anniversary-photo-accordion',
-    description: 'An elegant folding photo keepsake box wrapped in textured silk ribbon, containing 6 of your select photographs printed on luxury-grade linen cardstock.',
-    price: 950,
-    original_price: 1450,
-    category_id: 'cat-photo',
-    stock: 50,
-    is_customizable: true,
-    customization_fields: [
-      { name: '6 Photos Upload (Merged)', type: 'file', required: true },
-      { name: 'Anniversary Date', type: 'text', required: false }
-    ],
-    is_featured: false,
-    is_active: true,
-    rating: 4.9,
-    review_count: 67,
-    images: ['https://images.unsplash.com/photo-1512909006721-3d6018887383?w=600']
-  },
-  {
-    id: 'prod-dish',
-    name: 'Celestial Glow Resin Trinket Dish',
-    slug: 'celestial-glow-trinket-dish',
-    description: 'A small, beautiful starburst resin dish detailed with gold rims, metallic flakes, and custom names. Perfect for rings, keys, and jewelry vanity storage.',
-    price: 1100,
-    original_price: 1600,
-    category_id: 'cat-accessories',
-    stock: 40,
-    is_customizable: true,
-    customization_fields: [
-      { name: 'Engraved Name', type: 'text', required: true }
-    ],
-    is_featured: false,
-    is_active: true,
-    rating: 4.8,
-    review_count: 23,
-    images: ['https://images.unsplash.com/photo-1606744824163-985d376605aa?w=600']
-  },
-  {
-    id: 'prod-corp-chest',
-    name: 'Sandalwood & Velvet Corporate Gift Chest',
-    slug: 'sandalwood-corporate-gift-chest',
-    description: 'An ultra-premium corporate packaging solution featuring branded white-label options, luxury sandlewood desk organizers, custom ink pen, and hand-rolled tea containers.',
-    price: 5600,
-    original_price: 7500,
-    category_id: 'cat-hampers',
-    stock: 12,
-    is_customizable: true,
-    customization_fields: [
-      { name: 'Company Logo Upload', type: 'file', required: false },
-      { name: 'Recipients Name List', type: 'text', required: true }
-    ],
-    is_featured: true,
-    is_active: true,
-    rating: 4.9,
-    review_count: 9,
-    images: ['https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600']
-  }
-];
+const MOCK_PRODUCTS: Product[] = [];
 
 // Helper to get local data
 const getLocal = (key: string, fallback: any) => {
@@ -332,9 +174,9 @@ if (typeof window !== 'undefined') {
   if (!localStorage.getItem('artinova_collections')) {
     localStorage.setItem('artinova_collections', JSON.stringify(MOCK_COLLECTIONS));
   }
-  if (!localStorage.getItem('artinova_products') || localStorage.getItem('artinova_needs_clear_v3') !== 'true') {
+  if (!localStorage.getItem('artinova_products') || localStorage.getItem('artinova_needs_clear_v4') !== 'true') {
     localStorage.setItem('artinova_products', JSON.stringify(MOCK_PRODUCTS));
-    localStorage.setItem('artinova_needs_clear_v3', 'true');
+    localStorage.setItem('artinova_needs_clear_v4', 'true');
   }
   if (!localStorage.getItem('artinova_product_collections')) {
     const pcMapping = [

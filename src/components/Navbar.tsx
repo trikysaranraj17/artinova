@@ -24,11 +24,9 @@ export default function Navbar() {
   const wishlistCount = wishlistItems.length;
 
   const navLinks = [
-    { name: 'Shop', href: '/shop' },
-    { name: 'Collections', href: '/shop?tab=collections' },
-    { name: 'Wedding', href: '/collections/wedding-gifts' },
-    { name: 'Corporate', href: '/collections/corporate-gifts' },
-    { name: 'About', href: '/#about' }
+    { name: 'Home', href: '/' },
+    { name: 'Collections', href: '/shop' },
+    { name: 'Contact', href: '/contact' }
   ];
 
   // Track scroll position
@@ -58,9 +56,11 @@ export default function Navbar() {
           {/* Logo / Left */}
           <div className="flex-1 flex justify-start">
             <NextLink href="/" className="flex items-center gap-2 group select-none">
-              <span className="font-display text-2xl md:text-3xl font-bold tracking-[0.25em] text-[#F5F0E8] group-hover:text-[#C9A84C] transition-colors duration-300">
-                ARTINOVA
-              </span>
+              <img 
+                src="/logo.jpg" 
+                alt="ARTINOVA Logo" 
+                className="h-9 w-auto md:h-11 object-contain border border-[#C9A84C]/10 rounded-sm transition-transform duration-500 group-hover:scale-105" 
+              />
             </NextLink>
           </div>
 
@@ -120,20 +120,6 @@ export default function Navbar() {
                 )}
               </AnimatePresence>
             </div>
-
-            {/* Wishlist */}
-            <NextLink
-              href="/wishlist"
-              className="p-1.5 text-[#F5F0E8]/80 hover:text-[#C9A84C] transition-colors relative"
-              title="Wishlist"
-            >
-              <Heart size={16} strokeWidth={1.5} />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#C9A84C] text-[8px] text-[#0A0A0A] font-bold flex items-center justify-center shadow-[0_0_5px_rgba(201,168,76,0.5)]">
-                  {wishlistCount}
-                </span>
-              )}
-            </NextLink>
 
             {/* Cart Trigger */}
             <button
@@ -225,16 +211,7 @@ export default function Navbar() {
 
             <div className="h-[1px] bg-[#C9A84C]/10" />
 
-            <div className="flex items-center justify-between">
-              <NextLink
-                href="/wishlist"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 text-[#F5F0E8]/70 hover:text-[#C9A84C]"
-              >
-                <Heart size={16} />
-                <span className="font-accent text-[9px] uppercase tracking-wider">Wishlist ({wishlistCount})</span>
-              </NextLink>
-
+            <div className="flex items-center justify-center gap-8">
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
