@@ -50,15 +50,15 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen pt-32 pb-24 px-6 bg-[#0A0A0A] relative overflow-hidden font-body select-none">
+    <div className="w-full min-h-screen pt-32 pb-24 px-6 bg-[#0A0A0A] relative overflow-hidden font-body select-none flex flex-col items-center">
       {/* Golden backdrop glow */}
       <div className="absolute top-1/4 left-[-10%] w-[400px] h-[400px] bg-[#C9A84C]/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-[-10%] w-[400px] h-[400px] bg-[#C9A84C]/5 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="w-full max-w-6xl mx-auto relative z-10 flex flex-col items-center">
         
         {/* Title Section */}
-        <div className="text-center mb-16 md:mb-24">
+        <div className="w-full text-center mb-16 md:mb-24 flex flex-col items-center">
           <h1 className="text-3xl md:text-5xl font-display font-semibold tracking-[0.25em] text-[#F5F0E8] uppercase leading-none">
             GET IN <span className="text-[#C9A84C]">TOUCH</span>
           </h1>
@@ -69,10 +69,10 @@ export default function ContactPage() {
         </div>
 
         {/* 2-Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 lg:gap-24 items-start">
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 lg:gap-24 items-start">
           
           {/* Left Column: LUXURY CONCIERGE */}
-          <div className="bg-[#111111] border border-[#C9A84C]/10 p-8 md:p-12 rounded-xl shadow-2xl relative overflow-hidden">
+          <div className="w-full bg-[#111111] border border-[#C9A84C]/10 p-8 md:p-12 rounded-xl shadow-2xl relative overflow-hidden flex flex-col">
             <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-[#C9A84C]/5 blur-[60px] pointer-events-none" />
             
             <h2 className="text-xl font-display font-bold text-[#F5F0E8] tracking-widest uppercase mb-8">
@@ -107,7 +107,7 @@ export default function ContactPage() {
           </div>
 
           {/* Right Column: DIRECT INQUIRY FORM */}
-          <div className="bg-[#111111] border border-[#C9A84C]/10 p-8 md:p-12 rounded-xl shadow-2xl">
+          <div className="w-full bg-[#111111] border border-[#C9A84C]/10 p-8 md:p-12 rounded-xl shadow-2xl flex flex-col">
             {success ? (
               <div className="bg-emerald-950/20 border border-emerald-500/20 text-emerald-200 text-xs p-6 rounded-lg flex flex-col gap-4 text-center items-center font-sans">
                 <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500 flex items-center justify-center text-emerald-400 mb-2">
