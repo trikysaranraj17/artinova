@@ -53,9 +53,9 @@ export default function HomePage() {
   }, []);
 
   const trustPillars = [
-    { icon: <Sparkles className="text-[#C9A84C]" size={22} />, title: "Handcrafted Artistry", desc: "Every resin clock, frame, and coaster is meticulously cast and hand-polished." },
+    { icon: <Sparkles className="text-[#10B981]" size={22} />, title: "Handcrafted Artistry", desc: "Every resin clock, frame, and coaster is meticulously cast and hand-polished." },
     { icon: <Award className="text-[#C9A84C]" size={22} />, title: "Luxury Materials", desc: "Crafted exclusively with optical-grade resins, real gold foils, and preserved botanicals." },
-    { icon: <ShieldCheck className="text-[#C9A84C]" size={22} />, title: "Bespoke Personalization", desc: "Tailor each gift with custom names, dates, text engravings, and photo integration." }
+    { icon: <ShieldCheck className="text-[#10B981]" size={22} />, title: "Bespoke Personalization", desc: "Tailor each gift with custom names, dates, text engravings, and photo integration." }
   ];
 
   const customSteps = [
@@ -258,7 +258,7 @@ export default function HomePage() {
                     {/* TL Badge */}
                     <div className="absolute top-3 left-3 z-20 pointer-events-none">
                       {p.is_featured && (
-                        <span className="px-3 py-1.5 bg-[#C9A84C] text-[#0A0A0A] text-[9px] font-accent uppercase tracking-widest font-bold shadow-md rounded-sm">
+                        <span className="px-3 py-1.5 bg-gradient-to-r from-[#064E3B] to-[#10B981] text-white text-[9px] font-accent uppercase tracking-widest font-bold shadow-md rounded-sm border border-[#10B981]/25">
                           Bestseller
                         </span>
                       )}
@@ -361,11 +361,11 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative max-w-5xl mx-auto z-10 w-full">
             {/* Connector Line (Desktop) */}
-            <div className="hidden md:block absolute top-8 left-[15%] right-[15%] h-[1px] bg-gradient-to-r from-transparent via-[#C9A84C]/25 to-transparent z-0" />
+            <div className="hidden md:block absolute top-8 left-[15%] right-[15%] h-[1px] bg-gradient-to-r from-transparent via-[#10B981]/40 via-[#C9A84C]/40 to-transparent z-0" />
 
             {customSteps.map((step, i) => (
               <div key={i} className="flex flex-col items-center text-center gap-4 relative z-10 group select-none">
-                <div className="w-16 h-16 rounded-full bg-[#111111] border-2 border-[#C9A84C]/35 group-hover:border-[#C9A84C] flex items-center justify-center text-[#C9A84C] text-sm font-accent font-bold shadow-lg transition-colors duration-300">
+                <div className={`w-16 h-16 rounded-full bg-[#111111] border-2 ${i % 2 === 0 ? 'border-[#10B981]/35 group-hover:border-[#10B981] text-[#10B981]' : 'border-[#C9A84C]/35 group-hover:border-[#C9A84C] text-[#C9A84C]'} flex items-center justify-center text-sm font-accent font-bold shadow-lg transition-colors duration-300`}>
                   {step.num}
                 </div>
                 <h3 className="font-accent text-xs font-bold uppercase tracking-widest text-[#F5F0E8] mt-2">{step.title}</h3>
@@ -386,33 +386,36 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
-            {customerReviews.map((rev, idx) => (
-              <div key={idx} className="p-7 rounded-xl bg-[#111] border border-[#C9A84C]/10 hover:border-[#C9A84C] transition-all duration-300 flex flex-col gap-4 shadow-md">
-                {/* 5 stars */}
-                <div className="flex items-center gap-0.5 text-[#C9A84C] text-[10px]">
-                  {Array.from({ length: rev.rating }).map((_, i) => <span key={i}>★</span>)}
-                </div>
-                {/* Review italic */}
-                <p className="font-body italic text-[15px] text-[#9A8F7E] leading-relaxed mb-1">
-                  "{rev.review}"
-                </p>
-                
-                {/* Divider */}
-                <div className="h-[1px] bg-[#C9A84C]/15 w-full mt-auto" />
+            {customerReviews.map((rev, idx) => {
+              const isEven = idx % 2 === 0;
+              return (
+                <div key={idx} className={`p-7 rounded-xl bg-[#111] border ${isEven ? 'border-[#10B981]/15 hover:border-[#10B981]' : 'border-[#C9A84C]/10 hover:border-[#C9A84C]'} transition-all duration-300 flex flex-col gap-4 shadow-md`}>
+                  {/* 5 stars */}
+                  <div className="flex items-center gap-0.5 text-[#C9A84C] text-[10px]">
+                    {Array.from({ length: rev.rating }).map((_, i) => <span key={i}>★</span>)}
+                  </div>
+                  {/* Review italic */}
+                  <p className="font-body italic text-[15px] text-[#9A8F7E] leading-relaxed mb-1">
+                    "{rev.review}"
+                  </p>
+                  
+                  {/* Divider */}
+                  <div className={`h-[1px] ${isEven ? 'bg-[#10B981]/15' : 'bg-[#C9A84C]/15'} w-full mt-auto`} />
 
-                {/* Avatar circle */}
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#0A0A0A] border border-[#C9A84C]/35 flex items-center justify-center text-xs font-accent font-extrabold text-[#C9A84C] shrink-0">
-                    {rev.name.charAt(0)}
-                  </div>
-                  <div className="flex flex-col leading-none">
-                    <span className="font-body text-sm text-[#F5F0E8] font-bold">{rev.name}</span>
-                    <span className="font-body text-xs text-[#9A8F7E]/60 mt-1">{rev.city}</span>
-                    <span className="font-accent text-[9px] text-[#C9A84C] mt-1.5 uppercase tracking-wider">via {rev.product}</span>
+                  {/* Avatar circle */}
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full bg-[#0A0A0A] border ${isEven ? 'border-[#10B981]/35 text-[#10B981]' : 'border-[#C9A84C]/35 text-[#C9A84C]'} flex items-center justify-center text-xs font-accent font-extrabold shrink-0`}>
+                      {rev.name.charAt(0)}
+                    </div>
+                    <div className="flex flex-col leading-none">
+                      <span className="font-body text-sm text-[#F5F0E8] font-bold">{rev.name}</span>
+                      <span className="font-body text-xs text-[#9A8F7E]/60 mt-1">{rev.city}</span>
+                      <span className={`font-accent text-[9px] ${isEven ? 'text-[#10B981]' : 'text-[#C9A84C]'} mt-1.5 uppercase tracking-wider`}>via {rev.product}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
