@@ -64,7 +64,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             .eq('user_id', u.id)
             .single();
 
-          const isSystemAdmin = u.email?.toLowerCase() === 'deepaksabari28@gmail.com' || u.email?.toLowerCase() === 'deepaksabari28@gmial.com';
+          const isSystemAdmin = u.email?.toLowerCase() === 'deepaksabari28@gmail.com' || u.email?.toLowerCase() === 'deepaksabari28@gmial.com' || u.email?.toLowerCase() === 'akashselva18@gmail.com';
 
           const userProfile: UserProfile = {
             id: u.id,
@@ -96,7 +96,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const parsed = JSON.parse(storedUser);
         set({
           user: parsed,
-          isAdmin: parsed.email?.toLowerCase() === 'deepaksabari28@gmail.com' || parsed.email?.toLowerCase() === 'deepaksabari28@gmial.com',
+          isAdmin: parsed.email?.toLowerCase() === 'deepaksabari28@gmail.com' || parsed.email?.toLowerCase() === 'deepaksabari28@gmial.com' || parsed.email?.toLowerCase() === 'akashselva18@gmail.com',
           isGuest: false
         });
       } else if (isGuestMode) {
@@ -112,12 +112,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const lowerEmail = email.toLowerCase().trim();
 
     try {
-      // Direct Admin Credential Check for deepaksabari28@gmail.com
-      if ((lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com') && !isSupabaseConfigured) {
+      // Direct Admin Credential Check for deepaksabari28@gmail.com and akashselva18@gmail.com
+      if ((lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com' || lowerEmail === 'akashselva18@gmail.com') && !isSupabaseConfigured) {
+        const isAdminAkash = lowerEmail === 'akashselva18@gmail.com';
         const adminUser: UserProfile = {
-          id: 'usr-deepaksabari',
+          id: isAdminAkash ? 'usr-akashselva' : 'usr-deepaksabari',
           email: lowerEmail,
-          full_name: 'Deepak Sabari (Admin)',
+          full_name: isAdminAkash ? 'Akash Selva (Admin)' : 'Deepak Sabari (Admin)',
           phone: '+91 99999 99999',
           address: 'Artinova Studio HQ',
           isAdmin: true
@@ -136,7 +137,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           const u = data.user;
           const { data: profile } = await supabase.from('profiles').select('*').eq('id', u.id).single();
           const { data: adminData } = await supabase.from('admin_users').select('*').eq('user_id', u.id).single();
-          const isSystemAdmin = u.email?.toLowerCase() === 'deepaksabari28@gmail.com' || u.email?.toLowerCase() === 'deepaksabari28@gmial.com';
+          const isSystemAdmin = u.email?.toLowerCase() === 'deepaksabari28@gmail.com' || u.email?.toLowerCase() === 'deepaksabari28@gmial.com' || u.email?.toLowerCase() === 'akashselva18@gmail.com';
 
           const userProfile: UserProfile = {
             id: u.id,
@@ -158,7 +159,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           throw new Error('No account found with this email. Please sign up.');
         }
 
-        const isNewAdmin = lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com';
+        const isNewAdmin = lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com' || lowerEmail === 'akashselva18@gmail.com';
 
         const authenticatedUser: UserProfile = {
           id: existing.id,
@@ -200,7 +201,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           });
           if (profileErr) console.error('Error creating profile metadata:', profileErr);
 
-          const isNewAdmin = lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com';
+          const isNewAdmin = lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com' || lowerEmail === 'akashselva18@gmail.com';
 
           const userProfile: UserProfile = {
             id: u.id,
@@ -219,7 +220,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           throw new Error('An account already exists with this email address.');
         }
 
-        const isNewAdmin = lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com';
+        const isNewAdmin = lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com' || lowerEmail === 'akashselva18@gmail.com';
 
         const newUser = {
           id: `usr-${Date.now()}`,
@@ -330,12 +331,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true });
     try {
       const lowerEmail = email.toLowerCase().trim();
-      const isSpecialAdmin = lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com';
+      const isSpecialAdmin = lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com' || lowerEmail === 'akashselva18@gmail.com';
+      const isAdminAkash = lowerEmail === 'akashselva18@gmail.com';
       
       const mockGoogleUser = {
-        id: isSpecialAdmin ? 'usr-deepaksabari' : 'usr-google-' + Date.now(),
+        id: isSpecialAdmin ? (isAdminAkash ? 'usr-akashselva' : 'usr-deepaksabari') : 'usr-google-' + Date.now(),
         email: lowerEmail,
-        full_name: name || (isSpecialAdmin ? 'Deepak Sabari (Admin)' : 'Bespoke Patron (Google)'),
+        full_name: name || (isAdminAkash ? 'Akash Selva (Admin)' : (isSpecialAdmin ? 'Deepak Sabari (Admin)' : 'Bespoke Patron (Google)')),
         phone: '+91 99999 99999',
         address: 'Artinova studio HQ',
         isAdmin: isSpecialAdmin

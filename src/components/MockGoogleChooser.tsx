@@ -24,7 +24,7 @@ export default function MockGoogleChooser() {
     await loginWithMockEmail(email, name);
     // Redirect logic: if admin, go to admin secure dashboard; if user, go to profile
     const lowerEmail = email.toLowerCase().trim();
-    if (lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com') {
+    if (lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com' || lowerEmail === 'akashselva18@gmail.com') {
       router.push('/admin-secure-dashboard');
     } else {
       router.push('/profile');
@@ -40,9 +40,9 @@ export default function MockGoogleChooser() {
 
   const accounts = [
     {
-      name: 'R Deepak',
-      email: 'deepaksabari28@gmail.com',
-      avatar: 'D',
+      name: 'Akash Selva',
+      email: 'akashselva18@gmail.com',
+      avatar: 'A',
       color: 'bg-indigo-600',
     },
     {

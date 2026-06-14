@@ -1121,8 +1121,8 @@ export default function AdminDashboardPage() {
                 </div>
                 {!sidebarCollapsed && (
                   <div className="flex flex-col min-w-0">
-                    <span className="text-xs font-bold text-[#F5F0E8] truncate leading-tight">{user?.full_name || 'Deepak Sabari'}</span>
-                    <span className="text-[10px] text-[#9A8F7E] truncate">{user?.email || 'admin@artinova.in'}</span>
+                    <span className="text-xs font-bold text-[#F5F0E8] truncate leading-tight">{user?.full_name || 'Studio Admin'}</span>
+                    <span className="text-[10px] text-[#9A8F7E] truncate">{user?.email || 'akashselva18@gmail.com'}</span>
                   </div>
                 )}
               </div>

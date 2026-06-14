@@ -212,7 +212,7 @@ BEGIN
     (
       SELECT email FROM auth.users 
       WHERE id = auth.uid()
-    ) = 'deepaksabari28@gmail.com'
+    ) IN ('deepaksabari28@gmail.com', 'akashselva18@gmail.com')
   );
 END;
 $$ LANGUAGE plpgsql;

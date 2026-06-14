@@ -127,7 +127,7 @@ export default function Footer() {
           <div className="flex flex-col items-center md:items-start gap-3 text-[#9A8F7E] font-body text-xs">
             <div className="flex items-center gap-2.5">
               <Mail size={13} className="text-[#C9A84C] shrink-0" />
-              <span>care@artinova.in</span>
+              <span>akashselva18@gmail.com</span>
             </div>
             <div className="flex items-center gap-2.5">
               <Phone size={13} className="text-[#C9A84C] shrink-0" />
