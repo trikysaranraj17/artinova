@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-ambient-glow min-h-screen flex flex-col antialiased relative selection:bg-gold-champagne/30 selection:text-gold-champagne">
+      <body className="bg-ambient-glow min-h-screen w-full flex flex-col antialiased relative selection:bg-gold-champagne/30 selection:text-gold-champagne">
         {/* Global Cinematic Loading Screen */}
         <LoadingScreen />
 
