@@ -33,7 +33,7 @@ export default function Footer() {
           {/* Social Links */}
           <div className="flex items-center gap-3.5 text-[#F5F0E8]/70 mt-2">
             <a 
-              href="https://instagram.com/artinova.studio" 
+              href="https://www.instagram.com/__artinova__/" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="p-2 rounded-full border border-[#C9A84C]/15 hover:border-[#C9A84C] hover:text-[#C9A84C] transition-all duration-300 flex items-center justify-center"

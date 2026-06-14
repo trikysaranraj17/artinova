@@ -132,6 +132,14 @@ export default function HomePage() {
             >
               Customize Gift
             </a>
+            <a 
+              href="https://www.instagram.com/__artinova__/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="btn-gold w-full sm:w-auto text-center py-4 sm:py-3.5 px-8 text-xs font-accent uppercase tracking-widest font-bold btn-tap-scale block cursor-pointer border-[#10B981]/50 hover:border-[#10B981]"
+            >
+              VISIT OUR PAGE
+            </a>
           </div>
         </div>
 
