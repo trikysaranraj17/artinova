@@ -6,6 +6,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import LoginModal from './LoginModal';
 import MiniCartDrawer from './MiniCartDrawer';
+import MockGoogleChooser from './MockGoogleChooser';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -19,6 +20,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         </main>
         <LoginModal />
         <MiniCartDrawer />
+        <MockGoogleChooser />
       </>
     );
   }
@@ -31,6 +33,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
       </main>
       <LoginModal />
       <MiniCartDrawer />
+      <MockGoogleChooser />
       <Footer />
     </>
   );

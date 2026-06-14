@@ -25,6 +25,9 @@ interface AuthState {
   continueAsGuest: () => void;
   updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
+  mockGoogleOpen: boolean;
+  setMockGoogleOpen: (open: boolean) => void;
+  loginWithMockEmail: (email: string, name?: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -34,6 +37,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: true,
   loginModalOpen: false,
   setLoginModalOpen: (open) => set({ loginModalOpen: open }),
+  mockGoogleOpen: false,
+  setMockGoogleOpen: (open) => set({ mockGoogleOpen: open }),
 
   initialize: async () => {
     set({ isLoading: true });
@@ -310,32 +315,46 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
         if (error) throw error;
       } else {
-        // Mock prompt
-        if (typeof window === 'undefined') return;
-        const emailInput = window.prompt(
-          "Artinova Google Auth System\n\nEnter your Google email to authenticate:", 
-          ""
-        );
-        if (emailInput === null) return;
-        const email = emailInput.trim() || 'google-client@luxury.com';
-        const isSpecialAdmin = email.toLowerCase() === 'deepaksabari28@gmail.com' || email.toLowerCase() === 'deepaksabari28@gmial.com';
-        
-        const mockGoogleUser = {
-          id: isSpecialAdmin ? 'usr-deepaksabari' : 'usr-google-' + Date.now(),
-          email: email,
-          full_name: isSpecialAdmin ? 'Deepak Sabari (Admin)' : 'Bespoke Patron (Google)',
-          phone: '+91 99999 99999',
-          address: 'Artinova studio HQ',
-          isAdmin: isSpecialAdmin
-        };
-        
-        localStorage.setItem('artinova_user', JSON.stringify(mockGoogleUser));
-        localStorage.removeItem('artinova_guest');
-        set({ user: mockGoogleUser, isAdmin: isSpecialAdmin, isGuest: false, loginModalOpen: false });
+        // Open mock Google chooser modal instead of boring window.prompt
+        set({ mockGoogleOpen: true, loginModalOpen: false });
       }
     } catch (err) {
       console.error(err);
       throw err;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  loginWithMockEmail: async (email, name) => {
+    set({ isLoading: true });
+    try {
+      const lowerEmail = email.toLowerCase().trim();
+      const isSpecialAdmin = lowerEmail === 'deepaksabari28@gmail.com' || lowerEmail === 'deepaksabari28@gmial.com';
+      
+      const mockGoogleUser = {
+        id: isSpecialAdmin ? 'usr-deepaksabari' : 'usr-google-' + Date.now(),
+        email: lowerEmail,
+        full_name: name || (isSpecialAdmin ? 'Deepak Sabari (Admin)' : 'Bespoke Patron (Google)'),
+        phone: '+91 99999 99999',
+        address: 'Artinova studio HQ',
+        isAdmin: isSpecialAdmin
+      };
+      
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('artinova_user', JSON.stringify(mockGoogleUser));
+        localStorage.removeItem('artinova_guest');
+      }
+      
+      set({ 
+        user: mockGoogleUser, 
+        isAdmin: isSpecialAdmin, 
+        isGuest: false, 
+        loginModalOpen: false,
+        mockGoogleOpen: false
+      });
+    } catch (err) {
+      console.error(err);
     } finally {
       set({ isLoading: false });
     }
