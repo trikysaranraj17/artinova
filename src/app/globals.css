@@ -153,12 +153,13 @@ body {
 /* Ambient glow backgrounds */
 .bg-ambient-glow {
   background: 
-    radial-gradient(circle at 15% 15%, rgba(201, 168, 76, 0.18) 0%, transparent 45%),
-    radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 30% 80%, rgba(201, 168, 76, 0.1) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.03) 0%, transparent 60%),
-    #090909;
+    radial-gradient(circle at 15% 15%, rgba(201, 168, 76, 0.25) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.22) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 30% 80%, rgba(201, 168, 76, 0.15) 0%, transparent 40%),
+    linear-gradient(rgba(10, 10, 10, 0.88), rgba(10, 10, 10, 0.94)),
+    url('/green_resin_texture.png') no-repeat center center fixed;
+  background-size: cover;
 }
 
 /* Noise overlay */
