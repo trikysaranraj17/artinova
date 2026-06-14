@@ -218,8 +218,8 @@ if (typeof window !== 'undefined') {
   }
   if (!localStorage.getItem('artinova_settings')) {
     const settings = {
-      gpay_upi_id: 'artinova@upi',
-      gpay_qr_url: 'https://images.unsplash.com/photo-1605098295594-ea2243d56fc7?w=300',
+      gpay_upi_id: 'akashselva18@okhdfcbank',
+      gpay_qr_url: '/qr-code.jpg',
       whatsapp_number: '+91 99942 03670',
       gst_rate: '18',
       free_shipping_threshold: '999'
@@ -760,23 +760,37 @@ export async function createTrackingUpdate(orderId: string, stage: string, note?
 
 // ---------------- SETTINGS ----------------
 export async function getSettings(): Promise<any> {
+  const settingsData: any = {};
   if (isSupabaseConfigured) {
-    const { data, error } = await supabase.from('settings').select('*');
-    if (!error && data) {
-      const obj: any = {};
-      data.forEach(item => {
-        obj[item.key] = item.value;
-      });
-      return obj;
+    try {
+      const { data, error } = await supabase.from('settings').select('*');
+      if (!error && data) {
+        data.forEach(item => {
+          settingsData[item.key] = item.value;
+        });
+      }
+    } catch (err) {
+      console.warn('Error reading settings from Supabase:', err);
     }
+  } else {
+    const localData = getLocal('artinova_settings', {});
+    Object.assign(settingsData, localData);
   }
-  return getLocal('artinova_settings', {
-    gpay_upi_id: 'artinova@upi',
-    gpay_qr_url: 'https://images.unsplash.com/photo-1605098295594-ea2243d56fc7?w=300',
-    whatsapp_number: '+91 99942 03670',
-    gst_rate: '18',
-    free_shipping_threshold: '999'
-  });
+
+  // Ensure fresh defaults are set if empty or containing old placeholders
+  const finalSettings = {
+    gpay_upi_id: (!settingsData.gpay_upi_id || settingsData.gpay_upi_id === 'artinova@upi') 
+      ? 'akashselva18@okhdfcbank' 
+      : settingsData.gpay_upi_id,
+    gpay_qr_url: (!settingsData.gpay_qr_url || settingsData.gpay_qr_url.includes('unsplash.com')) 
+      ? '/qr-code.jpg' 
+      : settingsData.gpay_qr_url,
+    whatsapp_number: settingsData.whatsapp_number || '+91 99942 03670',
+    gst_rate: settingsData.gst_rate || '18',
+    free_shipping_threshold: settingsData.free_shipping_threshold || '999'
+  };
+
+  return finalSettings;
 }
 
 export async function updateSettings(key: string, value: string): Promise<boolean> {

@@ -92,8 +92,8 @@ export default function CheckoutPage() {
 
   // UPI configuration from settings
   const [settings, setSettings] = useState({
-    gpay_upi_id: 'artinova@upi',
-    gpay_qr_url: 'https://images.unsplash.com/photo-1605098295594-ea2243d56fc7?w=300'
+    gpay_upi_id: 'akashselva18@okhdfcbank',
+    gpay_qr_url: '/qr-code.jpg'
   });
 
   useEffect(() => {
@@ -102,8 +102,8 @@ export default function CheckoutPage() {
         const data = await getSettings();
         if (data) {
           setSettings({
-            gpay_upi_id: data.gpay_upi_id || 'artinova@upi',
-            gpay_qr_url: data.gpay_qr_url || 'https://images.unsplash.com/photo-1605098295594-ea2243d56fc7?w=300'
+            gpay_upi_id: data.gpay_upi_id || 'akashselva18@okhdfcbank',
+            gpay_qr_url: data.gpay_qr_url || '/qr-code.jpg'
           });
         }
       } catch (err) {
@@ -258,7 +258,13 @@ export default function CheckoutPage() {
       // 5. Send order email via unified API Route
       try {
         const placedItems = await getOrderItems(orderIdForConfirmation);
+        // Send email to customer
         await sendEmailTrigger(placed, placedItems, 'placed', user?.email || email);
+        // Send notification email to admin (Akash) with the uploaded screenshot
+        await sendEmailTrigger(placed, placedItems, 'placed', 'akashselva18@gmail.com', {
+          isAdminNotify: true,
+          screenshotUrl: finalScreenshotUrl
+        });
       } catch (emailErr) {
         console.error('Failed to trigger order confirmation email dispatch:', emailErr);
       }

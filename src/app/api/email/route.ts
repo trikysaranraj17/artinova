@@ -52,19 +52,40 @@ export async function POST(req: Request) {
 
     switch (emailType) {
       case 'placed':
-        subject = `Order #${orderNumber} Confirmed — Artinova`;
-        previewText = 'Greetings from Artinova! Your custom gift booking is confirmed.';
-        mainHeading = 'ORDER CONFIRMED';
-        messageBody = `
-          <p style="margin-top: 0; font-size: 15px; line-height: 1.6;">Dear ${customerName},</p>
-          <p style="font-size: 15px; line-height: 1.6;">Greetings from <strong>ARTINOVA</strong>! We are absolutely delighted to confirm that your order <strong>#${orderNumber}</strong> has been successfully placed.</p>
-          <p style="font-size: 15px; line-height: 1.6;">Your GPay/UPI manual payment screenshot has been uploaded. Our curation team will verify the payment and get in touch with you soon via email or WhatsApp to finalize your design specifications, text engravings, and delivery logistics.</p>
-          <div style="background-color: rgba(201, 168, 76, 0.08); border: 1px dashed #C9A84C; padding: 15px; margin: 25px 0; border-radius: 4px; text-align: center;">
-            <h4 style="margin: 0 0 8px 0; font-family: 'Cinzel', sans-serif; color: #C9A84C; letter-spacing: 1px; font-size: 12px;">Payment Verification in Progress</h4>
-            <p style="margin: 0; font-size: 13px; color: #9A8F7E; line-height: 1.5;">Our curation team reviews GPay screenshots within the next 2 hours. Once verified, we will trigger your order crafting schedule and reach out to you.</p>
-          </div>
-          ${itemsHtml}
-        `;
+        if (extraData?.isAdminNotify) {
+          subject = `[ADMIN ALERT] New Order #${orderNumber} Placed`;
+          previewText = `New order #${orderNumber} from ${customerName}. Payment verification required.`;
+          mainHeading = 'NEW ORDER PLACED';
+          messageBody = `
+            <p style="margin-top: 0; font-size: 15px; line-height: 1.6;">Dear Admin,</p>
+            <p style="font-size: 15px; line-height: 1.6;">A new order <strong>#${orderNumber}</strong> has been placed by <strong>${customerName}</strong> (${recipientEmail}).</p>
+            <p style="font-size: 15px; line-height: 1.6;">A payment screenshot has been uploaded. Please review the transaction details below and verify it in the Admin Secure Dashboard.</p>
+            ${extraData?.screenshotUrl ? `
+            <div style="margin: 25px 0; padding: 15px; border: 1px solid rgba(201, 168, 76, 0.25); border-radius: 4px; text-align: center; background-color: #161616;">
+              <h4 style="margin: 0 0 10px 0; font-family: 'Cinzel', sans-serif; color: #C9A84C; letter-spacing: 1px; font-size: 12px;">Payment Screenshot</h4>
+              <img src="${extraData.screenshotUrl}" alt="Payment Receipt" style="max-width: 100%; max-height: 400px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2px;" />
+              <div style="margin-top: 12px;">
+                <a href="${extraData.screenshotUrl}" target="_blank" style="color: #C9A84C; font-size: 12px; font-weight: bold; text-decoration: underline;">Open Receipt In New Tab</a>
+              </div>
+            </div>
+            ` : ''}
+            ${itemsHtml}
+          `;
+        } else {
+          subject = `Order #${orderNumber} Confirmed — Artinova`;
+          previewText = 'Greetings from Artinova! Your custom gift booking is confirmed.';
+          mainHeading = 'ORDER CONFIRMED';
+          messageBody = `
+            <p style="margin-top: 0; font-size: 15px; line-height: 1.6;">Dear ${customerName},</p>
+            <p style="font-size: 15px; line-height: 1.6;">Greetings from <strong>ARTINOVA</strong>! We are absolutely delighted to confirm that your order <strong>#${orderNumber}</strong> has been successfully placed.</p>
+            <p style="font-size: 15px; line-height: 1.6;">Your GPay/UPI manual payment screenshot has been uploaded. Our curation team will verify the payment and get in touch with you soon via email or WhatsApp to finalize your design specifications, text engravings, and delivery logistics.</p>
+            <div style="background-color: rgba(201, 168, 76, 0.08); border: 1px dashed #C9A84C; padding: 15px; margin: 25px 0; border-radius: 4px; text-align: center;">
+              <h4 style="margin: 0 0 8px 0; font-family: 'Cinzel', sans-serif; color: #C9A84C; letter-spacing: 1px; font-size: 12px;">Payment Verification in Progress</h4>
+              <p style="margin: 0; font-size: 13px; color: #9A8F7E; line-height: 1.5;">Our curation team reviews GPay screenshots within the next 2 hours. Once verified, we will trigger your order crafting schedule and reach out to you.</p>
+            </div>
+            ${itemsHtml}
+          `;
+        }
         break;
 
       case 'verified':
