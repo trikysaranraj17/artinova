@@ -93,7 +93,7 @@ export default function HomePage() {
 
         {/* Ambient Gold Orb Parallax */}
         <div 
-          className="absolute w-[450px] h-[450px] rounded-full bg-[#C9A84C]/5 blur-[120px] pointer-events-none transition-transform duration-500 ease-out"
+          className="absolute w-[600px] h-[600px] rounded-full bg-[#C9A84C]/14 blur-[130px] pointer-events-none transition-transform duration-500 ease-out"
           style={{ transform: `translate3d(${mouseOffset.x}px, ${mouseOffset.y}px, 0)` }}
         />
 
@@ -107,7 +107,7 @@ export default function HomePage() {
             ✦ EST. 2023 · HANDCRAFTED IN INDIA ✦
           </div>
 
-          <h1 className="font-display text-[52px] sm:text-[96px] font-bold tracking-tight text-[#F5F0E8] leading-none mb-4">
+          <h1 className="font-display text-[52px] sm:text-[96px] font-bold tracking-tight text-3d-luxury-gold leading-none mb-4">
             ARTINOVA
           </h1>
 

@@ -37,7 +37,8 @@
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
   --glow-gold: 0 0 25px rgba(201, 168, 76, 0.15);
   
-  --gradient-gold: linear-gradient(135deg, var(--color-gold-antique), var(--color-gold-champagne), var(--color-text-primary), var(--color-gold-champagne), var(--color-gold-antique));
+  --gradient-gold: linear-gradient(135deg, #B8860B 0%, #D4AF37 25%, #F5F0E8 50%, #D4AF37 75%, #B8860B 100%);
+  --gradient-gold-bright: linear-gradient(135deg, #FFE066 0%, #F3C63F 50%, #B8860B 100%);
 }
 
 * {
@@ -82,17 +83,17 @@ body {
 }
 
 .glass-card {
-  background: linear-gradient(135deg, rgba(22, 22, 22, 0.9) 0%, rgba(10, 10, 10, 0.6) 100%);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(201, 168, 76, 0.06);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-  transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  background: linear-gradient(135deg, rgba(28, 28, 28, 0.8) 0%, rgba(16, 16, 16, 0.5) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(201, 168, 76, 0.14);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.06);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  border: 1px solid rgba(201, 168, 76, 0.25);
-  box-shadow: 0 12px 40px 0 rgba(201, 168, 76, 0.12);
+  border: 1px solid rgba(201, 168, 76, 0.38);
+  box-shadow: 0 16px 48px 0 rgba(201, 168, 76, 0.22), inset 0 1px 2px rgba(201, 168, 76, 0.15);
   transform: translateY(-8px);
 }
 
@@ -152,9 +153,12 @@ body {
 /* Ambient glow backgrounds */
 .bg-ambient-glow {
   background: 
-    radial-gradient(circle at 10% 20%, rgba(201, 168, 76, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(184, 134, 11, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, #0A0A0A 0%, #0A0A0A 100%);
+    radial-gradient(circle at 15% 15%, rgba(201, 168, 76, 0.16) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, rgba(184, 134, 11, 0.14) 0%, transparent 45%),
+    radial-gradient(circle at 50% 15%, rgba(201, 168, 76, 0.1) 0%, transparent 35%),
+    radial-gradient(circle at 50% 85%, rgba(201, 168, 76, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(201, 168, 76, 0.04) 0%, transparent 65%),
+    #090909;
 }
 
 /* Noise overlay */
@@ -293,12 +297,13 @@ input:focus, textarea:focus, select:focus {
   position: relative;
   z-index: 1;
   font-family: var(--font-accent);
+  box-shadow: 0 0 15px rgba(201, 168, 76, 0.05);
 }
 
 .btn-gold:hover {
-  color: var(--color-black);
+  color: #050505;
   border-color: var(--color-gold);
-  box-shadow: var(--glow-gold);
+  box-shadow: 0 0 25px rgba(201, 168, 76, 0.3), 0 0 50px rgba(201, 168, 76, 0.1);
   transform: translateY(-3px);
 }
 
@@ -315,9 +320,9 @@ input:focus, textarea:focus, select:focus {
 
 .btn-solid-gold {
   display: inline-block;
-  background: var(--gradient-gold);
-  color: var(--color-black);
-  border: none;
+  background: linear-gradient(135deg, #FFE066 0%, #C9A84C 50%, #B8860B 100%);
+  color: #050505;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   padding: 1rem 2.5rem;
   text-transform: uppercase;
   letter-spacing: 3px;
@@ -325,13 +330,14 @@ input:focus, textarea:focus, select:focus {
   font-weight: 800;
   cursor: pointer;
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 10px 30px rgba(201, 168, 76, 0.15);
+  box-shadow: 0 10px 30px rgba(201, 168, 76, 0.25), 0 0 15px rgba(201, 168, 76, 0.15);
   font-family: var(--font-accent);
 }
 
 .btn-solid-gold:hover {
-  transform: translateY(-3px) scale(1.03);
-  box-shadow: 0 15px 40px rgba(201, 168, 76, 0.3);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(201, 168, 76, 0.42), 0 0 25px rgba(201, 168, 76, 0.3);
+  background: linear-gradient(135deg, #fff 0%, #C9A84C 50%, #B8860B 100%);
 }
 
 /* Image Cinematic Reveal */
@@ -353,11 +359,11 @@ input:focus, textarea:focus, select:focus {
 
 /* Luxury Product Grid Card */
 .luxury-card {
-  background: linear-gradient(145deg, rgba(22, 22, 22, 0.9), rgba(10, 10, 10, 0.95));
+  background: linear-gradient(145deg, rgba(28, 28, 28, 0.9), rgba(16, 16, 16, 0.95));
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(201, 168, 76, 0.06);
+  border: 1px solid rgba(201, 168, 76, 0.15);
   border-radius: 8px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.65), inset 0 1px 1px rgba(255,255,255,0.06);
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
@@ -365,8 +371,8 @@ input:focus, textarea:focus, select:focus {
 
 .luxury-card:hover {
   transform: translateY(-10px);
-  border-color: var(--color-gold);
-  box-shadow: 0 30px 60px rgba(201, 168, 76, 0.15), inset 0 2px 20px rgba(201, 168, 76, 0.08);
+  border-color: rgba(201, 168, 76, 0.45);
+  box-shadow: 0 30px 60px rgba(201, 168, 76, 0.22), inset 0 2px 20px rgba(201, 168, 76, 0.15);
 }
 
 /* Shimmer Sweep Animation */
