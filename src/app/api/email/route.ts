@@ -52,27 +52,29 @@ export async function POST(req: Request) {
 
     switch (emailType) {
       case 'placed':
-        subject = `Order #${orderNumber} Received — Artinova`;
-        previewText = 'Your luxury gift booking has been submitted. Next steps inside.';
-        mainHeading = 'COMMISSION RECEIVED';
+        subject = `Order #${orderNumber} Confirmed — Artinova`;
+        previewText = 'Greetings from Artinova! Your custom gift booking is confirmed.';
+        mainHeading = 'ORDER CONFIRMED';
         messageBody = `
           <p style="margin-top: 0; font-size: 15px; line-height: 1.6;">Dear ${customerName},</p>
-          <p style="font-size: 15px; line-height: 1.6;">Thank you for commissioning <strong>ARTINOVA</strong>. Your request for personalized, handcrafted gifting has been safely logged in our studio registry.</p>
+          <p style="font-size: 15px; line-height: 1.6;">Greetings from <strong>ARTINOVA</strong>! We are absolutely delighted to confirm that your order <strong>#${orderNumber}</strong> has been successfully placed.</p>
+          <p style="font-size: 15px; line-height: 1.6;">Your GPay/UPI manual payment screenshot has been uploaded. Our curation team will verify the payment and get in touch with you soon via email or WhatsApp to finalize your design specifications, text engravings, and delivery logistics.</p>
           <div style="background-color: rgba(201, 168, 76, 0.08); border: 1px dashed #C9A84C; padding: 15px; margin: 25px 0; border-radius: 4px; text-align: center;">
-            <h4 style="margin: 0 0 8px 0; font-family: 'Cinzel', sans-serif; color: #C9A84C; letter-spacing: 1px; font-size: 12px;">GPay Manual Payment Verification</h4>
-            <p style="margin: 0; font-size: 13px; color: #9A8F7E; line-height: 1.5;">Our master craftsmen will verify your GPay transaction screenshot within the next 2 hours. Once approved, the engraving and handcrafting timeline will initiate immediately.</p>
+            <h4 style="margin: 0 0 8px 0; font-family: 'Cinzel', sans-serif; color: #C9A84C; letter-spacing: 1px; font-size: 12px;">Payment Verification in Progress</h4>
+            <p style="margin: 0; font-size: 13px; color: #9A8F7E; line-height: 1.5;">Our curation team reviews GPay screenshots within the next 2 hours. Once verified, we will trigger your order crafting schedule and reach out to you.</p>
           </div>
           ${itemsHtml}
         `;
         break;
 
       case 'verified':
-        subject = `Payment Confirmed ✓ — Your Gift is Being Crafted`;
-        previewText = 'Your payment has been successfully verified by our admin.';
+        subject = `Payment Verified ✓ — Artinova Order #${orderNumber}`;
+        previewText = 'Greetings from Artinova! Your transaction has been verified successfully.';
         mainHeading = 'PAYMENT VERIFIED';
         messageBody = `
           <p style="margin-top: 0; font-size: 15px; line-height: 1.6;">Dear ${customerName},</p>
-          <p style="font-size: 15px; line-height: 1.6;">We have verified your transaction receipt. Your order is officially confirmed, and our design and crafting cycles are in motion.</p>
+          <p style="font-size: 15px; line-height: 1.6;">Greetings from <strong>ARTINOVA</strong>! We are pleased to inform you that your GPay/UPI manual transaction screenshot has been verified and confirmed.</p>
+          <p style="font-size: 15px; line-height: 1.6;">Your order is officially approved for crafting. Our curation team will get in touch with you soon to double-check any customization specifications before pouring and handcrafting begin.</p>
           
           <div style="margin: 25px 0; padding-left: 20px; border-left: 2px solid #C9A84C; font-family: 'DM Sans', sans-serif;">
             <h4 style="margin: 0 0 10px 0; font-family: 'Cinzel', sans-serif; color: #C9A84C; font-size: 11px; letter-spacing: 1px;">Crafting Timeline & QC</h4>
@@ -156,7 +158,7 @@ export async function POST(req: Request) {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>${subject}</title>
         </head>
-        <body style="background-color: #0A0A0A; color: #F5F0E8; font-family: 'DM Sans', Arial, sans-serif; margin: 0; padding: 40px 20px; -webkit-font-smoothing: antialiased;">
+        <body style="background-color: #0A0A0A; color: #F5F0E8; font-family: 'DM Sans', Arial, sans-serif; margin: 0; padding: 20px 10px; -webkit-font-smoothing: antialiased;">
           <div style="max-width: 600px; margin: 0 auto; background-color: #111111; border: 1px solid rgba(201, 168, 76, 0.15); border-radius: 8px; overflow: hidden; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);">
             
             <!-- Luxury Branding Header -->
@@ -170,7 +172,7 @@ export async function POST(req: Request) {
             </div>
 
             <!-- Content Area -->
-            <div style="padding: 40px 30px; font-family: 'DM Sans', sans-serif;">
+            <div style="padding: 30px 20px; font-family: 'DM Sans', sans-serif;">
               <h2 style="margin: 0 0 20px 0; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 24px; font-weight: bold; letter-spacing: 2px; color: #C9A84C; border-bottom: 1px solid rgba(201, 168, 76, 0.1); padding-bottom: 15px;">
                 ${mainHeading}
               </h2>
