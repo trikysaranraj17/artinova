@@ -6,20 +6,8 @@ import { X, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function LoginModal() {
-  const { user, isGuest, loginModalOpen, setLoginModalOpen, login, signup, continueAsGuest, loginWithGoogle } = useAuthStore();
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [isAdminSignUp, setIsAdminSignUp] = useState(false);
-  
-  // Form fields
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [adminSecret, setAdminSecret] = useState('');
-  
+  const { user, isGuest, loginModalOpen, setLoginModalOpen, continueAsGuest, loginWithGoogle } = useAuthStore();
   const [error, setError] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [formLoading, setFormLoading] = useState(false);
 
   useEffect(() => {
@@ -30,30 +18,6 @@ export default function LoginModal() {
     }, 1500);
     return () => clearTimeout(timer);
   }, [user, isGuest, setLoginModalOpen]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccessMsg(null);
-    setFormLoading(true);
-
-    if (isSignUp) {
-      try {
-        await signup(email, password, fullName, phone, address);
-        setSuccessMsg('Account created successfully.');
-      } catch (err: any) {
-        setError(err.message || 'Failed to sign up.');
-      }
-    } else {
-      try {
-        await login(email, password);
-        setSuccessMsg('Welcome to Artinova.');
-      } catch (err: any) {
-        setError(err.message || 'Authentication failed.');
-      }
-    }
-    setFormLoading(false);
-  };
 
   const handleGoogleSignIn = async () => {
     setError(null);
@@ -66,31 +30,6 @@ export default function LoginModal() {
       setFormLoading(false);
     }
   };
-
-  const clearForm = () => {
-    setEmail('');
-    setPassword('');
-    setFullName('');
-    setPhone('');
-    setAddress('');
-    setAdminSecret('');
-    setError(null);
-    setSuccessMsg(null);
-  };
-
-  const InputField = ({ label, type, value, onChange, placeholder, required = true }: any) => (
-    <div className="flex flex-col mb-4">
-      <label className="font-accent text-[9px] uppercase tracking-widest text-[#9A8F7E] mb-1">{label}</label>
-      <input
-        type={type}
-        required={required}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full bg-transparent border-b border-[#C9A84C]/20 py-2 text-sm font-body text-white placeholder-[#9A8F7E]/30 focus:outline-none focus:border-[#C9A84C] transition-colors"
-      />
-    </div>
-  );
 
   return (
     <AnimatePresence>
@@ -110,7 +49,7 @@ export default function LoginModal() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 10 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full max-w-md bg-[#111111] border border-[#C9A84C]/20 relative flex flex-col max-h-[90vh]"
+            className="w-full max-w-md bg-[#111111] border border-[#C9A84C]/20 relative flex flex-col overflow-hidden shadow-2xl rounded-lg"
           >
             <button
               onClick={() => setLoginModalOpen(false)}
@@ -119,91 +58,46 @@ export default function LoginModal() {
               <X size={18} strokeWidth={1.5} />
             </button>
 
-            <div className="flex flex-col items-center pt-10 pb-6 select-none border-b border-[#C9A84C]/10">
+            <div className="flex flex-col items-center pt-10 pb-6 select-none border-b border-[#C9A84C]/10 bg-[#0A0A0A]/30">
               <h2 className="font-display text-2xl tracking-[0.3em] text-[#F5F0E8] font-bold">ARTINOVA</h2>
               <span className="font-accent text-[8px] uppercase tracking-[0.4em] text-[#C9A84C] mt-1">
                 Private Access
               </span>
             </div>
 
-            <div className="flex justify-center border-b border-[#C9A84C]/10">
-              <button
-                onClick={() => { setIsSignUp(false); clearForm(); }}
-                className={`flex-1 py-4 text-[9px] uppercase tracking-[0.2em] transition-colors cursor-pointer ${!isSignUp ? 'text-[#C9A84C] border-b-2 border-[#C9A84C] font-bold' : 'text-[#9A8F7E] hover:text-[#F5F0E8]'}`}
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => { setIsSignUp(true); clearForm(); }}
-                className={`flex-1 py-4 text-[9px] uppercase tracking-[0.2em] transition-colors cursor-pointer ${isSignUp ? 'text-[#C9A84C] border-b-2 border-[#C9A84C] font-bold' : 'text-[#9A8F7E] hover:text-[#F5F0E8]'}`}
-              >
-                Register
-              </button>
-            </div>
+            <div className="p-8 flex flex-col gap-6 text-center">
+              <div className="flex flex-col gap-2">
+                <p className="font-body text-xs text-[#9A8F7E]/80 leading-relaxed max-w-xs mx-auto">
+                  Access your bespoke registry, view custom creations, and track your personalized orders.
+                </p>
+              </div>
 
-            <div className="flex-grow overflow-y-auto custom-scrollbar p-8">
-              <AnimatePresence mode="wait">
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="text-red-400 text-[10px] font-accent uppercase tracking-wider mb-6 text-center"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-                {successMsg && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="text-[#C9A84C] text-[10px] font-accent uppercase tracking-wider mb-6 text-center"
-                  >
-                    {successMsg}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {error && (
+                <div className="text-red-400 text-[10px] font-accent uppercase tracking-wider text-center border border-red-500/20 bg-red-950/5 py-2 rounded">
+                  {error}
+                </div>
+              )}
 
-              <form onSubmit={handleSubmit} className="flex flex-col">
-                {isSignUp ? (
-                  <>
-                    <InputField label="Full Name" type="text" value={fullName} onChange={(e: any) => setFullName(e.target.value)} placeholder="e.g. John Doe" />
-                    <InputField label="Email Address" type="email" value={email} onChange={(e: any) => setEmail(e.target.value)} placeholder="john@example.com" />
-                    <InputField label="Phone Number" type="tel" value={phone} onChange={(e: any) => setPhone(e.target.value)} placeholder="+91 98765 43210" />
-                    <InputField label="Password" type="password" value={password} onChange={(e: any) => setPassword(e.target.value)} placeholder="••••••••" />
-                  </>
-                ) : (
-                  <>
-                    <InputField label="Email Address" type="email" value={email} onChange={(e: any) => setEmail(e.target.value)} placeholder="john@example.com" />
-                    <InputField label="Password" type="password" value={password} onChange={(e: any) => setPassword(e.target.value)} placeholder="••••••••" />
-                  </>
-                )}
-
-
-
-                <button
-                  type="submit"
-                  disabled={formLoading}
-                  className="w-full bg-[#C9A84C] text-[#0A0A0A] py-4 text-[10px] font-accent uppercase tracking-[0.25em] font-extrabold hover:bg-[#F5F0E8] transition-colors mt-2 cursor-pointer"
-                >
-                  {formLoading ? 'Authenticating...' : isSignUp ? 'Create Account' : 'Authenticate'}
-                </button>
-              </form>
-
-              <div className="flex flex-col items-center mt-8 gap-4 border-t border-[#C9A84C]/10 pt-6">
+              <div className="flex flex-col gap-4 mt-2">
                 <button
                   type="button"
                   onClick={handleGoogleSignIn}
                   disabled={formLoading}
-                  className="font-accent text-[10px] uppercase tracking-wider text-[#9A8F7E] hover:text-[#F5F0E8] transition-colors flex items-center gap-2 cursor-pointer"
+                  className="w-full bg-[#C9A84C] text-[#0A0A0A] py-4 text-[10px] font-accent uppercase tracking-[0.25em] font-extrabold hover:bg-[#F5F0E8] transition-colors cursor-pointer flex items-center justify-center gap-2.5 shadow-md"
                 >
-                  Continue with Google
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" className="shrink-0">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05" />
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                  </svg>
+                  Sign in with Google
                 </button>
+
                 <button
                   type="button"
                   onClick={continueAsGuest}
-                  className="font-accent text-[9px] uppercase tracking-widest text-[#9A8F7E]/50 hover:text-[#C9A84C] transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="w-full py-3 border border-[#C9A84C]/35 hover:border-[#C9A84C] text-[#C9A84C] hover:bg-[#C9A84C]/5 rounded text-[9px] font-accent uppercase tracking-widest transition-colors flex items-center justify-center gap-1.5 cursor-pointer font-bold mt-2"
                 >
                   Browse as Guest <ArrowRight size={10} />
                 </button>

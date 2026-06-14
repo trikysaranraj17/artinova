@@ -136,14 +136,12 @@ export default function Navbar() {
             </button>
 
             {/* Admin Portal Shortcut */}
-            {isAdmin && (
-              <NextLink
-                href="/admin-secure-dashboard"
-                className="hidden sm:flex h-10 items-center justify-center gap-1 border border-[#C9A84C]/30 hover:border-[#C9A84C] bg-[#C9A84C]/5 px-3 rounded text-[8px] font-accent uppercase tracking-wider text-[#C9A84C] transition-all duration-300"
-              >
-                <Shield size={10} /> Dashboard
-              </NextLink>
-            )}
+            <NextLink
+              href="/admin"
+              className="hidden sm:flex h-10 items-center justify-center gap-1 border border-[#C9A84C]/30 hover:border-[#C9A84C] bg-[#C9A84C]/5 px-3 rounded text-[8.5px] font-accent uppercase tracking-wider text-[#C9A84C] transition-all duration-300"
+            >
+              <Shield size={10} /> Admin Portal
+            </NextLink>
 
             {/* Profile / Login */}
             <div className="hidden md:flex items-center">
@@ -194,7 +192,7 @@ export default function Navbar() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '-100%', opacity: 0 }}
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 w-full h-screen z-[999] bg-[#0A0A0A] flex flex-col justify-center items-center px-6 relative"
+            className="fixed inset-0 w-full h-screen z-[999] bg-[#0A0A0A] flex flex-col justify-center items-center px-6"
           >
             {/* Close Button top-right (40x40px) */}
             <button
@@ -277,15 +275,13 @@ export default function Navbar() {
                 )}
               </div>
 
-              {isAdmin && (
-                <NextLink
-                  href="/admin-secure-dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 border border-[#C9A84C]/50 bg-[#C9A84C]/5 py-3 rounded text-[10px] font-accent font-bold uppercase tracking-wider text-[#C9A84C]"
-                >
-                  <Shield size={12} /> Admin Dashboard
-                </NextLink>
-              )}
+              <NextLink
+                href="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-center gap-2 border border-[#C9A84C]/50 bg-[#C9A84C]/5 py-3 rounded text-[10px] font-accent font-bold uppercase tracking-wider text-[#C9A84C]"
+              >
+                <Shield size={12} /> Admin Portal
+              </NextLink>
 
               {user ? (
                 <button

@@ -9,7 +9,7 @@ import MiniCartDrawer from './MiniCartDrawer';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAdminPage = pathname === '/admin-secure-dashboard';
+  const isAdminPage = pathname === '/admin-secure-dashboard' || pathname === '/admin';
 
   if (isAdminPage) {
     return (

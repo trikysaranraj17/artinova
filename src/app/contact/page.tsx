@@ -92,7 +92,7 @@ export default function ContactPage() {
 
               <div>
                 <h4 className="text-[10px] text-[#C9A84C] tracking-widest uppercase mb-1 font-bold">Direct Correspondence</h4>
-                <p className="text-sm font-mono text-[#9A8F7E] font-medium break-all select-all">deepaksabari28@gmail.com</p>
+                <p className="text-sm font-mono text-[#9A8F7E] font-medium break-all select-all">care@artinova.in</p>
               </div>
 
               <a 

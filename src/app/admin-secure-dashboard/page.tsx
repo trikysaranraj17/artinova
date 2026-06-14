@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/authStore';
 import { 
   getProducts, createProduct, updateProduct, deleteProduct, Product,
@@ -63,6 +64,7 @@ const getStatusText = (status: string) => {
 };
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
   const { user, isAdmin, setLoginModalOpen, loginWithGoogle, logout } = useAuthStore();
   
   const [isMounted, setIsMounted] = useState(false);
@@ -134,6 +136,12 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isMounted && !isAdmin) {
+      router.push('/admin');
+    }
+  }, [isAdmin, isMounted, router]);
 
   // Fetch initial data
   const loadDashboardData = async (showLoading = true) => {
@@ -1113,8 +1121,8 @@ export default function AdminDashboardPage() {
                 </div>
                 {!sidebarCollapsed && (
                   <div className="flex flex-col min-w-0">
-                    <span className="text-xs font-bold text-[#F5F0E8] truncate leading-tight">Deepak Sabari</span>
-                    <span className="text-[10px] text-[#9A8F7E] truncate">deepaksabari28@gmail.com</span>
+                    <span className="text-xs font-bold text-[#F5F0E8] truncate leading-tight">{user?.full_name || 'Deepak Sabari'}</span>
+                    <span className="text-[10px] text-[#9A8F7E] truncate">{user?.email || 'admin@artinova.in'}</span>
                   </div>
                 )}
               </div>

@@ -99,7 +99,7 @@ export async function POST(req: Request) {
             <strong style="font-size: 12px; text-transform: uppercase; color: #e11d48;">Reason for Suspension:</strong>
             <p style="margin: 5px 0 0 0; font-size: 13px; line-height: 1.5; color: #9A8F7E;">${rejectReason}</p>
           </div>
-          <p style="font-size: 14px; line-height: 1.6;"><strong>Action Required:</strong> Please log into your <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/profile" style="color: #C9A84C; text-decoration: underline;">Artinova Profile</a> and re-upload the correct GPay/UPI confirmation screenshot, or connect with our support line at deepaksabari28@gmail.com.</p>
+          <p style="font-size: 14px; line-height: 1.6;"><strong>Action Required:</strong> Please log into your <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/profile" style="color: #C9A84C; text-decoration: underline;">Artinova Profile</a> and re-upload the correct GPay/UPI confirmation screenshot, or connect with our support line at care@artinova.in.</p>
         `;
         break;
 
@@ -189,7 +189,7 @@ export async function POST(req: Request) {
             <!-- Studio Footer -->
             <div style="background-color: #080808; border-top: 1px solid rgba(201, 168, 76, 0.05); padding: 30px 20px; text-align: center; font-size: 11px; color: #9A8F7E; line-height: 1.6;">
               <p style="margin: 0 0 6px 0; font-family: 'Cinzel', sans-serif; letter-spacing: 1px; color: #C9A84C;">ARTINOVA GIFTING STUDIO</p>
-              <p style="margin: 0;">Chennai, Tamil Nadu, India &bull; deepaksabari28@gmail.com</p>
+              <p style="margin: 0;">Chennai, Tamil Nadu, India &bull; care@artinova.in</p>
               <p style="margin: 15px 0 0 0; font-size: 10px; color: rgba(154, 143, 126, 0.4);">&copy; 2026 ARTINOVA. All rights reserved.</p>
             </div>
             

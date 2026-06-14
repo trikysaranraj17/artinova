@@ -314,7 +314,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (typeof window === 'undefined') return;
         const emailInput = window.prompt(
           "Artinova Google Auth System\n\nEnter your Google email to authenticate:", 
-          "deepaksabari28@gmail.com"
+          ""
         );
         if (emailInput === null) return;
         const email = emailInput.trim() || 'google-client@luxury.com';

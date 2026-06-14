@@ -175,7 +175,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               <h4 style="margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase; color:#B8860B; letter-spacing: 1px;">Studio Registry:</h4>
               <div style="font-size: 13px; font-weight: bold;">Artinova Premium Gifting</div>
               <div style="font-size: 13px; color:#444; margin-top: 5px;">Chennai, Tamil Nadu, India</div>
-              <div style="font-size: 13px; color:#444; margin-top: 3px;">deepaksabari28@gmail.com</div>
+              <div style="font-size: 13px; color:#444; margin-top: 3px;">care@artinova.in</div>
             </div>
           </div>
           
