@@ -10,14 +10,7 @@ export default function LoginModal() {
   const [error, setError] = useState<string | null>(null);
   const [formLoading, setFormLoading] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!user && !isGuest) {
-        setLoginModalOpen(true);
-      }
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [user, isGuest, setLoginModalOpen]);
+
 
   const handleGoogleSignIn = async () => {
     setError(null);

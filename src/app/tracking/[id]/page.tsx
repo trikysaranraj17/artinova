@@ -32,10 +32,9 @@ export default function OrderTrackingPage({ params }: { params: Promise<{ id: st
   // Authenticate gate
   useEffect(() => {
     if (!isLoading && !user && !isGuest) {
-      router.push('/');
-      setLoginModalOpen(true);
+      router.push('/login');
     }
-  }, [user, isGuest, isLoading, router, setLoginModalOpen]);
+  }, [user, isGuest, isLoading, router]);
 
   // Load tracking data
   useEffect(() => {

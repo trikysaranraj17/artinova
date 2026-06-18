@@ -163,12 +163,12 @@ export default function Navbar() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => setLoginModalOpen(true)}
+                <NextLink
+                  href="/login"
                   className="font-accent text-[9px] uppercase tracking-[0.15em] border border-[#C9A84C]/40 px-3 py-2 rounded hover:bg-[#C9A84C] hover:text-[#0A0A0A] transition-all duration-300 font-semibold cursor-pointer"
                 >
                   Sign In
-                </button>
+                </NextLink>
               )}
             </div>
 
@@ -294,15 +294,13 @@ export default function Navbar() {
                   <LogOut size={14} /> Sign Out
                 </button>
               ) : (
-                <button
-                  onClick={() => {
-                    setLoginModalOpen(true);
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full font-accent text-[10px] uppercase tracking-[0.2em] border border-[#C9A84C]/40 py-3 rounded hover:bg-[#C9A84C] hover:text-[#0A0A0A] transition-all duration-300 font-bold"
+                <NextLink
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center font-accent text-[10px] uppercase tracking-[0.2em] border border-[#C9A84C]/40 py-3 rounded hover:bg-[#C9A84C] hover:text-[#0A0A0A] transition-all duration-300 font-bold"
                 >
                   Sign In
-                </button>
+                </NextLink>
               )}
             </motion.div>
           </motion.div>

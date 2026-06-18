@@ -17,8 +17,7 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      await loginWithGoogle();
-      router.push('/profile');
+      await loginWithGoogle(window.location.origin + '/profile');
     } catch (err: any) {
       setError(err.message || 'Google authentication failed.');
     } finally {

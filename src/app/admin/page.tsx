@@ -28,7 +28,7 @@ export default function AdminPage() {
     setError(null);
     setLoading(true);
     try {
-      await loginWithGoogle();
+      await loginWithGoogle(window.location.origin + '/admin');
     } catch (err: any) {
       setError(err.message || 'Google authentication failed.');
     } finally {

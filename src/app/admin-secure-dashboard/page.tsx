@@ -560,7 +560,7 @@ export default function AdminDashboardPage() {
           </p>
 
           <button
-            onClick={loginWithGoogle}
+            onClick={() => loginWithGoogle(window.location.origin + '/admin')}
             className="w-full bg-[#C9A84C] text-[#0A0A0A] py-3.5 px-6 rounded font-accent text-[10px] font-bold uppercase tracking-widest hover:bg-[#F5F0E8] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg"
           >
             Authenticate with Google

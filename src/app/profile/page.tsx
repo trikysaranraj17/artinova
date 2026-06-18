@@ -62,10 +62,9 @@ export default function ProfilePage() {
   // Gatekeeper
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push('/');
-      setLoginModalOpen(true);
+      router.push('/login');
     }
-  }, [user, isLoading, router, setLoginModalOpen]);
+  }, [user, isLoading, router]);
 
   // Sync profile details and load orders & addresses
   useEffect(() => {

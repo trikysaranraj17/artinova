@@ -34,10 +34,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   // Authenticate gate
   useEffect(() => {
     if (!isLoading && !user && !isGuest) {
-      router.push('/');
-      setLoginModalOpen(true);
+      router.push('/login');
     }
-  }, [user, isGuest, isLoading, router, setLoginModalOpen]);
+  }, [user, isGuest, isLoading, router]);
 
   // Load order details
   useEffect(() => {

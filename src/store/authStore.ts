@@ -24,7 +24,7 @@ interface AuthState {
   logout: () => Promise<void>;
   continueAsGuest: () => void;
   updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
+  loginWithGoogle: (redirectTo?: string) => Promise<void>;
   mockGoogleOpen: boolean;
   setMockGoogleOpen: (open: boolean) => void;
   loginWithMockEmail: (email: string, name?: string) => Promise<void>;
@@ -330,14 +330,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ user: updatedUser });
   },
 
-  loginWithGoogle: async () => {
+  loginWithGoogle: async (redirectTo) => {
     set({ isLoading: true });
     try {
       if (isSupabaseConfigured) {
+        const redirectUrl = redirectTo || (typeof window !== 'undefined' ? `${window.location.origin}` : undefined);
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: typeof window !== 'undefined' ? `${window.location.origin}` : undefined,
+            redirectTo: redirectUrl,
           },
         });
         if (error) throw error;

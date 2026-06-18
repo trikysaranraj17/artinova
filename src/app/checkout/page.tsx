@@ -26,10 +26,12 @@ export default function CheckoutPage() {
 
   // Redirect if cart is empty or user is not logged in
   useEffect(() => {
-    if (items.length === 0) {
+    if (!user) {
+      router.push('/login');
+    } else if (items.length === 0) {
       router.push('/cart');
     }
-  }, [items, router]);
+  }, [items, user, router]);
 
   // Checkout Step Wizard State: 1 = Info, 2 = Review, 3 = Payment
   const [checkoutStep, setCheckoutStep] = useState(1);

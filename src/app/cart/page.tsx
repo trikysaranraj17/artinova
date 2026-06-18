@@ -35,7 +35,7 @@ export default function CartPage() {
 
   const handleCheckoutRedirect = () => {
     if (!user) {
-      setLoginModalOpen(true);
+      router.push('/login');
     } else {
       router.push('/checkout');
     }
