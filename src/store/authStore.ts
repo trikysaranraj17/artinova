@@ -90,12 +90,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             });
           } catch (e) {
             console.error('Error in onAuthStateChange processing:', e);
+            set({ isLoading: false });
           }
         } else {
           // If no session, clear user state (unless in mock local storage mode)
           const storedUser = localStorage.getItem('artinova_user');
           if (!storedUser) {
             set({ user: null, isAdmin: false, isLoading: false });
+          } else {
+            set({ isLoading: false });
           }
         }
       });
@@ -103,34 +106,88 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          // The auth listener above will handle setting the state.
+          const u = session.user;
+          let profile = null;
+          try {
+            const { data } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', u.id)
+              .single();
+            if (data) profile = data;
+          } catch (e) {
+            console.warn('Failed to fetch profile in getSession:', e);
+          }
+
+          const isSystemAdmin = u.email?.toLowerCase() === 'deepaksabari28@gmail.com' || u.email?.toLowerCase() === 'deepaksabari28@gmial.com' || u.email?.toLowerCase() === 'akashselva18@gmail.com';
+
+          const userProfile: UserProfile = {
+            id: u.id,
+            email: u.email || '',
+            full_name: profile?.full_name || u.user_metadata?.full_name || '',
+            phone: profile?.phone || '',
+            avatar_url: profile?.avatar_url || '',
+            isAdmin: isSystemAdmin
+          };
+
+          set({
+            user: userProfile,
+            isAdmin: !!isSystemAdmin,
+            isGuest: false,
+            isLoading: false
+          });
           return;
+        } else {
+          // No active Supabase session, check local storage
+          const storedUser = localStorage.getItem('artinova_user');
+          const isGuestMode = localStorage.getItem('artinova_guest') === 'true';
+          if (storedUser) {
+            try {
+              const parsed = JSON.parse(storedUser);
+              set({
+                user: parsed,
+                isAdmin: parsed.email?.toLowerCase() === 'deepaksabari28@gmail.com' || parsed.email?.toLowerCase() === 'deepaksabari28@gmial.com' || parsed.email?.toLowerCase() === 'akashselva18@gmail.com',
+                isGuest: false,
+                isLoading: false
+              });
+              return;
+            } catch (e) {
+              console.error(e);
+            }
+          } else if (isGuestMode) {
+            set({ isGuest: true, isLoading: false });
+            return;
+          }
         }
       } catch (err) {
         console.warn('Supabase auth initialization failed, fallback to local storage:', err);
       }
     }
 
-    // 2. Local Storage Check
+    // 2. Local Storage Check when Supabase check was skipped/failed
     if (typeof window !== 'undefined') {
       const storedUser = localStorage.getItem('artinova_user');
       const isGuestMode = localStorage.getItem('artinova_guest') === 'true';
       if (storedUser) {
-        const parsed = JSON.parse(storedUser);
-        set({
-          user: parsed,
-          isAdmin: parsed.email?.toLowerCase() === 'deepaksabari28@gmail.com' || parsed.email?.toLowerCase() === 'deepaksabari28@gmial.com' || parsed.email?.toLowerCase() === 'akashselva18@gmail.com',
-          isGuest: false,
-          isLoading: false
-        });
-        return;
+        try {
+          const parsed = JSON.parse(storedUser);
+          set({
+            user: parsed,
+            isAdmin: parsed.email?.toLowerCase() === 'deepaksabari28@gmail.com' || parsed.email?.toLowerCase() === 'deepaksabari28@gmial.com' || parsed.email?.toLowerCase() === 'akashselva18@gmail.com',
+            isGuest: false,
+            isLoading: false
+          });
+          return;
+        } catch (e) {
+          console.error(e);
+        }
       } else if (isGuestMode) {
         set({ isGuest: true, isLoading: false });
         return;
       }
     }
     
-    set({ isLoading: false });
+    set({ user: null, isAdmin: false, isLoading: false });
   },
 
   login: async (email, pass, adminSecret) => {
