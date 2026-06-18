@@ -1,16 +1,22 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import LoginModal from './LoginModal';
 import MiniCartDrawer from './MiniCartDrawer';
 import MockGoogleChooser from './MockGoogleChooser';
+import { useAuthStore } from '../store/authStore';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdminPage = pathname === '/admin-secure-dashboard' || pathname === '/admin';
+  const { initialize } = useAuthStore();
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
 
   if (isAdminPage) {
     return (
