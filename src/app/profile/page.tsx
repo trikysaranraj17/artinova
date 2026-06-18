@@ -274,7 +274,7 @@ export default function ProfilePage() {
     );
   }
 
-  const totalSpent = orders.reduce((sum, o) => sum + o.total, 0);
+  const totalSpent = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
 
   return (
     <div className="min-h-screen pt-32 pb-24 px-6 bg-[#0A0A0A] relative text-[#F5F0E8] font-body select-none">

@@ -16,8 +16,15 @@ export default function CustomCursor() {
   const haloRef = useRef<HTMLDivElement>(null);
   const coreRef = useRef<HTMLDivElement>(null);
   const [particles, setParticles] = useState<Particle[]>([]);
+  const [isMobileDevice, setIsMobileDevice] = useState(true);
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth <= 1024 || window.matchMedia('(hover: none)').matches;
+      setIsMobileDevice(isMobile);
+      if (isMobile) return;
+    }
+
     let particleId = 0;
     let lastX = 0;
     let lastY = 0;
@@ -36,7 +43,6 @@ export default function CustomCursor() {
     const updatePosition = (e: MouseEvent) => {
       lastX = e.clientX;
       lastY = e.clientY;
-      // Use requestAnimationFrame for smoother cursor updates synced with monitor refresh rate
       requestAnimationFrame(() => updateStyles(lastX, lastY));
     };
 
@@ -88,7 +94,7 @@ export default function CustomCursor() {
         });
       }
       
-      setParticles((prev) => [...prev, ...newParticles].slice(-15)); // Cap particles for performance
+      setParticles((prev) => [...prev, ...newParticles].slice(-15));
     };
 
     window.addEventListener('mousemove', updatePosition, { passive: true });
@@ -106,7 +112,7 @@ export default function CustomCursor() {
 
   // Update particles positions
   useEffect(() => {
-    if (particles.length === 0) return;
+    if (particles.length === 0 || isMobileDevice) return;
 
     const frame = requestAnimationFrame(() => {
       setParticles((prev) =>
@@ -123,9 +129,9 @@ export default function CustomCursor() {
     });
 
     return () => cancelAnimationFrame(frame);
-  }, [particles]);
+  }, [particles, isMobileDevice]);
 
-  if (typeof window !== 'undefined' && window.innerWidth <= 1024) return null;
+  if (isMobileDevice) return null;
 
   return (
     <>
@@ -198,6 +204,18 @@ export default function CustomCursor() {
           background-color: rgba(212, 175, 55, 0.05) !important;
           border-color: rgba(212, 175, 55, 0.6) !important;
           box-shadow: 0 0 15px rgba(212, 175, 55, 0.2) !important;
+        }
+        @media (max-width: 1024px) {
+          .custom-cursor-halo,
+          .custom-cursor-core {
+            display: none !important;
+          }
+        }
+        @media (hover: none) and (pointer: coarse) {
+          .custom-cursor-halo,
+          .custom-cursor-core {
+            display: none !important;
+          }
         }
       `}</style>
     </>

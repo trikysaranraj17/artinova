@@ -168,7 +168,7 @@ export default function AdminDashboardPage() {
           const registered = JSON.parse(localStorage.getItem('artinova_registered_users') || '[]');
           const customersList = registered.map((u: any) => {
             const userOrders = ords.filter(o => o.user_id === u.id);
-            const totalSpent = userOrders.reduce((sum, o) => sum + o.total, 0);
+            const totalSpent = userOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
             return {
               ...u,
               ordersCount: userOrders.length,
@@ -571,7 +571,7 @@ export default function AdminDashboardPage() {
   }
 
   // Analytics variables
-  const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
+  const totalSales = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
   const totalOrdersCount = orders.length;
   const productsCount = products.length;
   const pendingPayments = orders.filter(o => o.payment_status === 'pending').length;
