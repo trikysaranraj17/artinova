@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Particle {
@@ -13,34 +13,38 @@ interface Particle {
 }
 
 export default function CustomCursor() {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [trail, setTrail] = useState<{ x: number; y: number; id: number }[]>([]);
-  const [isHovered, setIsHovered] = useState(false);
+  const haloRef = useRef<HTMLDivElement>(null);
+  const coreRef = useRef<HTMLDivElement>(null);
   const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    let idCounter = 0;
     let particleId = 0;
+    let lastX = 0;
+    let lastY = 0;
+
+    const updateStyles = (x: number, y: number) => {
+      if (coreRef.current) {
+        const isHover = coreRef.current.classList.contains('hovered');
+        coreRef.current.style.transform = `translate3d(${x - 4}px, ${y - 4}px, 0) scale(${isHover ? 0.6 : 1})`;
+      }
+      if (haloRef.current) {
+        const isHover = haloRef.current.classList.contains('hovered');
+        haloRef.current.style.transform = `translate3d(${x - 30}px, ${y - 30}px, 0) scale(${isHover ? 1.5 : 1})`;
+      }
+    };
 
     const updatePosition = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-
-      setTrail((prev) => {
-        const newTrail = [...prev, { x: e.clientX, y: e.clientY, id: idCounter++ }];
-        if (newTrail.length > 8) newTrail.shift();
-        return newTrail;
-      });
-
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        setTrail([]);
-      }, 150);
+      lastX = e.clientX;
+      lastY = e.clientY;
+      // Use requestAnimationFrame for smoother cursor updates synced with monitor refresh rate
+      requestAnimationFrame(() => updateStyles(lastX, lastY));
     };
 
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (
+      if (!target) return;
+
+      const isInteractive = 
         target.tagName === 'A' ||
         target.tagName === 'BUTTON' ||
         target.tagName === 'INPUT' ||
@@ -48,21 +52,27 @@ export default function CustomCursor() {
         target.tagName === 'TEXTAREA' ||
         target.closest('a') ||
         target.closest('button') ||
-        target.closest('.cursor-pointer')
-      ) {
-        setIsHovered(true);
+        target.closest('.cursor-pointer');
+
+      if (isInteractive) {
+        haloRef.current?.classList.add('hovered');
+        coreRef.current?.classList.add('hovered');
       } else {
-        setIsHovered(false);
+        haloRef.current?.classList.remove('hovered');
+        coreRef.current?.classList.remove('hovered');
       }
+      updateStyles(lastX, lastY);
     };
 
     const handleMouseOut = () => {
-      setIsHovered(false);
+      haloRef.current?.classList.remove('hovered');
+      coreRef.current?.classList.remove('hovered');
+      updateStyles(lastX, lastY);
     };
 
     // Click particle burst
     const handleClick = (e: MouseEvent) => {
-      const burstCount = 10;
+      const burstCount = 6;
       const newParticles: Particle[] = [];
       
       for (let i = 0; i < burstCount; i++) {
@@ -78,20 +88,19 @@ export default function CustomCursor() {
         });
       }
       
-      setParticles((prev) => [...prev, ...newParticles]);
+      setParticles((prev) => [...prev, ...newParticles].slice(-15)); // Cap particles for performance
     };
 
-    window.addEventListener('mousemove', updatePosition);
-    window.addEventListener('mouseover', handleMouseOver);
-    window.addEventListener('mouseout', handleMouseOut);
-    window.addEventListener('click', handleClick);
+    window.addEventListener('mousemove', updatePosition, { passive: true });
+    window.addEventListener('mouseover', handleMouseOver, { passive: true });
+    window.addEventListener('mouseout', handleMouseOut, { passive: true });
+    window.addEventListener('click', handleClick, { passive: true });
 
     return () => {
       window.removeEventListener('mousemove', updatePosition);
       window.removeEventListener('mouseover', handleMouseOver);
       window.removeEventListener('mouseout', handleMouseOut);
       window.removeEventListener('click', handleClick);
-      clearTimeout(timeout);
     };
   }, []);
 
@@ -106,10 +115,10 @@ export default function CustomCursor() {
             ...p,
             x: p.x + p.vx,
             y: p.y + p.vy,
-            vx: p.vx * 0.96, // friction
-            vy: p.vy * 0.96
+            vx: p.vx * 0.94,
+            vy: p.vy * 0.94
           }))
-          .filter((p) => Math.abs(p.vx) > 0.1 || Math.abs(p.vy) > 0.1)
+          .filter((p) => Math.abs(p.vx) > 0.15 || Math.abs(p.vy) > 0.15)
       );
     });
 
@@ -128,18 +137,18 @@ export default function CustomCursor() {
             initial={{ opacity: 0.8, scale: 1 }}
             animate={{ opacity: 0, scale: 0.2 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
             style={{
               position: 'fixed',
               top: p.y,
               left: p.x,
-              width: '4px',
-              height: '4px',
+              width: '3px',
+              height: '3px',
               backgroundColor: p.color,
               borderRadius: '50%',
               pointerEvents: 'none',
               zIndex: 99999,
-              boxShadow: `0 0 6px ${p.color}`
+              boxShadow: `0 0 4px ${p.color}`
             }}
           />
         ))}
@@ -147,61 +156,50 @@ export default function CustomCursor() {
 
       {/* Outer Halo Glow */}
       <div
+        ref={haloRef}
+        className="custom-cursor-halo"
         style={{
           position: 'fixed',
           top: 0,
           left: 0,
-          transform: `translate(${position.x - 30}px, ${position.y - 30}px) scale(${isHovered ? 1.5 : 1})`,
           width: '60px',
           height: '60px',
           border: '1px solid rgba(212, 175, 55, 0.3)',
-          backgroundColor: isHovered ? 'rgba(212, 175, 55, 0.05)' : 'transparent',
           borderRadius: '50%',
           pointerEvents: 'none',
           zIndex: 99999,
-          transition: 'transform 0.15s ease-out, background-color 0.3s ease, border-color 0.3s ease',
-          boxShadow: isHovered ? '0 0 15px rgba(212, 175, 55, 0.2)' : 'none'
+          willChange: 'transform',
+          transition: 'transform 0.08s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease'
         }}
       />
 
       {/* Main Cursor Core */}
       <div
+        ref={coreRef}
+        className="custom-cursor-core"
         style={{
           position: 'fixed',
           top: 0,
           left: 0,
-          transform: `translate(${position.x - 4}px, ${position.y - 4}px) scale(${isHovered ? 0.6 : 1})`,
           width: '8px',
           height: '8px',
           backgroundColor: '#d4af37',
           borderRadius: '50%',
           pointerEvents: 'none',
           zIndex: 100000,
-          transition: 'transform 0.1s ease-out',
-          boxShadow: '0 0 8px #d4af37'
+          willChange: 'transform',
+          boxShadow: '0 0 8px #d4af37',
+          transition: 'transform 0.02s linear'
         }}
       />
 
-      {/* Laser trail lines */}
-      {trail.map((point, index) => (
-        <div
-          key={point.id}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            transform: `translate(${point.x - 2}px, ${point.y - 2}px)`,
-            width: '4px',
-            height: '4px',
-            backgroundColor: '#d4af37',
-            borderRadius: '50%',
-            pointerEvents: 'none',
-            zIndex: 99998,
-            opacity: (index / trail.length) * 0.4,
-            boxShadow: '0 0 4px #d4af37'
-          }}
-        />
-      ))}
+      <style jsx global>{`
+        .custom-cursor-halo.hovered {
+          background-color: rgba(212, 175, 55, 0.05) !important;
+          border-color: rgba(212, 175, 55, 0.6) !important;
+          box-shadow: 0 0 15px rgba(212, 175, 55, 0.2) !important;
+        }
+      `}</style>
     </>
   );
 }
