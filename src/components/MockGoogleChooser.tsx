@@ -13,10 +13,33 @@ export default function MockGoogleChooser() {
   const [customEmail, setCustomEmail] = useState('');
   const [customName, setCustomName] = useState('');
   const [isMounted, setIsMounted] = useState(false);
+  const [deviceAccounts, setDeviceAccounts] = useState<any[]>([]);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('artinova_device_accounts');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setDeviceAccounts(parsed);
+          if (parsed.length === 0) {
+            setShowCustomInput(true);
+          } else {
+            setShowCustomInput(false);
+          }
+        } catch (e) {
+          console.error(e);
+          setShowCustomInput(true);
+        }
+      } else {
+        setShowCustomInput(true);
+      }
+    }
+  }, [mockGoogleOpen]);
 
   if (!isMounted) return null;
 
@@ -31,39 +54,24 @@ export default function MockGoogleChooser() {
     }
   };
 
+  const handleRemoveAccount = (email: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const updated = deviceAccounts.filter(acc => acc.email !== email);
+    setDeviceAccounts(updated);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('artinova_device_accounts', JSON.stringify(updated));
+    }
+    if (updated.length === 0) {
+      setShowCustomInput(true);
+    }
+  };
+
   const handleCustomSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customEmail) return;
     const name = customName || customEmail.split('@')[0];
     handleSelectAccount(customEmail, name);
   };
-
-  const accounts = [
-    {
-      name: 'Akash Selva',
-      email: 'akashselva18@gmail.com',
-      avatar: 'A',
-      color: 'bg-indigo-600',
-    },
-    {
-      name: 'Saran Raj',
-      email: 'trikysaran5721@gmail.com',
-      avatar: 'S',
-      color: 'bg-pink-600',
-    },
-    {
-      name: 'schl admin',
-      email: 'thiruviadmin1955@gmail.com',
-      avatar: 's',
-      color: 'bg-emerald-600',
-    },
-    {
-      name: 'thiruvika',
-      email: 'thiruvika1955@gmail.com',
-      avatar: 't',
-      color: 'bg-amber-600',
-    }
-  ];
 
   return (
     <AnimatePresence>
@@ -111,15 +119,15 @@ export default function MockGoogleChooser() {
 
             {/* Account List */}
             <div className="flex flex-col border-b border-neutral-800 pb-2 max-h-[260px] overflow-y-auto custom-scrollbar">
-              {accounts.map((acc, idx) => (
+              {deviceAccounts.map((acc, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSelectAccount(acc.email, acc.name)}
                   className="w-full flex items-center justify-between py-3.5 px-3 rounded-lg hover:bg-neutral-800/60 transition-colors text-left cursor-pointer group"
                 >
-                  <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="flex items-center gap-3.5 min-w-0 flex-grow">
                     {/* Circle Avatar */}
-                    <div className={`w-8 h-8 rounded-full ${acc.color} flex items-center justify-center text-white font-bold text-xs uppercase shadow-sm shrink-0`}>
+                    <div className={`w-8 h-8 rounded-full ${acc.color || 'bg-indigo-600'} flex items-center justify-center text-white font-bold text-xs uppercase shadow-sm shrink-0`}>
                       {acc.avatar}
                     </div>
                     
@@ -132,6 +140,16 @@ export default function MockGoogleChooser() {
                       </span>
                     </div>
                   </div>
+
+                  {/* Remove Account */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleRemoveAccount(acc.email, e)}
+                    className="text-neutral-500 hover:text-red-400 p-1.5 rounded-full hover:bg-[#1E1E1E] transition-colors cursor-pointer shrink-0 z-10 opacity-0 group-hover:opacity-100"
+                    title="Remove account from device"
+                  >
+                    <X size={14} />
+                  </button>
                 </button>
               ))}
             </div>

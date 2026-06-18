@@ -15,7 +15,7 @@ import {
   Users, Upload, Eye, X, Check, ArrowRight, Loader2, Sparkles, 
   TrendingUp, BarChart3, Settings, Truck, CreditCard, PieChart, 
   Download, FileText, CheckCircle2, AlertCircle, RefreshCw, LogOut,
-  FolderOpen, Calendar, HelpCircle, Bell, ChevronDown, CheckSquare, Square
+  FolderOpen, Calendar, HelpCircle, Bell, ChevronDown, CheckSquare, Square, Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -972,6 +972,184 @@ export default function AdminDashboardPage() {
 
       <div className="flex-grow flex w-full relative">
         
+        {/* MOBILE SIDEBAR DRAWER */}
+        <AnimatePresence>
+          {mobileSidebarOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.6 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMobileSidebarOpen(false)}
+                className="fixed inset-0 z-[150] bg-black lg:hidden"
+              />
+              {/* Drawer */}
+              <motion.aside
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="fixed top-0 bottom-0 left-0 z-[200] w-[260px] bg-[#0D0D0D] border-[#C9A84C]/10 border-r flex flex-col justify-between select-none lg:hidden h-screen"
+              >
+                <div className="flex flex-col flex-grow min-h-0">
+                  {/* Top header */}
+                  <div className="h-16 px-5 border-b border-[#C9A84C]/8 flex items-center justify-between shrink-0">
+                    <span className="font-display font-semibold tracking-wider text-[#C9A84C] text-lg uppercase">
+                      ARTINOVA
+                    </span>
+                    <button 
+                      onClick={() => setMobileSidebarOpen(false)}
+                      className="text-[#9A8F7E] hover:text-[#C9A84C] p-1.5 hover:bg-[#C9A84C]/5 rounded cursor-pointer shrink-0"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+
+                  {/* Sidebar Navigation items */}
+                  <div className="flex-grow overflow-y-auto custom-scrollbar py-4 px-3 flex flex-col gap-2">
+                    {/* MAIN SECTION */}
+                    <span className="text-[10px] tracking-widest text-[#9A8F7E]/40 font-bold font-sans uppercase px-3 pt-3">Main</span>
+                    <button
+                      onClick={() => { setActiveTab('overview'); setSelectedOrderId(null); setMobileSidebarOpen(false); }}
+                      className={`flex items-center gap-3 h-12 px-3 rounded-lg font-sans text-[13px] font-medium transition-all duration-200 ${
+                        activeTab === 'overview'
+                          ? 'bg-[#C9A84C]/8 text-[#C9A84C] border-l-3 border-[#C9A84C]'
+                          : 'text-[#9A8F7E] hover:bg-[#C9A84C]/4 hover:text-[#F5F0E8]'
+                      }`}
+                    >
+                      <BarChart3 size={18} className="shrink-0" />
+                      <span>Overview</span>
+                    </button>
+
+                    {/* CATALOG SECTION */}
+                    <span className="text-[10px] tracking-widest text-[#9A8F7E]/40 font-bold font-sans uppercase px-3 pt-3">Catalog</span>
+                    <button
+                      onClick={() => { setActiveTab('products'); setSelectedOrderId(null); setMobileSidebarOpen(false); }}
+                      className={`flex items-center gap-3 h-12 px-3 rounded-lg font-sans text-[13px] font-medium transition-all duration-200 ${
+                        activeTab === 'products'
+                          ? 'bg-[#C9A84C]/8 text-[#C9A84C] border-l-3 border-[#C9A84C]'
+                          : 'text-[#9A8F7E] hover:bg-[#C9A84C]/4 hover:text-[#F5F0E8]'
+                      }`}
+                    >
+                      <Package size={18} className="shrink-0" />
+                      <span>Products</span>
+                    </button>
+                    <button
+                      onClick={() => { setActiveTab('categories'); setSelectedOrderId(null); setMobileSidebarOpen(false); }}
+                      className={`flex items-center gap-3 h-12 px-3 rounded-lg font-sans text-[13px] font-medium transition-all duration-200 ${
+                        activeTab === 'categories'
+                          ? 'bg-[#C9A84C]/8 text-[#C9A84C] border-l-3 border-[#C9A84C]'
+                          : 'text-[#9A8F7E] hover:bg-[#C9A84C]/4 hover:text-[#F5F0E8]'
+                      }`}
+                    >
+                      <FolderOpen size={18} className="shrink-0" />
+                      <span>Categories</span>
+                    </button>
+
+                    {/* COMMERCE SECTION */}
+                    <span className="text-[10px] tracking-widest text-[#9A8F7E]/40 font-bold font-sans uppercase px-3 pt-3">Commerce</span>
+                    <button
+                      onClick={() => { setActiveTab('orders'); setSelectedOrderId(null); setMobileSidebarOpen(false); }}
+                      className={`flex items-center gap-3 h-12 px-3 rounded-lg font-sans text-[13px] font-medium transition-all duration-200 ${
+                        activeTab === 'orders'
+                          ? 'bg-[#C9A84C]/8 text-[#C9A84C] border-l-3 border-[#C9A84C]'
+                          : 'text-[#9A8F7E] hover:bg-[#C9A84C]/4 hover:text-[#F5F0E8]'
+                      }`}
+                    >
+                      <ShoppingBag size={18} className="shrink-0" />
+                      <span>Orders</span>
+                    </button>
+                    <button
+                      onClick={() => { setActiveTab('payments'); setSelectedOrderId(null); setMobileSidebarOpen(false); }}
+                      className={`flex items-center gap-3 h-12 px-3 rounded-lg font-sans text-[13px] font-medium transition-all duration-200 ${
+                        activeTab === 'payments'
+                          ? 'bg-[#C9A84C]/8 text-[#C9A84C] border-l-3 border-[#C9A84C]'
+                          : 'text-[#9A8F7E] hover:bg-[#C9A84C]/4 hover:text-[#F5F0E8]'
+                      }`}
+                    >
+                      <CreditCard size={18} className="shrink-0" />
+                      <span>Payments</span>
+                    </button>
+                    <button
+                      onClick={() => { setActiveTab('customers'); setSelectedOrderId(null); setMobileSidebarOpen(false); }}
+                      className={`flex items-center gap-3 h-12 px-3 rounded-lg font-sans text-[13px] font-medium transition-all duration-200 ${
+                        activeTab === 'customers'
+                          ? 'bg-[#C9A84C]/8 text-[#C9A84C] border-l-3 border-[#C9A84C]'
+                          : 'text-[#9A8F7E] hover:bg-[#C9A84C]/4 hover:text-[#F5F0E8]'
+                      }`}
+                    >
+                      <Users size={18} className="shrink-0" />
+                      <span>Customers</span>
+                    </button>
+
+                    {/* OPERATIONS SECTION */}
+                    <span className="text-[10px] tracking-widest text-[#9A8F7E]/40 font-bold font-sans uppercase px-3 pt-3">Operations</span>
+                    <button
+                      onClick={() => { setActiveTab('tracking'); setMobileSidebarOpen(false); }}
+                      className={`flex items-center gap-3 h-12 px-3 rounded-lg font-sans text-[13px] font-medium transition-all duration-200 ${
+                        activeTab === 'tracking'
+                          ? 'bg-[#C9A84C]/8 text-[#C9A84C] border-l-3 border-[#C9A84C]'
+                          : 'text-[#9A8F7E] hover:bg-[#C9A84C]/4 hover:text-[#F5F0E8]'
+                      }`}
+                    >
+                      <Truck size={18} className="shrink-0" />
+                      <span>Tracking</span>
+                    </button>
+                    <button
+                      onClick={() => { setActiveTab('analytics'); setSelectedOrderId(null); setMobileSidebarOpen(false); }}
+                      className={`flex items-center gap-3 h-12 px-3 rounded-lg font-sans text-[13px] font-medium transition-all duration-200 ${
+                        activeTab === 'analytics'
+                          ? 'bg-[#C9A84C]/8 text-[#C9A84C] border-l-3 border-[#C9A84C]'
+                          : 'text-[#9A8F7E] hover:bg-[#C9A84C]/4 hover:text-[#F5F0E8]'
+                      }`}
+                    >
+                      <PieChart size={18} className="shrink-0" />
+                      <span>Analytics</span>
+                    </button>
+
+                    {/* SYSTEM SECTION */}
+                    <span className="text-[10px] tracking-widest text-[#9A8F7E]/40 font-bold font-sans uppercase px-3 pt-3">System</span>
+                    <button
+                      onClick={() => { setActiveTab('settings'); setSelectedOrderId(null); setMobileSidebarOpen(false); }}
+                      className={`flex items-center gap-3 h-12 px-3 rounded-lg font-sans text-[13px] font-medium transition-all duration-200 ${
+                        activeTab === 'settings'
+                          ? 'bg-[#C9A84C]/8 text-[#C9A84C] border-l-3 border-[#C9A84C]'
+                          : 'text-[#9A8F7E] hover:bg-[#C9A84C]/4 hover:text-[#F5F0E8]'
+                      }`}
+                    >
+                      <Settings size={18} className="shrink-0" />
+                      <span>Settings</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Bottom Sidebar: Admin User card */}
+                <div className="p-4 border-t border-[#C9A84C]/8 shrink-0 bg-[#0A0A0A]/40">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/35 flex items-center justify-center text-[#C9A84C] font-bold text-xs shrink-0">
+                        {user?.full_name?.charAt(0) || 'A'}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-bold text-[#F5F0E8] truncate leading-tight">{user?.full_name || 'Studio Admin'}</span>
+                        <span className="text-[10px] text-[#9A8F7E] truncate">{user?.email || 'akashselva18@gmail.com'}</span>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => { logout(); setMobileSidebarOpen(false); }}
+                      className="text-[#9A8F7E] hover:text-red-400 p-1 rounded hover:bg-red-500/5 transition-colors cursor-pointer shrink-0"
+                      title="Sign Out"
+                    >
+                      <LogOut size={14} />
+                    </button>
+                  </div>
+                </div>
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
+        
         {/* SIDEBAR: 240px width (collapsed: 64px) */}
         <aside className={`bg-[#0D0D0D] border-r border-[#C9A84C]/8 flex flex-col justify-between shrink-0 select-none transition-all duration-300 ${
           sidebarCollapsed ? 'w-16' : 'w-[240px]'
@@ -1145,6 +1323,13 @@ export default function AdminDashboardPage() {
           {/* TOP BAR: Height 64px, Background #0D0D0D */}
           <header className="h-16 px-6 md:px-8 bg-[#0D0D0D] border-b border-[#C9A84C]/8 flex items-center justify-between shrink-0 sticky top-0 z-[100] select-none">
             <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setMobileSidebarOpen(true)}
+                className="lg:hidden text-[#C9A84C] hover:text-[#F5F0E8] p-1.5 hover:bg-[#C9A84C]/5 rounded transition-colors"
+                title="Open Navigation"
+              >
+                <Menu size={20} />
+              </button>
               <h2 className="font-display text-lg md:text-xl font-bold text-[#F5F0E8] tracking-wide">
                 {getPageTitle()}
               </h2>
@@ -1168,7 +1353,7 @@ export default function AdminDashboardPage() {
           </header>
 
           {/* MAIN CONTENT AREA: padding 32px (p-8) */}
-          <main className="flex-1 p-8 overflow-y-auto max-w-full">
+          <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto max-w-full">
             
             {loading ? (
               <div className="h-full w-full flex flex-col items-center justify-center gap-4 text-[#9A8F7E]/65 py-20 select-none">
@@ -1445,7 +1630,7 @@ export default function AdminDashboardPage() {
                     </div>
 
                     {/* Table */}
-                    <div className="bg-[#111111] border border-[#C9A84C]/10 rounded-xl overflow-hidden shadow-xl">
+                    <div className="bg-[#111111] border border-[#C9A84C]/10 rounded-xl overflow-x-auto shadow-xl">
                       <table className="w-full text-left border-collapse">
                         <thead>
                           <tr className="border-b border-[#C9A84C]/15 bg-black/40 font-accent text-[9px] uppercase tracking-widest text-[#9A8F7E] font-extrabold select-none">
@@ -1868,7 +2053,7 @@ export default function AdminDashboardPage() {
                         </div>
 
                         {/* List grid */}
-                        <div className="bg-[#111111] border border-[#C9A84C]/10 rounded-xl overflow-hidden shadow-xl">
+                        <div className="bg-[#111111] border border-[#C9A84C]/10 rounded-xl overflow-x-auto shadow-xl">
                           <table className="w-full text-left border-collapse font-sans text-xs">
                             <thead>
                               <tr className="border-b border-[#C9A84C]/15 bg-black/40 font-accent text-[9px] uppercase tracking-widest text-[#9A8F7E] font-extrabold select-none">
@@ -2006,7 +2191,7 @@ export default function AdminDashboardPage() {
                       </button>
                     </div>
 
-                    <div className="bg-[#111111] border border-[#C9A84C]/10 rounded-xl overflow-hidden shadow-xl">
+                    <div className="bg-[#111111] border border-[#C9A84C]/10 rounded-xl overflow-x-auto shadow-xl">
                       <table className="w-full text-left border-collapse font-sans text-xs">
                         <thead>
                           <tr className="border-b border-[#C9A84C]/15 bg-black/40 font-accent text-[9px] uppercase tracking-widest text-[#9A8F7E] font-extrabold select-none">

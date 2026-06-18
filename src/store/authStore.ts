@@ -346,6 +346,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (typeof window !== 'undefined') {
         localStorage.setItem('artinova_user', JSON.stringify(mockGoogleUser));
         localStorage.removeItem('artinova_guest');
+
+        // Save to device accounts history
+        try {
+          const stored = localStorage.getItem('artinova_device_accounts');
+          let accounts = [];
+          if (stored) {
+            accounts = JSON.parse(stored);
+          }
+          if (!accounts.some((acc: any) => acc.email.toLowerCase() === lowerEmail)) {
+            const colors = ['bg-indigo-600', 'bg-pink-600', 'bg-emerald-600', 'bg-amber-600', 'bg-purple-600'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            const displayName = mockGoogleUser.full_name;
+            accounts.push({
+              name: displayName,
+              email: lowerEmail,
+              avatar: displayName.charAt(0).toUpperCase(),
+              color: randomColor
+            });
+            localStorage.setItem('artinova_device_accounts', JSON.stringify(accounts));
+          }
+        } catch (e) {
+          console.error('Failed to save to device accounts history', e);
+        }
       }
       
       set({ 

@@ -28,7 +28,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   return (
     <>
       <Navbar />
-      <main className="flex-grow w-full pt-20">
+      <main className="flex-grow w-full">
         {children}
       </main>
       <LoginModal />

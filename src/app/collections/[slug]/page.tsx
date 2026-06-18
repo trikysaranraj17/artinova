@@ -59,7 +59,7 @@ export default function CollectionPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center text-[#C9A84C]">
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center text-[#C9A84C] pt-[72px]">
         <div className="w-10 h-10 border-2 border-[#C9A84C] border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -67,7 +67,7 @@ export default function CollectionPage() {
 
   if (!collection) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center text-center p-6 gap-4">
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center text-center p-6 gap-4 pt-[72px]">
         <h1 className="font-display text-3xl text-[#F5F0E8]">Collection Not Found</h1>
         <NextLink href="/shop" className="btn-solid-gold">
           Return to Shop
@@ -79,7 +79,7 @@ export default function CollectionPage() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#F5F0E8] font-body pb-24">
       {/* Editorial Banner */}
-      <section className="relative h-[40vh] sm:h-[50vh] w-full flex items-center justify-center overflow-hidden">
+      <section className="relative h-[40vh] sm:h-[50vh] w-full flex items-center justify-center overflow-hidden pt-[72px]">
         <div className="absolute inset-0 z-0">
           <img 
             src={getBannerUrl()} 
