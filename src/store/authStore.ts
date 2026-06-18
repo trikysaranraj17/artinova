@@ -45,42 +45,65 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     
     // 1. Supabase Check
     if (isSupabaseConfigured) {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
+      // Set up onAuthStateChange listener to handle redirects and updates dynamically
+      supabase.auth.onAuthStateChange(async (event, session) => {
         if (session?.user) {
           const u = session.user;
           
-          // Fetch additional profile data
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', u.id)
-            .single();
+          try {
+            // Fetch additional profile data
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', u.id)
+              .single();
 
-          // Check if admin
-          const { data: adminData } = await supabase
-            .from('admin_users')
-            .select('*')
-            .eq('user_id', u.id)
-            .single();
+            const isSystemAdmin = u.email?.toLowerCase() === 'deepaksabari28@gmail.com' || u.email?.toLowerCase() === 'deepaksabari28@gmial.com' || u.email?.toLowerCase() === 'akashselva18@gmail.com';
 
-          const isSystemAdmin = u.email?.toLowerCase() === 'deepaksabari28@gmail.com' || u.email?.toLowerCase() === 'deepaksabari28@gmial.com' || u.email?.toLowerCase() === 'akashselva18@gmail.com';
+            const userProfile: UserProfile = {
+              id: u.id,
+              email: u.email || '',
+              full_name: profile?.full_name || u.user_metadata?.full_name || '',
+              phone: profile?.phone || '',
+              avatar_url: profile?.avatar_url || '',
+              isAdmin: isSystemAdmin
+            };
 
-          const userProfile: UserProfile = {
-            id: u.id,
-            email: u.email || '',
-            full_name: profile?.full_name || u.user_metadata?.full_name || '',
-            phone: profile?.phone || '',
-            avatar_url: profile?.avatar_url || '',
-            isAdmin: isSystemAdmin
-          };
+            // If profile does not exist in DB (e.g. first Google signup), create it
+            if (!profile && profileError && profileError.code === 'PGRST116') {
+              try {
+                await supabase.from('profiles').upsert({
+                  id: u.id,
+                  full_name: userProfile.full_name,
+                  phone: ''
+                });
+              } catch (e) {
+                console.warn('Could not auto-create profiles row:', e);
+              }
+            }
 
-          set({
-            user: userProfile,
-            isAdmin: !!isSystemAdmin,
-            isGuest: false,
-            isLoading: false
-          });
+            set({
+              user: userProfile,
+              isAdmin: !!isSystemAdmin,
+              isGuest: false,
+              isLoading: false
+            });
+          } catch (e) {
+            console.error('Error in onAuthStateChange processing:', e);
+          }
+        } else {
+          // If no session, clear user state (unless in mock local storage mode)
+          const storedUser = localStorage.getItem('artinova_user');
+          if (!storedUser) {
+            set({ user: null, isAdmin: false, isLoading: false });
+          }
+        }
+      });
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          // The auth listener above will handle setting the state.
           return;
         }
       } catch (err) {
@@ -97,10 +120,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({
           user: parsed,
           isAdmin: parsed.email?.toLowerCase() === 'deepaksabari28@gmail.com' || parsed.email?.toLowerCase() === 'deepaksabari28@gmial.com' || parsed.email?.toLowerCase() === 'akashselva18@gmail.com',
-          isGuest: false
+          isGuest: false,
+          isLoading: false
         });
+        return;
       } else if (isGuestMode) {
-        set({ isGuest: true });
+        set({ isGuest: true, isLoading: false });
+        return;
       }
     }
     
