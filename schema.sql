@@ -273,50 +273,32 @@ CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN SECURITY DEFINER AS $$
 BEGIN
   RETURN (
+    (auth.jwt() ->> 'email') IN ('deepaksabari28@gmail.com', 'akashselva18@gmail.com', 'deepaksabari28@gmial.com')
+    OR
     EXISTS (
       SELECT 1 FROM public.admin_users 
       WHERE admin_users.user_id = auth.uid()
-    ) OR 
-    (
-      SELECT email FROM auth.users 
-      WHERE id = auth.uid()
-    ) IN ('deepaksabari28@gmail.com', 'akashselva18@gmail.com')
+    )
   );
 END;
 $$ LANGUAGE plpgsql;
 
 -- RLS Policies
 
--- Drop old policies to prevent name duplication errors and clear legacy recursive policies
-DROP POLICY IF EXISTS "Profiles view" ON public.profiles;
-DROP POLICY IF EXISTS "Profiles update" ON public.profiles;
-DROP POLICY IF EXISTS "Profiles insert" ON public.profiles;
-DROP POLICY IF EXISTS "Addresses owner" ON public.addresses;
-DROP POLICY IF EXISTS "Categories public read" ON public.categories;
-DROP POLICY IF EXISTS "Categories admin write" ON public.categories;
-DROP POLICY IF EXISTS "Collections public read" ON public.collections;
-DROP POLICY IF EXISTS "Collections admin write" ON public.collections;
-DROP POLICY IF EXISTS "Products public read" ON public.products;
-DROP POLICY IF EXISTS "Products admin write" ON public.products;
-DROP POLICY IF EXISTS "Product images read" ON public.product_images;
-DROP POLICY IF EXISTS "Product images admin write" ON public.product_images;
-DROP POLICY IF EXISTS "Product collections read" ON public.product_collections;
-DROP POLICY IF EXISTS "Product collections admin write" ON public.product_collections;
-DROP POLICY IF EXISTS "Cart owner" ON public.cart_items;
-DROP POLICY IF EXISTS "Wishlist owner" ON public.wishlist;
-DROP POLICY IF EXISTS "Orders select" ON public.orders;
-DROP POLICY IF EXISTS "Orders write" ON public.orders;
-DROP POLICY IF EXISTS "Order items select" ON public.order_items;
-DROP POLICY IF EXISTS "Order items write" ON public.order_items;
-DROP POLICY IF EXISTS "Tracking read" ON public.tracking_updates;
-DROP POLICY IF EXISTS "Tracking write" ON public.tracking_updates;
-DROP POLICY IF EXISTS "Reviews read" ON public.reviews;
-DROP POLICY IF EXISTS "Reviews write" ON public.reviews;
-DROP POLICY IF EXISTS "Admin users policy" ON public.admin_users;
-DROP POLICY IF EXISTS "Settings read" ON public.settings;
-DROP POLICY IF EXISTS "Settings write" ON public.settings;
-DROP POLICY IF EXISTS "Contact insert" ON public.contact_requests;
-DROP POLICY IF EXISTS "Contact read" ON public.contact_requests;
+-- Drop all existing policies on public schema tables dynamically to clear duplicate/legacy recursive policies
+DO $$
+DECLARE
+    pol record;
+BEGIN
+    FOR pol IN 
+        SELECT schemaname, tablename, policyname 
+        FROM pg_policies 
+        WHERE schemaname = 'public'
+    LOOP
+        EXECUTE format('DROP POLICY IF EXISTS %I ON %I.%I', pol.policyname, pol.schemaname, pol.tablename);
+    END LOOP;
+END $$;
+
 -- Profiles: Users see/edit own, Admins see all
 CREATE POLICY "Profiles view" ON public.profiles FOR SELECT USING (auth.uid() = id OR public.is_admin());
 CREATE POLICY "Profiles update" ON public.profiles FOR UPDATE USING (auth.uid() = id OR public.is_admin());
@@ -371,9 +353,18 @@ CREATE POLICY "Tracking write" ON public.tracking_updates FOR ALL USING (public.
 CREATE POLICY "Reviews read" ON public.reviews FOR SELECT USING (true);
 CREATE POLICY "Reviews write" ON public.reviews FOR ALL USING (auth.uid() = user_id OR public.is_admin());
 
--- Admin Users: Only admin users see/edit
-CREATE POLICY "Admin users policy" ON public.admin_users FOR ALL USING (
-  (auth.jwt() ->> 'email') IN ('deepaksabari28@gmail.com', 'akashselva18@gmail.com')
+-- Admin Users: Anyone can view their own record, or the main admins can view all (Recursion-proof)
+CREATE POLICY "Admin users select own" ON public.admin_users FOR SELECT USING (
+  auth.uid() = user_id 
+  OR 
+  (auth.jwt() ->> 'email') IN ('deepaksabari28@gmail.com', 'akashselva18@gmail.com', 'deepaksabari28@gmial.com')
+);
+
+-- Admin Users modifications: Only main admins or existing admins can modify
+CREATE POLICY "Admin users admin access" ON public.admin_users FOR ALL USING (
+  (auth.jwt() ->> 'email') IN ('deepaksabari28@gmail.com', 'akashselva18@gmail.com', 'deepaksabari28@gmial.com')
+  OR
+  public.is_admin()
 );
 
 -- Settings: Public select, Admin write
