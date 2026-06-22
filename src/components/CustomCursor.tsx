@@ -114,7 +114,7 @@ export default function CustomCursor() {
           zIndex: 99999,
           willChange: 'transform',
           transform: 'translate3d(calc(var(--mouse-x, -100px) - 30px), calc(var(--mouse-y, -100px) - 30px), 0)',
-          transition: 'transform 0.08s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease'
+          transition: 'transform 0.01s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease'
         }}
       />
 
