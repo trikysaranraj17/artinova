@@ -274,7 +274,9 @@ CREATE POLICY "Reviews read" ON public.reviews FOR SELECT USING (true);
 CREATE POLICY "Reviews write" ON public.reviews FOR ALL USING (auth.uid() = user_id OR public.is_admin());
 
 -- Admin Users: Only admin users see/edit
-CREATE POLICY "Admin users policy" ON public.admin_users FOR ALL USING (public.is_admin());
+CREATE POLICY "Admin users policy" ON public.admin_users FOR ALL USING (
+  (auth.jwt() ->> 'email') IN ('deepaksabari28@gmail.com', 'akashselva18@gmail.com')
+);
 
 -- Settings: Public select, Admin write
 CREATE POLICY "Settings read" ON public.settings FOR SELECT USING (true);
