@@ -287,6 +287,36 @@ $$ LANGUAGE plpgsql;
 
 -- RLS Policies
 
+-- Drop old policies to prevent name duplication errors and clear legacy recursive policies
+DROP POLICY IF EXISTS "Profiles view" ON public.profiles;
+DROP POLICY IF EXISTS "Profiles update" ON public.profiles;
+DROP POLICY IF EXISTS "Profiles insert" ON public.profiles;
+DROP POLICY IF EXISTS "Addresses owner" ON public.addresses;
+DROP POLICY IF EXISTS "Categories public read" ON public.categories;
+DROP POLICY IF EXISTS "Categories admin write" ON public.categories;
+DROP POLICY IF EXISTS "Collections public read" ON public.collections;
+DROP POLICY IF EXISTS "Collections admin write" ON public.collections;
+DROP POLICY IF EXISTS "Products public read" ON public.products;
+DROP POLICY IF EXISTS "Products admin write" ON public.products;
+DROP POLICY IF EXISTS "Product images read" ON public.product_images;
+DROP POLICY IF EXISTS "Product images admin write" ON public.product_images;
+DROP POLICY IF EXISTS "Product collections read" ON public.product_collections;
+DROP POLICY IF EXISTS "Product collections admin write" ON public.product_collections;
+DROP POLICY IF EXISTS "Cart owner" ON public.cart_items;
+DROP POLICY IF EXISTS "Wishlist owner" ON public.wishlist;
+DROP POLICY IF EXISTS "Orders select" ON public.orders;
+DROP POLICY IF EXISTS "Orders write" ON public.orders;
+DROP POLICY IF EXISTS "Order items select" ON public.order_items;
+DROP POLICY IF EXISTS "Order items write" ON public.order_items;
+DROP POLICY IF EXISTS "Tracking read" ON public.tracking_updates;
+DROP POLICY IF EXISTS "Tracking write" ON public.tracking_updates;
+DROP POLICY IF EXISTS "Reviews read" ON public.reviews;
+DROP POLICY IF EXISTS "Reviews write" ON public.reviews;
+DROP POLICY IF EXISTS "Admin users policy" ON public.admin_users;
+DROP POLICY IF EXISTS "Settings read" ON public.settings;
+DROP POLICY IF EXISTS "Settings write" ON public.settings;
+DROP POLICY IF EXISTS "Contact insert" ON public.contact_requests;
+DROP POLICY IF EXISTS "Contact read" ON public.contact_requests;
 -- Profiles: Users see/edit own, Admins see all
 CREATE POLICY "Profiles view" ON public.profiles FOR SELECT USING (auth.uid() = id OR public.is_admin());
 CREATE POLICY "Profiles update" ON public.profiles FOR UPDATE USING (auth.uid() = id OR public.is_admin());
