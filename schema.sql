@@ -22,11 +22,17 @@ BEGIN
     ALTER TABLE public.collections ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
   END IF;
 
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'category_id' AND data_type = 'uuid') THEN
+  -- Ensure category_id column exists on products table
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'category_id') THEN
+    ALTER TABLE public.products ADD COLUMN category_id TEXT;
+  ELSIF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'category_id' AND data_type = 'uuid') THEN
     ALTER TABLE public.products ALTER COLUMN category_id TYPE TEXT;
   END IF;
 
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'product_collections' AND column_name = 'collection_id' AND data_type = 'uuid') THEN
+  -- Ensure collection_id column exists on product_collections table
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'product_collections' AND column_name = 'collection_id') THEN
+    ALTER TABLE public.product_collections ADD COLUMN collection_id TEXT;
+  ELSIF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'product_collections' AND column_name = 'collection_id' AND data_type = 'uuid') THEN
     ALTER TABLE public.product_collections ALTER COLUMN collection_id TYPE TEXT;
   END IF;
 
@@ -110,6 +116,7 @@ CREATE TABLE IF NOT EXISTS public.products (
   meta_description TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS category_id TEXT;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_customizable BOOLEAN DEFAULT false;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS customization_fields JSONB DEFAULT '[]'::JSONB;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false;
@@ -134,6 +141,7 @@ CREATE TABLE IF NOT EXISTS public.product_collections (
   collection_id TEXT REFERENCES public.collections(id) ON DELETE CASCADE,
   PRIMARY KEY (product_id, collection_id)
 );
+ALTER TABLE public.product_collections ADD COLUMN IF NOT EXISTS collection_id TEXT;
 
 -- 8. CART_ITEMS
 CREATE TABLE IF NOT EXISTS public.cart_items (
