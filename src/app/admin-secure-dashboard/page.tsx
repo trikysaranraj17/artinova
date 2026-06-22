@@ -313,8 +313,9 @@ export default function AdminDashboardPage() {
       resetProductForm();
       loadDashboardData(false);
       alert('Product catalog successfully updated.');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert(`Error saving product: ${err?.message || err?.details || JSON.stringify(err) || 'Unknown database error'}`);
     }
   };
 

@@ -1,6 +1,45 @@
 -- ARTINOVA SQL Schema V2
 -- Run this script in the Supabase SQL Editor to initialize your database structure.
 
+-- Safe migrations to convert categories.id and collections.id from UUID to TEXT
+-- to match the frontend hardcoded values.
+DO $$ 
+BEGIN
+  -- 1. Drop foreign key constraints first to allow altering primary key types
+  ALTER TABLE IF EXISTS public.products DROP CONSTRAINT IF EXISTS products_category_id_fkey;
+  ALTER TABLE IF EXISTS public.product_collections DROP CONSTRAINT IF EXISTS product_collections_collection_id_fkey;
+
+  -- 2. Alter column types to TEXT if they are still UUID
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'categories' AND column_name = 'id' AND data_type = 'uuid') THEN
+    ALTER TABLE public.categories ALTER COLUMN id DROP DEFAULT;
+    ALTER TABLE public.categories ALTER COLUMN id TYPE TEXT;
+    ALTER TABLE public.categories ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'collections' AND column_name = 'id' AND data_type = 'uuid') THEN
+    ALTER TABLE public.collections ALTER COLUMN id DROP DEFAULT;
+    ALTER TABLE public.collections ALTER COLUMN id TYPE TEXT;
+    ALTER TABLE public.collections ALTER COLUMN id SET DEFAULT gen_random_uuid()::text;
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'category_id' AND data_type = 'uuid') THEN
+    ALTER TABLE public.products ALTER COLUMN category_id TYPE TEXT;
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'product_collections' AND column_name = 'collection_id' AND data_type = 'uuid') THEN
+    ALTER TABLE public.product_collections ALTER COLUMN collection_id TYPE TEXT;
+  END IF;
+
+  -- 3. Recreate foreign key constraints
+  IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'products_category_id_fkey') THEN
+    ALTER TABLE public.products ADD CONSTRAINT products_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.categories(id) ON DELETE SET NULL;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'product_collections_collection_id_fkey') THEN
+    ALTER TABLE public.product_collections ADD CONSTRAINT product_collections_collection_id_fkey FOREIGN KEY (collection_id) REFERENCES public.collections(id) ON DELETE CASCADE;
+  END IF;
+END $$;
+
 -- Enable Row Level Security
 -- 1. PROFILES (extends auth.users)
 CREATE TABLE IF NOT EXISTS public.profiles (
@@ -29,7 +68,7 @@ CREATE TABLE IF NOT EXISTS public.addresses (
 
 -- 3. CATEGORIES
 CREATE TABLE IF NOT EXISTS public.categories (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   image_url TEXT,
@@ -40,7 +79,7 @@ ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS display_order INT DEFAULT
 
 -- 4. COLLECTIONS
 CREATE TABLE IF NOT EXISTS public.collections (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   description TEXT,
@@ -59,7 +98,7 @@ CREATE TABLE IF NOT EXISTS public.products (
   description TEXT,
   price DECIMAL(10,2) NOT NULL,
   original_price DECIMAL(10,2),
-  category_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
+  category_id TEXT REFERENCES public.categories(id) ON DELETE SET NULL,
   stock INT DEFAULT 0,
   is_customizable BOOLEAN DEFAULT false,
   customization_fields JSONB DEFAULT '[]'::JSONB,
@@ -92,7 +131,7 @@ CREATE TABLE IF NOT EXISTS public.product_images (
 -- 7. PRODUCT_COLLECTIONS (junction)
 CREATE TABLE IF NOT EXISTS public.product_collections (
   product_id UUID REFERENCES public.products(id) ON DELETE CASCADE,
-  collection_id UUID REFERENCES public.collections(id) ON DELETE CASCADE,
+  collection_id TEXT REFERENCES public.collections(id) ON DELETE CASCADE,
   PRIMARY KEY (product_id, collection_id)
 );
 
@@ -306,3 +345,32 @@ CREATE POLICY "Settings write" ON public.settings FOR ALL USING (public.is_admin
 -- Contact Requests: Anyone insert, Admin read
 CREATE POLICY "Contact insert" ON public.contact_requests FOR INSERT WITH CHECK (true);
 CREATE POLICY "Contact read" ON public.contact_requests FOR SELECT USING (public.is_admin());
+
+-- Seed data for Categories
+INSERT INTO public.categories (id, name, slug, display_order)
+VALUES 
+  ('cat-frames', 'Luxury Frames', 'luxury-frames', 1),
+  ('cat-hampers', 'Premium Hampers', 'premium-hampers', 2),
+  ('cat-art', 'Resin Art Masterpieces', 'resin-art-masterpieces', 3),
+  ('cat-accessories', 'Custom Accessories', 'custom-accessories', 4),
+  ('cat-keepsakes', 'Bespoke Keepsakes', 'bespoke-keepsakes', 5)
+ON CONFLICT (id) DO UPDATE SET 
+  name = EXCLUDED.name,
+  slug = EXCLUDED.slug,
+  display_order = EXCLUDED.display_order;
+
+-- Seed data for Collections
+INSERT INTO public.collections (id, name, slug, description, is_featured)
+VALUES 
+  ('col-wedding', 'Wedding Gifts', 'wedding-gifts', 'Curated royal wedding gifts and customized couples coordinates.', true),
+  ('col-couple', 'Couple Gifts', 'couple-gifts', 'Handcrafted items to celebrate unions, engagements, and anniversaries.', true),
+  ('col-birthday', 'Birthday Gifts', 'birthday-gifts', 'Unique personalized keepsakes that make birthdays unforgettable.', false),
+  ('col-corporate', 'Corporate Gifts', 'corporate-gifts', 'White-label luxury executive presentation sets for brands.', true),
+  ('col-photo', 'Photo Gifts', 'photo-gifts', 'Turn frozen visual memories into physical gold-leafed glass frames.', false),
+  ('col-resin', 'Resin Art', 'resin-art', 'Indulge in liquid-gold resin geodes and bespoke preservation pieces.', true),
+  ('col-hampers', 'Luxury Hampers', 'luxury-hampers', 'Grand gift trunks containing fine sandlewood and custom keepsakes.', true)
+ON CONFLICT (id) DO UPDATE SET 
+  name = EXCLUDED.name,
+  slug = EXCLUDED.slug,
+  description = EXCLUDED.description,
+  is_featured = EXCLUDED.is_featured;
