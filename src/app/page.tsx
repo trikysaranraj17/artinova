@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import NextLink from 'next/link';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,8 +21,8 @@ export default function HomePage() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
   const [activeTab, setActiveTab] = useState('All');
+  const orbRef = useRef<HTMLDivElement>(null);
   
   // Accordion FAQ states
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -46,9 +46,11 @@ export default function HomePage() {
     const handleMouseMove = (e: MouseEvent) => {
       const x = (e.clientX / window.innerWidth - 0.5) * 20;
       const y = (e.clientY / window.innerHeight - 0.5) * 20;
-      setMouseOffset({ x, y });
+      if (orbRef.current) {
+        orbRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      }
     };
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
@@ -93,8 +95,9 @@ export default function HomePage() {
 
         {/* Ambient Gold Orb Parallax */}
         <div 
+          ref={orbRef}
           className="absolute w-[600px] h-[600px] rounded-full bg-[#C9A84C]/14 blur-[130px] pointer-events-none transition-transform duration-500 ease-out"
-          style={{ transform: `translate3d(${mouseOffset.x}px, ${mouseOffset.y}px, 0)` }}
+          style={{ transform: 'translate3d(0, 0, 0)' }}
         />
 
         {/* Vignette */}

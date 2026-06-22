@@ -1,21 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-interface Particle {
-  id: number;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  color: string;
-}
 
 export default function CustomCursor() {
   const haloRef = useRef<HTMLDivElement>(null);
   const coreRef = useRef<HTMLDivElement>(null);
-  const [particles, setParticles] = useState<Particle[]>([]);
   const [isMobileDevice, setIsMobileDevice] = useState(true);
 
   useEffect(() => {
@@ -25,25 +14,11 @@ export default function CustomCursor() {
       if (isMobile) return;
     }
 
-    let particleId = 0;
-    let lastX = 0;
-    let lastY = 0;
-
-    const updateStyles = (x: number, y: number) => {
-      if (coreRef.current) {
-        const isHover = coreRef.current.classList.contains('hovered');
-        coreRef.current.style.transform = `translate3d(${x - 4}px, ${y - 4}px, 0) scale(${isHover ? 0.6 : 1})`;
-      }
-      if (haloRef.current) {
-        const isHover = haloRef.current.classList.contains('hovered');
-        haloRef.current.style.transform = `translate3d(${x - 30}px, ${y - 30}px, 0) scale(${isHover ? 1.5 : 1})`;
-      }
-    };
-
     const updatePosition = (e: MouseEvent) => {
-      lastX = e.clientX;
-      lastY = e.clientY;
-      requestAnimationFrame(() => updateStyles(lastX, lastY));
+      const x = e.clientX;
+      const y = e.clientY;
+      document.documentElement.style.setProperty('--mouse-x', `${x}px`);
+      document.documentElement.style.setProperty('--mouse-y', `${y}px`);
     };
 
     const handleMouseOver = (e: MouseEvent) => {
@@ -67,34 +42,40 @@ export default function CustomCursor() {
         haloRef.current?.classList.remove('hovered');
         coreRef.current?.classList.remove('hovered');
       }
-      updateStyles(lastX, lastY);
     };
 
     const handleMouseOut = () => {
       haloRef.current?.classList.remove('hovered');
       coreRef.current?.classList.remove('hovered');
-      updateStyles(lastX, lastY);
     };
 
-    // Click particle burst
+    // Click particle burst (pure vanilla DOM, zero React overhead)
     const handleClick = (e: MouseEvent) => {
       const burstCount = 6;
-      const newParticles: Particle[] = [];
-      
+      const container = document.getElementById('cursor-particle-container');
+      if (!container) return;
+
       for (let i = 0; i < burstCount; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 3 + 1;
-        newParticles.push({
-          id: particleId++,
-          x: e.clientX,
-          y: e.clientY,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          color: Math.random() > 0.5 ? '#d4af37' : '#f5e6c8'
+        const speed = Math.random() * 80 + 40; // distance in pixels
+        const tx = Math.cos(angle) * speed;
+        const ty = Math.sin(angle) * speed;
+        const color = Math.random() > 0.5 ? '#d4af37' : '#f5e6c8';
+
+        const particle = document.createElement('div');
+        particle.className = 'click-particle';
+        particle.style.setProperty('--tx', `${tx}px`);
+        particle.style.setProperty('--ty', `${ty}px`);
+        particle.style.left = `${e.clientX}px`;
+        particle.style.top = `${e.clientY}px`;
+        particle.style.backgroundColor = color;
+        particle.style.boxShadow = `0 0 4px ${color}`;
+
+        container.appendChild(particle);
+        particle.addEventListener('animationend', () => {
+          particle.remove();
         });
       }
-      
-      setParticles((prev) => [...prev, ...newParticles].slice(-15));
     };
 
     window.addEventListener('mousemove', updatePosition, { passive: true });
@@ -110,55 +91,12 @@ export default function CustomCursor() {
     };
   }, []);
 
-  // Update particles positions
-  useEffect(() => {
-    if (particles.length === 0 || isMobileDevice) return;
-
-    const frame = requestAnimationFrame(() => {
-      setParticles((prev) =>
-        prev
-          .map((p) => ({
-            ...p,
-            x: p.x + p.vx,
-            y: p.y + p.vy,
-            vx: p.vx * 0.94,
-            vy: p.vy * 0.94
-          }))
-          .filter((p) => Math.abs(p.vx) > 0.15 || Math.abs(p.vy) > 0.15)
-      );
-    });
-
-    return () => cancelAnimationFrame(frame);
-  }, [particles, isMobileDevice]);
-
   if (isMobileDevice) return null;
 
   return (
     <>
-      {/* Click Particles */}
-      <AnimatePresence>
-        {particles.map((p) => (
-          <motion.div
-            key={p.id}
-            initial={{ opacity: 0.8, scale: 1 }}
-            animate={{ opacity: 0, scale: 0.2 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-            style={{
-              position: 'fixed',
-              top: p.y,
-              left: p.x,
-              width: '3px',
-              height: '3px',
-              backgroundColor: p.color,
-              borderRadius: '50%',
-              pointerEvents: 'none',
-              zIndex: 99999,
-              boxShadow: `0 0 4px ${p.color}`
-            }}
-          />
-        ))}
-      </AnimatePresence>
+      {/* Particle Container */}
+      <div id="cursor-particle-container" className="fixed inset-0 pointer-events-none z-[99999]" />
 
       {/* Outer Halo Glow */}
       <div
@@ -175,6 +113,7 @@ export default function CustomCursor() {
           pointerEvents: 'none',
           zIndex: 99999,
           willChange: 'transform',
+          transform: 'translate3d(calc(var(--mouse-x, -100px) - 30px), calc(var(--mouse-y, -100px) - 30px), 0)',
           transition: 'transform 0.08s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease'
         }}
       />
@@ -194,8 +133,8 @@ export default function CustomCursor() {
           pointerEvents: 'none',
           zIndex: 100000,
           willChange: 'transform',
-          boxShadow: '0 0 8px #d4af37',
-          transition: 'transform 0.02s linear'
+          transform: 'translate3d(calc(var(--mouse-x, -100px) - 4px), calc(var(--mouse-y, -100px) - 4px), 0)',
+          boxShadow: '0 0 8px #d4af37'
         }}
       />
 
@@ -204,6 +143,31 @@ export default function CustomCursor() {
           background-color: rgba(212, 175, 55, 0.05) !important;
           border-color: rgba(212, 175, 55, 0.6) !important;
           box-shadow: 0 0 15px rgba(212, 175, 55, 0.2) !important;
+        }
+        .custom-cursor-core.hovered {
+          transform: translate3d(calc(var(--mouse-x, -100px) - 4px), calc(var(--mouse-y, -100px) - 4px), 0) scale(0.6) !important;
+        }
+        .custom-cursor-halo.hovered {
+          transform: translate3d(calc(var(--mouse-x, -100px) - 30px), calc(var(--mouse-y, -100px) - 30px), 0) scale(1.5) !important;
+        }
+        .click-particle {
+          position: fixed;
+          width: 3px;
+          height: 3px;
+          border-radius: 50%;
+          pointer-events: none;
+          z-index: 99999;
+          animation: particle-burst-animation 0.6s cubic-bezier(0.1, 0.8, 0.25, 1) forwards;
+        }
+        @keyframes particle-burst-animation {
+          0% {
+            transform: translate3d(-50%, -50%, 0) scale(1);
+            opacity: 0.8;
+          }
+          100% {
+            transform: translate3d(calc(-50% + var(--tx)), calc(-50% + var(--ty)), 0) scale(0.2);
+            opacity: 0;
+          }
         }
         @media (max-width: 1024px) {
           .custom-cursor-halo,
