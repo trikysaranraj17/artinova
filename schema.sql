@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS public.categories (
   image_url TEXT,
   display_order INT DEFAULT 0
 );
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS display_order INT DEFAULT 0;
 
 -- 4. COLLECTIONS
 CREATE TABLE IF NOT EXISTS public.collections (
@@ -45,6 +47,9 @@ CREATE TABLE IF NOT EXISTS public.collections (
   banner_url TEXT,
   is_featured BOOLEAN DEFAULT false
 );
+ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS banner_url TEXT;
+ALTER TABLE public.collections ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false;
 
 -- 5. PRODUCTS
 CREATE TABLE IF NOT EXISTS public.products (
@@ -66,6 +71,14 @@ CREATE TABLE IF NOT EXISTS public.products (
   meta_description TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_customizable BOOLEAN DEFAULT false;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS customization_fields JSONB DEFAULT '[]'::JSONB;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS rating DECIMAL(3,2) DEFAULT 5.0;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS review_count INT DEFAULT 0;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS meta_title TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS meta_description TEXT;
 
 -- 6. PRODUCT_IMAGES
 CREATE TABLE IF NOT EXISTS public.product_images (
@@ -122,6 +135,11 @@ CREATE TABLE IF NOT EXISTS public.orders (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_screenshot_url TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS order_status TEXT DEFAULT 'received';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS tracking_number TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS courier TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS admin_notes TEXT;
 
 -- 11. ORDER_ITEMS
 CREATE TABLE IF NOT EXISTS public.order_items (
@@ -134,6 +152,7 @@ CREATE TABLE IF NOT EXISTS public.order_items (
   price DECIMAL(10,2) NOT NULL,
   customization JSONB DEFAULT '{}'::JSONB
 );
+ALTER TABLE public.order_items ADD COLUMN IF NOT EXISTS customization JSONB DEFAULT '{}'::JSONB;
 
 -- 12. TRACKING_UPDATES
 CREATE TABLE IF NOT EXISTS public.tracking_updates (
@@ -164,6 +183,7 @@ CREATE TABLE IF NOT EXISTS public.admin_users (
   name TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE public.admin_users ADD COLUMN IF NOT EXISTS name TEXT;
 
 -- 15. SETTINGS
 CREATE TABLE IF NOT EXISTS public.settings (
@@ -181,6 +201,7 @@ CREATE TABLE IF NOT EXISTS public.contact_requests (
   type TEXT DEFAULT 'general', -- general | corporate | custom
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+ALTER TABLE public.contact_requests ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'general';
 
 -- Enable RLS on all tables
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
