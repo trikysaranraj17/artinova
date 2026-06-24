@@ -286,7 +286,14 @@ export default function AdminDashboardPage() {
   // Product submit logic
   const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pName || !pPrice) return;
+    if (!pName) {
+      alert("Product Name is required.");
+      return;
+    }
+    if (!pPrice) {
+      alert("Product Price is required.");
+      return;
+    }
 
     const payload = {
       name: pName,
@@ -697,7 +704,8 @@ export default function AdminDashboardPage() {
               onClick={resetProductForm}
               className="fixed inset-0 bg-black/80 z-[200] cursor-pointer"
             />
-            <motion.div
+            <motion.form
+              onSubmit={handleProductSubmit}
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
@@ -707,7 +715,7 @@ export default function AdminDashboardPage() {
               {/* Header */}
               <div className="h-16 px-6 border-b border-[#C9A84C]/10 flex items-center justify-between bg-[#0D0D0D]">
                 <h3 className="font-display text-lg font-bold text-[#F5F0E8]">{isEditing ? 'Modify Product record' : 'Register new creation'}</h3>
-                <button onClick={resetProductForm} className="text-[#9A8F7E] hover:text-[#C9A84C] cursor-pointer">
+                <button type="button" onClick={resetProductForm} className="text-[#9A8F7E] hover:text-[#C9A84C] cursor-pointer">
                   <X size={18} />
                 </button>
               </div>
@@ -960,13 +968,13 @@ export default function AdminDashboardPage() {
                   Cancel
                 </button>
                 <button
-                  onClick={handleProductSubmit}
+                  type="submit"
                   className="px-8 py-2.5 bg-[#C9A84C] text-[#0A0A0A] rounded-lg font-accent text-[9px] uppercase tracking-widest font-extrabold hover:bg-[#F5F0E8] transition-colors cursor-pointer"
                 >
                   {isEditing ? 'Save Changes' : 'Save Product'}
                 </button>
               </div>
-            </motion.div>
+            </motion.form>
           </>
         )}
       </AnimatePresence>

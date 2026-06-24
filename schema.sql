@@ -44,6 +44,20 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'product_collections_collection_id_fkey') THEN
     ALTER TABLE public.product_collections ADD CONSTRAINT product_collections_collection_id_fkey FOREIGN KEY (collection_id) REFERENCES public.collections(id) ON DELETE CASCADE;
   END IF;
+
+  -- Safe migrations for products table: rename title to name, and add slug and original_price columns
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'title') 
+     AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'name') THEN
+    ALTER TABLE public.products RENAME COLUMN title TO name;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'slug') THEN
+    ALTER TABLE public.products ADD COLUMN slug TEXT UNIQUE;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'original_price') THEN
+    ALTER TABLE public.products ADD COLUMN original_price DECIMAL(10,2);
+  END IF;
 END $$;
 
 -- Enable Row Level Security
