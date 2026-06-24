@@ -148,6 +148,11 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'shipping_email') THEN
     ALTER TABLE public.orders ADD COLUMN shipping_email TEXT;
   END IF;
+
+  -- Drop legacy total_amount column if it exists to avoid NOT NULL violations (since code uses total instead)
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'total_amount') THEN
+    ALTER TABLE public.orders DROP COLUMN total_amount;
+  END IF;
 END $$;
 
 -- Enable Row Level Security
