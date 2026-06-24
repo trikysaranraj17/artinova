@@ -58,6 +58,11 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'original_price') THEN
     ALTER TABLE public.products ADD COLUMN original_price DECIMAL(10,2);
   END IF;
+
+  -- Drop legacy category column if it exists to avoid NOT NULL violations (since code uses category_id instead)
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'category') THEN
+    ALTER TABLE public.products DROP COLUMN category;
+  END IF;
 END $$;
 
 -- Enable Row Level Security
