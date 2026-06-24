@@ -153,6 +153,16 @@ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'total_amount') THEN
     ALTER TABLE public.orders DROP COLUMN total_amount;
   END IF;
+
+  -- Drop legacy delivery_estimate column if it exists to avoid NOT NULL violations
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'delivery_estimate') THEN
+    ALTER TABLE public.orders DROP COLUMN delivery_estimate;
+  END IF;
+
+  -- Drop legacy status column if it exists
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'status') THEN
+    ALTER TABLE public.orders DROP COLUMN status;
+  END IF;
 END $$;
 
 -- Enable Row Level Security
