@@ -632,8 +632,16 @@ export async function createOrder(
   };
 
   if (isSupabaseConfigured) {
+    // Sanitize order payload to prevent UUID syntax errors for empty id or non-uuid 'guest' fields
+    const { id, user_id, address_id, ...restOrder } = newOrder;
+    const supabaseOrder = {
+      ...restOrder,
+      user_id: (user_id && user_id !== 'guest' && user_id !== '') ? user_id : null,
+      address_id: (address_id && address_id !== '') ? address_id : null
+    };
+
     // 1. Insert order
-    const { data: ordData, error: ordErr } = await supabase.from('orders').insert([newOrder]).select().single();
+    const { data: ordData, error: ordErr } = await supabase.from('orders').insert([supabaseOrder]).select().single();
     if (ordErr || !ordData) throw new Error(ordErr?.message || 'Error inserting order in Supabase');
 
     // 2. Fetch product names and images to store in order_items
