@@ -85,6 +85,52 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'wishlist' AND column_name = 'created_at') THEN
     ALTER TABLE public.wishlist ADD COLUMN created_at TIMESTAMPTZ DEFAULT NOW();
   END IF;
+
+  -- Safe migrations for orders table: add missing columns if they do not exist
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'order_number') THEN
+    ALTER TABLE public.orders ADD COLUMN order_number TEXT UNIQUE;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'address_id') THEN
+    ALTER TABLE public.orders ADD COLUMN address_id UUID REFERENCES public.addresses(id) ON DELETE SET NULL;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'subtotal') THEN
+    ALTER TABLE public.orders ADD COLUMN subtotal DECIMAL(10,2);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'gst') THEN
+    ALTER TABLE public.orders ADD COLUMN gst DECIMAL(10,2);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'shipping') THEN
+    ALTER TABLE public.orders ADD COLUMN shipping DECIMAL(10,2);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'total') THEN
+    ALTER TABLE public.orders ADD COLUMN total DECIMAL(10,2);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'gift_note') THEN
+    ALTER TABLE public.orders ADD COLUMN gift_note TEXT;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'payment_status') THEN
+    ALTER TABLE public.orders ADD COLUMN payment_status TEXT DEFAULT 'pending';
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'updated_at') THEN
+    ALTER TABLE public.orders ADD COLUMN updated_at TIMESTAMPTZ DEFAULT NOW();
+  END IF;
+
+  -- Safe migrations for order_items table: add missing columns if they do not exist
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'order_items' AND column_name = 'product_name') THEN
+    ALTER TABLE public.order_items ADD COLUMN product_name TEXT;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'order_items' AND column_name = 'product_image') THEN
+    ALTER TABLE public.order_items ADD COLUMN product_image TEXT;
+  END IF;
 END $$;
 
 -- Enable Row Level Security
