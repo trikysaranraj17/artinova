@@ -131,6 +131,23 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'order_items' AND column_name = 'product_image') THEN
     ALTER TABLE public.order_items ADD COLUMN product_image TEXT;
   END IF;
+
+  -- Safe migrations for orders table: add shipping info columns if they do not exist
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'shipping_name') THEN
+    ALTER TABLE public.orders ADD COLUMN shipping_name TEXT;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'shipping_phone') THEN
+    ALTER TABLE public.orders ADD COLUMN shipping_phone TEXT;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'shipping_address') THEN
+    ALTER TABLE public.orders ADD COLUMN shipping_address TEXT;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'shipping_email') THEN
+    ALTER TABLE public.orders ADD COLUMN shipping_email TEXT;
+  END IF;
 END $$;
 
 -- Enable Row Level Security
@@ -267,6 +284,10 @@ CREATE TABLE IF NOT EXISTS public.orders (
   tracking_number TEXT,
   courier TEXT,
   admin_notes TEXT,
+  shipping_name TEXT,
+  shipping_phone TEXT,
+  shipping_address TEXT,
+  shipping_email TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -275,6 +296,10 @@ ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS order_status TEXT DEFAULT 're
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS tracking_number TEXT;
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS courier TEXT;
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS admin_notes TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS shipping_name TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS shipping_phone TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS shipping_address TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS shipping_email TEXT;
 
 -- 11. ORDER_ITEMS
 CREATE TABLE IF NOT EXISTS public.order_items (

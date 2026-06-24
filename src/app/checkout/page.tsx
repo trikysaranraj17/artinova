@@ -241,7 +241,8 @@ export default function CheckoutPage() {
         payment_screenshot_url: finalScreenshotUrl,
         shipping_name: name,
         shipping_phone: phone,
-        shipping_address: fullShippingAddress
+        shipping_address: fullShippingAddress,
+        shipping_email: email
       };
 
       const orderItems = items.map(item => ({
