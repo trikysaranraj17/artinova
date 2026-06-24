@@ -38,14 +38,6 @@ export default function AdminPage() {
 
   if (!isMounted) return null;
 
-  // Show Loading indicator if auth state is initializing
-  if (isLoading && !user) {
-    return (
-      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center text-[#C9A84C]">
-        <div className="w-10 h-10 border-2 border-[#C9A84C] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   // Access Denied Wall if logged in but NOT an admin
   if (user && !isAdmin) {

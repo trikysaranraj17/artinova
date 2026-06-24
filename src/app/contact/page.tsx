@@ -50,7 +50,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="w-full min-h-screen pt-32 pb-24 px-6 bg-[#0A0A0A] relative overflow-hidden font-body select-none flex flex-col items-center">
+    <div className="w-full min-h-screen pt-8 md:pt-16 pb-24 px-6 bg-[#0A0A0A] relative overflow-hidden font-body select-none flex flex-col items-center">
       {/* Golden backdrop glow */}
       <div className="absolute top-1/4 left-[-10%] w-[400px] h-[400px] bg-[#C9A84C]/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-[-10%] w-[400px] h-[400px] bg-[#C9A84C]/5 rounded-full blur-[120px] pointer-events-none" />

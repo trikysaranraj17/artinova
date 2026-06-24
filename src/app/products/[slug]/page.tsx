@@ -190,7 +190,7 @@ export default function ProductDetailPage() {
   const saveAmt = product.original_price ? product.original_price - product.price : 0;
 
   return (
-    <div className="min-h-screen pt-32 pb-24 px-6 bg-[#0A0A0A] text-[#F5F0E8] font-body relative">
+    <div className="min-h-screen pt-8 md:pt-16 pb-24 px-6 bg-[#0A0A0A] text-[#F5F0E8] font-body relative">
       <div className="max-w-7xl mx-auto">
         
         {/* Back Link */}
@@ -596,7 +596,7 @@ export default function ProductDetailPage() {
         {relatedProducts.length > 0 && (
           <div className="mt-28 border-t border-[#C9A84C]/15 pt-20">
             <h2 className="font-display text-3xl font-bold mb-10 text-center sm:text-left">Complementary Masterpieces</h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map((p) => {
                 const inWish = hasItem(p.id);
                 return (

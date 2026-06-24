@@ -77,7 +77,7 @@ export default function AdminDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [settings, setSettings] = useState<any>({});
   const [customers, setCustomers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // Layout states
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -187,7 +187,7 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
-    loadDashboardData(true);
+    loadDashboardData(false);
   }, [isAdmin]);
 
   // Load selected order extra details

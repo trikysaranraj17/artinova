@@ -49,7 +49,7 @@ export default function CartPage() {
   const remainingForFree = freeShippingLimit - subtotal;
 
   return (
-    <div className="min-h-screen pt-32 pb-24 px-6 bg-[#0A0A0A] text-[#F5F0E8] font-body relative">
+    <div className="min-h-screen pt-8 md:pt-16 pb-24 px-6 bg-[#0A0A0A] text-[#F5F0E8] font-body relative">
       {/* Background glow */}
       <div className="absolute top-1/4 left-1/4 w-[450px] h-[450px] bg-[#C9A84C]/5 rounded-full blur-[120px] pointer-events-none" />
 

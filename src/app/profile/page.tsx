@@ -277,7 +277,7 @@ export default function ProfilePage() {
   const totalSpent = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
 
   return (
-    <div className="min-h-screen pt-32 pb-24 px-6 bg-[#0A0A0A] relative text-[#F5F0E8] font-body select-none">
+    <div className="min-h-screen pt-8 md:pt-16 pb-24 px-6 bg-[#0A0A0A] relative text-[#F5F0E8] font-body select-none">
       <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[#C9A84C]/5 blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto flex flex-col gap-10 relative z-10">

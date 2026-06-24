@@ -73,7 +73,7 @@ function ShopContent() {
   });
 
   return (
-    <div className="min-h-screen pt-32 pb-24 px-6 bg-[#0A0A0A] relative text-[#F5F0E8] font-body select-none">
+    <div className="min-h-screen pt-8 md:pt-16 pb-24 px-6 bg-[#0A0A0A] relative text-[#F5F0E8] font-body select-none">
       {/* Background ambient glows */}
       <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[#C9A84C]/5 blur-[120px] pointer-events-none" />
 
@@ -140,7 +140,7 @@ function ShopContent() {
 
         {/* Main Grid Display */}
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="aspect-square rounded-lg bg-[#111111] animate-pulse border border-[#C9A84C]/10" />
             ))}
@@ -160,7 +160,7 @@ function ShopContent() {
             </NextLink>
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {sortedProducts.map((p) => (
               <div key={p.id} className="group luxury-card relative flex flex-col h-full bg-[#161616] border border-[#C9A84C]/10 rounded-lg overflow-hidden transition-all duration-300 hover:border-[#C9A84C]/45">
                 {/* Badges */}

@@ -121,7 +121,7 @@ export default function OrdersHistoryPage() {
   }
 
   return (
-    <div className="min-h-screen pt-40 pb-24 px-6 bg-[#0A0A0A] text-[#F5F0E8] font-body relative overflow-hidden">
+    <div className="min-h-screen pt-8 md:pt-16 pb-24 px-6 bg-[#0A0A0A] text-[#F5F0E8] font-body relative overflow-hidden">
       {/* Background ambient glow */}
       <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-[#C9A84C]/5 rounded-full blur-[120px] pointer-events-none" />
 

@@ -12,6 +12,7 @@ import { useAuthStore } from '../store/authStore';
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdminPage = pathname === '/admin-secure-dashboard' || pathname === '/admin';
+  const isHomePage = pathname === '/';
   const { initialize } = useAuthStore();
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   return (
     <>
       <Navbar />
-      <main className="flex-grow w-full">
+      <main className={`flex-grow w-full ${isHomePage ? 'pt-0' : 'pt-[72px] md:pt-[80px]'}`}>
         {children}
       </main>
       <LoginModal />

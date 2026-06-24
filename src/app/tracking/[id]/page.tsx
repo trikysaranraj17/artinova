@@ -123,7 +123,7 @@ export default function OrderTrackingPage({ params }: { params: Promise<{ id: st
   };
 
   return (
-    <div className="min-h-screen pt-40 pb-24 px-6 bg-[#0A0A0A] text-[#F5F0E8] font-body relative overflow-hidden">
+    <div className="min-h-screen pt-8 md:pt-16 pb-24 px-6 bg-[#0A0A0A] text-[#F5F0E8] font-body relative overflow-hidden">
       {/* Golden backdrop glow */}
       <div className="absolute top-1/3 right-[-10%] w-96 h-96 bg-[#C9A84C]/5 blur-[120px] pointer-events-none" />
 

@@ -239,7 +239,7 @@ export default function HomePage() {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="aspect-square rounded-lg bg-[#111111] animate-pulse border border-[#C9A84C]/10 skeleton-box" />
               ))}
@@ -261,7 +261,7 @@ export default function HomePage() {
               </a>
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 items-stretch">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 items-stretch">
               {filteredProducts.map((p) => {
                 const inWishlist = hasItem(p.id);
                 return (
