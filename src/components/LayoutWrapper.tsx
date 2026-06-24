@@ -13,6 +13,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   const pathname = usePathname();
   const isAdminPage = pathname === '/admin-secure-dashboard' || pathname === '/admin';
   const isHomePage = pathname === '/';
+  const isCollectionsPage = pathname?.startsWith('/collections/');
   const { initialize } = useAuthStore();
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   return (
     <>
       <Navbar />
-      <main className={`flex-grow w-full ${isHomePage ? 'pt-0' : 'pt-[72px] md:pt-[80px]'}`}>
+      <main className={`flex-grow w-full ${isHomePage || isCollectionsPage ? 'pt-0' : 'pt-[72px]'}`}>
         {children}
       </main>
       <LoginModal />

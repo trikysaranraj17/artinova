@@ -29,6 +29,10 @@ export default function Navbar() {
     { name: 'Contact', href: '/contact' }
   ];
 
+  const isHomePage = pathname === '/';
+  const isCollectionsPage = pathname?.startsWith('/collections/');
+  const hasBanner = isHomePage || isCollectionsPage;
+
   // Track scroll position
   useEffect(() => {
     const handleScroll = () => {
@@ -46,7 +50,7 @@ export default function Navbar() {
     <>
       <header 
         className={`fixed top-0 left-0 right-0 z-50 h-[72px] flex items-center transition-all duration-300 ${
-          scrolled 
+          scrolled || !hasBanner
             ? 'bg-[#0A0A0A]/92 border-b border-[#C9A84C]/10 backdrop-blur-[20px] shadow-[0_4px_30px_rgba(0,0,0,0.8)]' 
             : 'bg-transparent border-b border-transparent'
         }`}

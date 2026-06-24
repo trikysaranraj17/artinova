@@ -63,6 +63,28 @@ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'category') THEN
     ALTER TABLE public.products DROP COLUMN category;
   END IF;
+
+  -- Safe migrations for cart_items table: add customization, created_at, and unique constraint if missing
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'cart_items' AND column_name = 'customization') THEN
+    ALTER TABLE public.cart_items ADD COLUMN customization JSONB DEFAULT '{}'::JSONB;
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'cart_items' AND column_name = 'created_at') THEN
+    ALTER TABLE public.cart_items ADD COLUMN created_at TIMESTAMPTZ DEFAULT NOW();
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE table_name = 'cart_items' AND constraint_name = 'cart_items_user_id_product_id_key') THEN
+    BEGIN
+      ALTER TABLE public.cart_items ADD CONSTRAINT cart_items_user_id_product_id_key UNIQUE (user_id, product_id);
+    EXCEPTION WHEN duplicate_table OR duplicate_object THEN
+      -- ignore
+    END;
+  END IF;
+
+  -- Safe migrations for wishlist table: add created_at if missing
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'wishlist' AND column_name = 'created_at') THEN
+    ALTER TABLE public.wishlist ADD COLUMN created_at TIMESTAMPTZ DEFAULT NOW();
+  END IF;
 END $$;
 
 -- Enable Row Level Security
@@ -169,7 +191,8 @@ CREATE TABLE IF NOT EXISTS public.cart_items (
   product_id UUID REFERENCES public.products(id) ON DELETE CASCADE,
   quantity INT DEFAULT 1,
   customization JSONB DEFAULT '{}'::JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, product_id)
 );
 
 -- 9. WISHLIST

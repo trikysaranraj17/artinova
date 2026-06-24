@@ -79,7 +79,7 @@ export default function CollectionPage() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#F5F0E8] font-body pb-24">
       {/* Editorial Banner */}
-      <section className="relative h-[40vh] sm:h-[50vh] w-full flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[300px] sm:min-h-[400px] pt-[88px] md:pt-[104px] pb-12 w-full flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
             src={getBannerUrl()} 
@@ -89,7 +89,7 @@ export default function CollectionPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/60 to-transparent" />
         </div>
         
-        <div className="relative z-10 text-center px-6 max-w-3xl flex flex-col items-center gap-4 mt-10">
+        <div className="relative z-10 text-center px-6 max-w-3xl flex flex-col items-center gap-4">
           <span className="font-accent text-[9px] uppercase tracking-[0.3em] text-[#C9A84C]">ARTINOVA CURATED</span>
           <h1 className="font-display text-4xl sm:text-6xl font-semibold tracking-wide text-gold-gradient leading-none">
             {collection.name}
