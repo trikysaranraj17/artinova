@@ -305,7 +305,7 @@ export default function CheckoutPage() {
         {/* Title */}
         <div className="flex flex-col gap-2 mb-8 select-none text-center">
           <span className="font-accent text-[9px] text-[#C9A84C] uppercase tracking-[0.25em]">Secure Checkout</span>
-          <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-wide text-[#F5F0E8] leading-none">
+          <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-wide text-[#F5F0E8] leading-tight">
             Bespoke Gifting Registry
           </h1>
           <div className="w-12 h-[1px] bg-[#C9A84C] mt-2 mx-auto" />

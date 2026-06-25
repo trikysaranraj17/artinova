@@ -290,7 +290,7 @@ export default function ProfilePage() {
             className="h-16 w-auto object-contain border border-[#C9A84C]/25 rounded-md mb-1 shadow-[0_0_20px_rgba(201,168,76,0.15)]"
           />
           <span className="font-accent text-[9px] text-[#C9A84C] uppercase tracking-[0.25em]">Bespoke Registry</span>
-          <h1 className="font-display text-3xl sm:text-5xl font-semibold tracking-wide text-[#F5F0E8] leading-none mt-1">
+          <h1 className="font-display text-3xl sm:text-5xl font-semibold tracking-wide text-[#F5F0E8] leading-tight mt-1">
             Patron Registry Desk
           </h1>
           <div className="w-12 h-[1px] bg-[#C9A84C] mt-2" />

@@ -110,7 +110,7 @@ export default function HomePage() {
             ✦ EST. 2023 · HANDCRAFTED IN INDIA ✦
           </div>
 
-          <h1 className="font-display text-[52px] sm:text-[96px] font-bold tracking-tight text-3d-luxury-gold leading-none mb-4">
+          <h1 className="font-display text-[52px] sm:text-[96px] font-bold tracking-tight text-3d-luxury-gold leading-tight mb-4">
             ARTINOVA
           </h1>
 
@@ -296,7 +296,7 @@ export default function HomePage() {
                     {/* Content padding 16px */}
                     <div className="p-3 sm:p-4 flex flex-col flex-grow gap-1 sm:gap-1.5">
                       <span className="font-accent text-[8px] sm:text-[10px] tracking-[1px] sm:tracking-[2px] text-[#C9A84C]/80 uppercase">Handcrafted</span>
-                      <h3 className="font-display text-xs sm:text-[18px] text-[#F5F0E8] line-clamp-2 leading-snug group-hover:text-[#C9A84C] transition-colors mb-1 min-h-[36px] sm:min-h-[50px] font-bold">
+                      <h3 className="font-display text-xs sm:text-[18px] text-[#F5F0E8] leading-snug group-hover:text-[#C9A84C] transition-colors mb-1 min-h-[36px] sm:min-h-[50px] font-bold break-words">
                         {p.name}
                       </h3>
                       

@@ -307,7 +307,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-12 select-none border-b border-[#C9A84C]/10 pb-6">
           <div className="flex flex-col gap-2">
             <span className="font-accent text-[9px] text-[#C9A84C] uppercase tracking-[0.25em]">Registry Archives</span>
-            <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-wide text-[#F5F0E8] leading-none">
+            <h1 className="font-display text-3xl sm:text-4xl font-semibold tracking-wide text-[#F5F0E8] leading-tight">
               Order #{order.order_number}
             </h1>
             <div className="flex items-center gap-4 text-xs text-[#9A8F7E] mt-1">

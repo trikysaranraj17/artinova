@@ -59,7 +59,7 @@ export default function ContactPage() {
         
         {/* Title Section */}
         <div className="w-full text-center mb-16 md:mb-24 flex flex-col items-center">
-          <h1 className="text-3xl md:text-5xl font-display font-semibold tracking-[0.25em] text-[#F5F0E8] uppercase leading-none">
+          <h1 className="text-3xl md:text-5xl font-display font-semibold tracking-[0.25em] text-[#F5F0E8] uppercase leading-tight">
             GET IN <span className="text-[#C9A84C]">TOUCH</span>
           </h1>
           <div className="w-10 h-[1px] bg-[#C9A84C] mt-6 mx-auto" />

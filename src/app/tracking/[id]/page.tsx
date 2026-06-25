@@ -140,7 +140,7 @@ export default function OrderTrackingPage({ params }: { params: Promise<{ id: st
         {/* Title */}
         <div className="flex flex-col gap-2 mb-12 select-none">
           <span className="font-accent text-[9px] text-[#C9A84C] uppercase tracking-[0.25em]">Real-Time Logistics Tracker</span>
-          <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-wide text-[#F5F0E8] leading-none">
+          <h1 className="font-display text-4xl sm:text-5xl font-semibold tracking-wide text-[#F5F0E8] leading-tight">
             Track Order
           </h1>
           <div className="w-12 h-[1px] bg-[#C9A84C] mt-2" />

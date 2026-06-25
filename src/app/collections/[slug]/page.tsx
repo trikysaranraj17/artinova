@@ -91,7 +91,7 @@ export default function CollectionPage() {
         
         <div className="relative z-10 text-center px-6 max-w-3xl flex flex-col items-center gap-4">
           <span className="font-accent text-[9px] uppercase tracking-[0.3em] text-[#C9A84C]">ARTINOVA CURATED</span>
-          <h1 className="font-display text-4xl sm:text-6xl font-semibold tracking-wide text-gold-gradient leading-none">
+          <h1 className="font-display text-4xl sm:text-6xl font-semibold tracking-wide text-gold-gradient leading-tight">
             {collection.name}
           </h1>
           {collection.description && (
@@ -158,7 +158,7 @@ export default function CollectionPage() {
 
                   {/* Info details */}
                   <div className="p-3 sm:p-4 flex flex-col flex-grow gap-1 sm:gap-2 border-t border-[#C9A84C]/10">
-                    <h3 className="font-display text-xs sm:text-[15px] text-[#F5F0E8] line-clamp-1 group-hover:text-[#C9A84C] transition-colors font-bold">
+                    <h3 className="font-display text-xs sm:text-[15px] text-[#F5F0E8] group-hover:text-[#C9A84C] transition-colors font-bold min-h-[32px] sm:min-h-[40px] break-words">
                       {p.name}
                     </h3>
                     

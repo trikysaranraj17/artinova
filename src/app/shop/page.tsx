@@ -87,7 +87,7 @@ function ShopContent() {
             className="h-16 w-auto object-contain border border-[#C9A84C]/20 rounded-md mb-2 shadow-[0_0_20px_rgba(201,168,76,0.15)]"
           />
           <span className="font-accent text-[9px] text-[#C9A84C] uppercase tracking-[0.25em]">Artisan Boutique</span>
-          <h1 className="font-display text-3xl sm:text-5xl font-semibold tracking-wide text-[#F5F0E8] leading-none">
+          <h1 className="font-display text-3xl sm:text-5xl font-semibold tracking-wide text-[#F5F0E8] leading-tight">
             The Collections
           </h1>
           <div className="w-12 h-[1px] bg-[#C9A84C] mt-2" />
@@ -193,7 +193,7 @@ function ShopContent() {
 
                 {/* Product details */}
                 <div className="p-3 sm:p-4 flex flex-col flex-grow gap-1 sm:gap-1.5 border-t border-[#C9A84C]/10">
-                  <h3 className="font-display text-xs sm:text-sm text-[#F5F0E8] line-clamp-1 group-hover:text-[#C9A84C] transition-colors font-bold">
+                  <h3 className="font-display text-xs sm:text-sm text-[#F5F0E8] group-hover:text-[#C9A84C] transition-colors font-bold min-h-[32px] sm:min-h-[40px] break-words">
                     {p.name}
                   </h3>
                   

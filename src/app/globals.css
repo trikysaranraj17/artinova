@@ -564,4 +564,13 @@ input:focus, textarea:focus, select:focus {
   animation: shimmer-sweep-line 3s infinite linear;
 }
 
+/* Hide scrollbars utility */
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+}
+.scrollbar-none {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
 
