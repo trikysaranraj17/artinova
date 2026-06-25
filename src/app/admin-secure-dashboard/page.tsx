@@ -579,7 +579,8 @@ export default function AdminDashboardPage() {
   }
 
   // Analytics variables
-  const totalSales = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  const verifiedOrders = orders.filter(o => o.payment_status === 'verified');
+  const totalSales = verifiedOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
   const totalOrdersCount = orders.length;
   const productsCount = products.length;
   const pendingPayments = orders.filter(o => o.payment_status === 'pending').length;
@@ -596,7 +597,7 @@ export default function AdminDashboardPage() {
   });
 
   // Chart datasets
-  const salesHistoryData = orders
+  const salesHistoryData = verifiedOrders
     .map(o => ({
       date: new Date(o.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
       amount: o.total
