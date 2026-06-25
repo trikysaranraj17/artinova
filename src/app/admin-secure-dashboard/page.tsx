@@ -608,7 +608,7 @@ export default function AdminDashboardPage() {
     { name: 'Frames', value: products.filter(p => p.category_id === 'cat-frames').length },
     { name: 'Hampers', value: products.filter(p => p.category_id === 'cat-hampers').length },
     { name: 'Resin Art', value: products.filter(p => p.category_id === 'cat-art').length },
-    { name: 'Custom', value: products.filter(p => p.category_id === 'cat-keepsakes' || p.category_id === 'cat-accessories').length }
+    { name: 'Chocolates', value: products.filter(p => p.category_id === 'cat-chocolates').length }
   ];
 
   const COLORS = ['#C9A84C', '#B8860B', '#9A8F7E', '#4A4035', '#2C251E', '#1C1814'];
@@ -795,8 +795,7 @@ export default function AdminDashboardPage() {
                       <option value="cat-frames">Luxury Frames</option>
                       <option value="cat-hampers">Premium Hampers</option>
                       <option value="cat-art">Resin Art Masterpieces</option>
-                      <option value="cat-accessories">Custom Accessories</option>
-                      <option value="cat-keepsakes">Bespoke Keepsakes</option>
+                      <option value="cat-chocolates">Customized Chocolate Covers</option>
                     </select>
                   </div>
                   <div className="flex flex-col gap-1">
@@ -1608,8 +1607,7 @@ export default function AdminDashboardPage() {
                           <option value="cat-frames">Luxury Frames</option>
                           <option value="cat-hampers">Premium Hampers</option>
                           <option value="cat-art">Resin Art</option>
-                          <option value="cat-accessories">Accessories</option>
-                          <option value="cat-keepsakes">Keepsakes</option>
+                          <option value="cat-chocolates">Customized Chocolate Covers</option>
                         </select>
                         <select
                           value={productStatusFilter}
@@ -1743,10 +1741,9 @@ export default function AdminDashboardPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {[
                         { id: 'cat-frames', name: 'Luxury Frames', desc: 'Custom memory frames cast in optical-grade crystal resin.' },
-                        { id: 'cat-hampers', name: 'Premium Hampers', desc: 'Bespoke corporate and wedding hampers containing curated keepsakes.' },
+                        { id: 'cat-hampers', name: 'Premium Hampers', desc: 'Bespoke corporate and wedding hampers containing curated contents.' },
                         { id: 'cat-art', name: 'Resin Art Masterpieces', desc: 'Liquid-gold geode resin wall clocks and centerpieces.' },
-                        { id: 'cat-accessories', name: 'Custom Accessories', desc: 'Handcrafted keychains, coasters, and small personalized keepsakes.' },
-                        { id: 'cat-keepsakes', name: 'Bespoke Keepsakes', desc: 'Individually commissioned luxury keepsakes for events.' }
+                        { id: 'cat-chocolates', name: 'Customized Chocolate Covers', desc: 'Personalized premium chocolate wraps and presentation covers.' }
                       ].map(cat => {
                         const count = products.filter(p => p.category_id === cat.id).length;
                         return (
@@ -1890,15 +1887,7 @@ export default function AdminDashboardPage() {
                                   <strong className="text-white">{formatDate(orders.find(o => o.id === selectedOrderId)?.created_at || '')}</strong>
                                 </div>
                                 <div className="flex justify-between border-t border-white/5 pt-2">
-                                  <span>Subtotal</span>
-                                  <strong className="text-white">₹{orders.find(o => o.id === selectedOrderId)?.subtotal?.toLocaleString()}</strong>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>GST (18% inclusive)</span>
-                                  <strong className="text-white">₹{orders.find(o => o.id === selectedOrderId)?.gst?.toLocaleString()}</strong>
-                                </div>
-                                <div className="flex justify-between border-t border-white/5 pt-2 items-end">
-                                  <span className="text-[#C9A84C] font-bold">Total (large gold)</span>
+                                  <span>Total</span>
                                   <strong className="text-xl font-bold text-[#C9A84C] font-display">₹{orders.find(o => o.id === selectedOrderId)?.total?.toLocaleString()}</strong>
                                 </div>
                               </div>
@@ -2531,27 +2520,15 @@ export default function AdminDashboardPage() {
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[11px] font-sans font-semibold text-[#9A8F7E]">GST standard rate (%)</label>
-                          <input
-                            type="number"
-                            required
-                            value={setGstRate}
-                            onChange={(e) => setSetGstRate(e.target.value)}
-                            className="bg-[#0A0A0A] border border-[#C9A84C]/15 h-11 px-4 rounded-lg text-white"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[11px] font-sans font-semibold text-[#9A8F7E]">Free Shipping threshold (₹)</label>
-                          <input
-                            type="number"
-                            required
-                            value={setThreshold}
-                            onChange={(e) => setSetThreshold(e.target.value)}
-                            className="bg-[#0A0A0A] border border-[#C9A84C]/15 h-11 px-4 rounded-lg text-white"
-                          />
-                        </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[11px] font-sans font-semibold text-[#9A8F7E]">Free Shipping threshold (₹)</label>
+                        <input
+                          type="number"
+                          required
+                          value={setThreshold}
+                          onChange={(e) => setSetThreshold(e.target.value)}
+                          className="bg-[#0A0A0A] border border-[#C9A84C]/15 h-11 px-4 rounded-lg text-white"
+                        />
                       </div>
 
                       <button

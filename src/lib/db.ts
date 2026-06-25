@@ -136,8 +136,7 @@ const MOCK_CATEGORIES: Category[] = [
   { id: 'cat-frames', name: 'Luxury Frames', slug: 'luxury-frames', display_order: 1 },
   { id: 'cat-hampers', name: 'Premium Hampers', slug: 'premium-hampers', display_order: 2 },
   { id: 'cat-art', name: 'Resin Art Masterpieces', slug: 'resin-art-masterpieces', display_order: 3 },
-  { id: 'cat-accessories', name: 'Custom Accessories', slug: 'custom-accessories', display_order: 4 },
-  { id: 'cat-keepsakes', name: 'Bespoke Keepsakes', slug: 'bespoke-keepsakes', display_order: 5 }
+  { id: 'cat-chocolates', name: 'Customized Chocolate Covers', slug: 'customized-chocolate-covers', display_order: 4 }
 ];
 
 const MOCK_COLLECTIONS: Collection[] = [

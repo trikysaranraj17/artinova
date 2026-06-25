@@ -577,10 +577,7 @@ export default function CheckoutPage() {
                 <span>Items Subtotal</span>
                 <span>₹{subtotal.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between">
-                <span>GST (18% inclusive)</span>
-                <span>₹{gst.toLocaleString()}</span>
-              </div>
+
               <div className="flex justify-between">
                 <span>Luxury Shipping</span>
                 {shipping === 0 ? (

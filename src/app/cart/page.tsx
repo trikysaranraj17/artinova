@@ -227,10 +227,7 @@ export default function CartPage() {
                   <span>Trunk Subtotal</span>
                   <span>₹{subtotal.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>GST (18% inclusive)</span>
-                  <span>₹{gst.toLocaleString()}</span>
-                </div>
+
                 <div className="flex justify-between">
                   <span>Delivery Charges</span>
                   {shipping === 0 ? (

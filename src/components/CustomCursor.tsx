@@ -14,11 +14,16 @@ export default function CustomCursor() {
       if (isMobile) return;
     }
 
+    let mouseX = -100;
+    let mouseY = -100;
+    let haloX = -100;
+    let haloY = -100;
+    let isHovered = false;
+    let frameId: number;
+
     const updatePosition = (e: MouseEvent) => {
-      const x = e.clientX;
-      const y = e.clientY;
-      document.documentElement.style.setProperty('--mouse-x', `${x}px`);
-      document.documentElement.style.setProperty('--mouse-y', `${y}px`);
+      mouseX = e.clientX;
+      mouseY = e.clientY;
     };
 
     const handleMouseOver = (e: MouseEvent) => {
@@ -36,20 +41,23 @@ export default function CustomCursor() {
         target.closest('.cursor-pointer');
 
       if (isInteractive) {
+        isHovered = true;
         haloRef.current?.classList.add('hovered');
         coreRef.current?.classList.add('hovered');
       } else {
+        isHovered = false;
         haloRef.current?.classList.remove('hovered');
         coreRef.current?.classList.remove('hovered');
       }
     };
 
     const handleMouseOut = () => {
+      isHovered = false;
       haloRef.current?.classList.remove('hovered');
       coreRef.current?.classList.remove('hovered');
     };
 
-    // Click particle burst (pure vanilla DOM, zero React overhead)
+    // Click particle burst
     const handleClick = (e: MouseEvent) => {
       const burstCount = 6;
       const container = document.getElementById('cursor-particle-container');
@@ -78,16 +86,39 @@ export default function CustomCursor() {
       }
     };
 
+    // Performance-optimized animation loop
+    const tick = () => {
+      // Direct positioning for core cursor
+      if (coreRef.current) {
+        coreRef.current.style.transform = `translate3d(${mouseX - 4}px, ${mouseY - 4}px, 0) ${isHovered ? 'scale(0.6)' : 'scale(1)'}`;
+      }
+
+      // Smooth lag interpolation for outer halo
+      const ease = 0.15; // interpolation factor
+      haloX += (mouseX - haloX) * ease;
+      haloY += (mouseY - haloY) * ease;
+
+      if (haloRef.current) {
+        haloRef.current.style.transform = `translate3d(${haloX - 30}px, ${haloY - 30}px, 0) ${isHovered ? 'scale(1.5)' : 'scale(1)'}`;
+      }
+
+      frameId = requestAnimationFrame(tick);
+    };
+
     window.addEventListener('mousemove', updatePosition, { passive: true });
     window.addEventListener('mouseover', handleMouseOver, { passive: true });
     window.addEventListener('mouseout', handleMouseOut, { passive: true });
     window.addEventListener('click', handleClick, { passive: true });
+
+    // Start animation loop
+    frameId = requestAnimationFrame(tick);
 
     return () => {
       window.removeEventListener('mousemove', updatePosition);
       window.removeEventListener('mouseover', handleMouseOver);
       window.removeEventListener('mouseout', handleMouseOut);
       window.removeEventListener('click', handleClick);
+      cancelAnimationFrame(frameId);
     };
   }, []);
 
@@ -113,8 +144,7 @@ export default function CustomCursor() {
           pointerEvents: 'none',
           zIndex: 99999,
           willChange: 'transform',
-          transform: 'translate3d(calc(var(--mouse-x, -100px) - 30px), calc(var(--mouse-y, -100px) - 30px), 0)',
-          transition: 'transform 0.01s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease'
+          transition: 'background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease'
         }}
       />
 
@@ -133,7 +163,6 @@ export default function CustomCursor() {
           pointerEvents: 'none',
           zIndex: 100000,
           willChange: 'transform',
-          transform: 'translate3d(calc(var(--mouse-x, -100px) - 4px), calc(var(--mouse-y, -100px) - 4px), 0)',
           boxShadow: '0 0 8px #d4af37'
         }}
       />
@@ -143,12 +172,6 @@ export default function CustomCursor() {
           background-color: rgba(212, 175, 55, 0.05) !important;
           border-color: rgba(212, 175, 55, 0.6) !important;
           box-shadow: 0 0 15px rgba(212, 175, 55, 0.2) !important;
-        }
-        .custom-cursor-core.hovered {
-          transform: translate3d(calc(var(--mouse-x, -100px) - 4px), calc(var(--mouse-y, -100px) - 4px), 0) scale(0.6) !important;
-        }
-        .custom-cursor-halo.hovered {
-          transform: translate3d(calc(var(--mouse-x, -100px) - 30px), calc(var(--mouse-y, -100px) - 30px), 0) scale(1.5) !important;
         }
         .click-particle {
           position: fixed;

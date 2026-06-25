@@ -214,13 +214,13 @@ export default function HomePage() {
 
           {/* Filter Tabs */}
           <div className="flex items-center justify-center gap-2 overflow-x-auto pb-4 scrollbar-none w-full mb-10 snap-x">
-            {['All', 'cat-art', 'cat-hampers', 'cat-frames', 'cat-accessories'].map((tab) => {
+            {['All', 'cat-art', 'cat-hampers', 'cat-frames', 'cat-chocolates'].map((tab) => {
               const labelMap: Record<string, string> = {
                 'All': 'All Creations',
                 'cat-art': 'Resin Clocks',
                 'cat-hampers': 'Luxury Hampers',
                 'cat-frames': 'Custom Frames',
-                'cat-accessories': 'Accessories'
+                'cat-chocolates': 'Chocolate Covers'
               };
               return (
                 <button
@@ -261,15 +261,15 @@ export default function HomePage() {
               </a>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 items-stretch">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 items-stretch">
               {filteredProducts.map((p) => {
                 const inWishlist = hasItem(p.id);
                 return (
                   <div key={p.id} className="luxury-card relative flex flex-col h-full bg-[#161616] group">
                     {/* TL Badge */}
-                    <div className="absolute top-3 left-3 z-20 pointer-events-none">
+                    <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20 pointer-events-none">
                       {p.is_featured && (
-                        <span className="px-3 py-1.5 bg-gradient-to-r from-[#064E3B] to-[#10B981] text-white text-[9px] font-accent uppercase tracking-widest font-bold shadow-md rounded-sm border border-[#10B981]/25">
+                        <span className="px-1.5 py-0.5 sm:px-3 sm:py-1.5 bg-gradient-to-r from-[#064E3B] to-[#10B981] text-white text-[7px] sm:text-[9px] font-accent uppercase tracking-widest font-bold shadow-md rounded-sm border border-[#10B981]/25">
                           Bestseller
                         </span>
                       )}
@@ -278,10 +278,10 @@ export default function HomePage() {
                     {/* TR Wishlist Heart */}
                     <button 
                       onClick={() => toggleItem(user?.id || 'guest', p.id)}
-                      className="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-[#0A0A0A]/60 border border-[#C9A84C]/15 hover:border-[#C9A84C] text-[#F5F0E8]/70 hover:text-red-400 flex items-center justify-center transition-all cursor-pointer"
+                      className="absolute top-2 right-2 sm:top-3 sm:right-3 z-20 w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-[#0A0A0A]/60 border border-[#C9A84C]/15 hover:border-[#C9A84C] text-[#F5F0E8]/70 hover:text-red-400 flex items-center justify-center transition-all cursor-pointer"
                       title="Add to Wishlist"
                     >
-                      <Heart size={14} fill={inWishlist ? '#C9A84C' : 'none'} className={inWishlist ? 'text-[#C9A84C]' : ''} />
+                      <Heart size={12} fill={inWishlist ? '#C9A84C' : 'none'} className={inWishlist ? 'text-[#C9A84C] w-3 h-3 sm:w-3.5 sm:h-3.5' : 'w-3 h-3 sm:w-3.5 sm:h-3.5'} />
                     </button>
 
                     {/* Product Image aspect-ratio 1/1 */}
@@ -294,27 +294,27 @@ export default function HomePage() {
                     </NextLink>
 
                     {/* Content padding 16px */}
-                    <div className="p-4 flex flex-col flex-grow gap-1.5">
-                      <span className="font-accent text-[10px] tracking-[2px] text-[#C9A84C]/80 uppercase">Handcrafted</span>
-                      <h3 className="font-display text-[18px] text-[#F5F0E8] line-clamp-2 leading-snug group-hover:text-[#C9A84C] transition-colors mb-1 min-h-[50px] font-bold">
+                    <div className="p-3 sm:p-4 flex flex-col flex-grow gap-1 sm:gap-1.5">
+                      <span className="font-accent text-[8px] sm:text-[10px] tracking-[1px] sm:tracking-[2px] text-[#C9A84C]/80 uppercase">Handcrafted</span>
+                      <h3 className="font-display text-xs sm:text-[18px] text-[#F5F0E8] line-clamp-2 leading-snug group-hover:text-[#C9A84C] transition-colors mb-1 min-h-[36px] sm:min-h-[50px] font-bold">
                         {p.name}
                       </h3>
                       
                       {/* Review stars */}
-                      <div className="flex items-center gap-0.5 text-[#C9A84C] text-[10px] mb-2">
+                      <div className="flex items-center gap-0.5 text-[#C9A84C] text-[8px] sm:text-[10px] mb-1 sm:mb-2">
                         {Array.from({ length: 5 }).map((_, idx) => (
                           <span key={idx}>★</span>
                         ))}
-                        <span className="text-[#9A8F7E] text-[10px] ml-1">({p.review_count || 0})</span>
+                        <span className="text-[#9A8F7E] text-[8px] sm:text-[10px] ml-1">({p.review_count || 0})</span>
                       </div>
 
                       {/* Pricing */}
-                      <div className="flex items-center justify-between mt-auto pt-2 border-t border-[#C9A84C]/5">
-                        <span className="font-body text-[#C9A84C] font-bold text-base">
+                      <div className="flex items-center justify-between mt-auto pt-1.5 sm:pt-2 border-t border-[#C9A84C]/5">
+                        <span className="font-body text-xs sm:text-base text-[#C9A84C] font-bold">
                           ₹{p.price.toLocaleString()}
                         </span>
                         {p.original_price && (
-                          <span className="font-body text-[#9A8F7E]/50 line-through text-[11px] ml-2">
+                          <span className="font-body text-[#9A8F7E]/50 line-through text-[9px] sm:text-[11px] ml-1.5 sm:ml-2">
                             ₹{p.original_price.toLocaleString()}
                           </span>
                         )}
@@ -324,7 +324,7 @@ export default function HomePage() {
                     {/* Add to Cart button translates up on hover */}
                     <button 
                       onClick={() => addItem(user?.id || 'guest', p.id, 1)}
-                      className="w-full bg-[#111111] border-t border-[#C9A84C]/25 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0A0A0A] py-3 text-[9px] font-accent uppercase tracking-widest font-extrabold transition-all duration-300 cursor-pointer btn-tap-scale"
+                      className="w-full bg-[#111111] border-t border-[#C9A84C]/25 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0A0A0A] py-2 sm:py-3 text-[8px] sm:text-[9px] font-accent uppercase tracking-widest font-extrabold transition-all duration-300 cursor-pointer btn-tap-scale"
                     >
                       Add To Cart
                     </button>

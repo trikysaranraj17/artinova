@@ -509,8 +509,7 @@ VALUES
   ('cat-frames', 'Luxury Frames', 'luxury-frames', 1),
   ('cat-hampers', 'Premium Hampers', 'premium-hampers', 2),
   ('cat-art', 'Resin Art Masterpieces', 'resin-art-masterpieces', 3),
-  ('cat-accessories', 'Custom Accessories', 'custom-accessories', 4),
-  ('cat-keepsakes', 'Bespoke Keepsakes', 'bespoke-keepsakes', 5)
+  ('cat-chocolates', 'Customized Chocolate Covers', 'customized-chocolate-covers', 4)
 ON CONFLICT (id) DO UPDATE SET 
   name = EXCLUDED.name,
   slug = EXCLUDED.slug,

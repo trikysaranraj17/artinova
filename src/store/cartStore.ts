@@ -110,8 +110,7 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
 
   getGST: () => {
-    // 18% GST standard calculations
-    return Math.round(get().getSubtotal() * 0.18 * 100) / 100;
+    return 0;
   },
 
   getShipping: () => {

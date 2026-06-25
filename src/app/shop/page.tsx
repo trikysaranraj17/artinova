@@ -160,18 +160,18 @@ function ShopContent() {
             </NextLink>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {sortedProducts.map((p) => (
               <div key={p.id} className="group luxury-card relative flex flex-col h-full bg-[#161616] border border-[#C9A84C]/10 rounded-lg overflow-hidden transition-all duration-300 hover:border-[#C9A84C]/45">
                 {/* Badges */}
-                <div className="absolute top-3 left-3 z-20 flex flex-col gap-1 pointer-events-none">
+                <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20 flex flex-col gap-1 pointer-events-none">
                   {p.is_featured && (
-                    <span className="px-2 py-0.5 bg-[#C9A84C] text-[#0A0A0A] text-[7px] font-accent uppercase tracking-widest font-bold rounded-sm shadow-md">
+                    <span className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-[#C9A84C] text-[#0A0A0A] text-[6px] sm:text-[7px] font-accent uppercase tracking-widest font-bold rounded-sm shadow-md">
                       Bestseller
                     </span>
                   )}
                   {p.is_customizable && (
-                    <span className="px-2 py-0.5 bg-[#111111]/90 border border-[#C9A84C]/25 text-[#C9A84C] text-[7px] font-accent uppercase tracking-widest font-bold rounded-sm">
+                    <span className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-[#111111]/90 border border-[#C9A84C]/25 text-[#C9A84C] text-[6px] sm:text-[7px] font-accent uppercase tracking-widest font-bold rounded-sm">
                       Custom
                     </span>
                   )}
@@ -185,32 +185,32 @@ function ShopContent() {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                   />
                   <div className="absolute inset-0 bg-[#0A0A0A]/0 group-hover:bg-[#0A0A0A]/60 transition-all duration-300 flex items-center justify-center">
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4 py-2 border border-[#C9A84C] bg-[#0A0A0A] text-[#C9A84C] font-accent text-[9px] uppercase tracking-widest font-bold">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3 py-1.5 border border-[#C9A84C] bg-[#0A0A0A] text-[#C9A84C] font-accent text-[8px] sm:text-[9px] uppercase tracking-widest font-bold">
                       View details
                     </span>
                   </div>
                 </NextLink>
 
                 {/* Product details */}
-                <div className="p-4 flex flex-col flex-grow gap-1.5 border-t border-[#C9A84C]/10">
-                  <h3 className="font-display text-sm text-[#F5F0E8] line-clamp-1 group-hover:text-[#C9A84C] transition-colors font-bold">
+                <div className="p-3 sm:p-4 flex flex-col flex-grow gap-1 sm:gap-1.5 border-t border-[#C9A84C]/10">
+                  <h3 className="font-display text-xs sm:text-sm text-[#F5F0E8] line-clamp-1 group-hover:text-[#C9A84C] transition-colors font-bold">
                     {p.name}
                   </h3>
                   
                   {/* Review Stars */}
-                  <div className="flex items-center gap-0.5 text-[#C9A84C] text-[9px]">
+                  <div className="flex items-center gap-0.5 text-[#C9A84C] text-[7px] sm:text-[9px]">
                     {Array.from({ length: 5 }).map((_, idx) => (
                       <span key={idx}>★</span>
                     ))}
-                    <span className="text-[#9A8F7E] text-[8px] ml-1">({p.review_count || 0})</span>
+                    <span className="text-[#9A8F7E] text-[6px] sm:text-[8px] ml-1">({p.review_count || 0})</span>
                   </div>
 
-                  <div className="flex items-center justify-between mt-auto pt-2 border-t border-[#C9A84C]/5">
+                  <div className="flex items-center justify-between mt-auto pt-1.5 sm:pt-2 border-t border-[#C9A84C]/5">
                     <span className="font-body text-[#C9A84C] font-bold text-xs sm:text-sm">
                       ₹{p.price.toLocaleString()}
                     </span>
                     {p.original_price && (
-                      <span className="font-body text-[#9A8F7E]/45 line-through text-[10px] sm:text-xs">
+                      <span className="font-body text-[#9A8F7E]/45 line-through text-[9px] sm:text-xs">
                         ₹{p.original_price.toLocaleString()}
                       </span>
                     )}
@@ -218,7 +218,7 @@ function ShopContent() {
                   
                   <button 
                     onClick={() => addItem(user?.id || 'guest', p.id, 1)}
-                    className="w-full bg-[#111111] border border-[#C9A84C]/35 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0A0A0A] py-2 mt-2.5 text-[8.5px] font-accent uppercase tracking-widest font-bold transition-all duration-300 cursor-pointer rounded-sm"
+                    className="w-full bg-[#111111] border border-[#C9A84C]/35 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0A0A0A] py-1.5 sm:py-2 mt-2 text-[8px] sm:text-[8.5px] font-accent uppercase tracking-widest font-bold transition-all duration-300 cursor-pointer rounded-sm"
                   >
                     Add To Cart
                   </button>

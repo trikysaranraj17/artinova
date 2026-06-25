@@ -198,10 +198,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                 <td style="color:#666;">Items Subtotal</td>
                 <td style="text-align: right; font-weight: bold;">₹${order.subtotal.toLocaleString()}</td>
               </tr>
-              <tr>
-                <td style="color:#666;">GST (18% inclusive)</td>
-                <td style="text-align: right;">₹${order.gst.toLocaleString()}</td>
-              </tr>
+
               <tr>
                 <td style="color:#666;">Shipping Transit</td>
                 <td style="text-align: right;">${order.shipping === 0 ? 'Free Shipping' : `₹${order.shipping.toLocaleString()}`}</td>
@@ -560,10 +557,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                   <span>Trunk Subtotal</span>
                   <span>₹{order.subtotal?.toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>GST (18%)</span>
-                  <span>₹{order.gst?.toLocaleString()}</span>
-                </div>
+
                 <div className="flex justify-between">
                   <span>Shipping Courier</span>
                   {order.shipping === 0 ? (

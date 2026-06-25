@@ -36,13 +36,13 @@ export default function Navbar() {
   // Track scroll position
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 80) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      const isScrolled = window.scrollY > 80;
+      setScrolled((prev) => {
+        if (prev !== isScrolled) return isScrolled;
+        return prev;
+      });
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 

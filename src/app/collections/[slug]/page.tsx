@@ -115,20 +115,20 @@ export default function CollectionPage() {
             </NextLink>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {products.map((p) => {
               const inWishlist = hasItem(p.id);
               return (
                 <div key={p.id} className="group luxury-card relative flex flex-col h-full bg-[#161616]">
                   {/* Top Badges */}
-                  <div className="absolute top-3 left-3 z-20 flex flex-col gap-1.5 pointer-events-none">
+                  <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20 flex flex-col gap-1 pointer-events-none">
                     {p.is_featured && (
-                      <span className="px-2 py-0.5 bg-[#C9A84C] text-[#0A0A0A] text-[7.5px] font-accent uppercase tracking-widest font-extrabold rounded-sm shadow-md">
+                      <span className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-[#C9A84C] text-[#0A0A0A] text-[6px] sm:text-[7.5px] font-accent uppercase tracking-widest font-extrabold rounded-sm shadow-md">
                         Bestseller
                       </span>
                     )}
                     {p.is_customizable && (
-                      <span className="px-2 py-0.5 bg-[#111111]/90 border border-[#C9A84C]/30 text-[#C9A84C] text-[7.5px] font-accent uppercase tracking-widest font-extrabold rounded-sm">
+                      <span className="px-1.5 py-0.5 sm:px-2 sm:py-0.5 bg-[#111111]/90 border border-[#C9A84C]/30 text-[#C9A84C] text-[6px] sm:text-[7.5px] font-accent uppercase tracking-widest font-extrabold rounded-sm">
                         Custom
                       </span>
                     )}
@@ -137,9 +137,9 @@ export default function CollectionPage() {
                   {/* Wishlist Heart */}
                   <button 
                     onClick={() => toggleItem(user?.id || 'guest', p.id)}
-                    className="absolute top-3 right-3 z-20 p-2 rounded-full bg-[#0A0A0A]/60 border border-[#C9A84C]/10 hover:border-[#C9A84C] text-[#F5F0E8]/70 hover:text-red-400 transition-all cursor-pointer"
+                    className="absolute top-2 right-2 sm:top-3 sm:right-3 z-20 p-1.5 sm:p-2 rounded-full bg-[#0A0A0A]/60 border border-[#C9A84C]/10 hover:border-[#C9A84C] text-[#F5F0E8]/70 hover:text-red-400 transition-all cursor-pointer"
                   >
-                    <Heart size={13} fill={inWishlist ? '#ef4444' : 'none'} className={inWishlist ? 'text-red-500' : ''} />
+                    <Heart size={11} fill={inWishlist ? '#ef4444' : 'none'} className={inWishlist ? 'text-red-500 w-2.5 h-2.5 sm:w-[13px] sm:h-[13px]' : 'w-2.5 h-2.5 sm:w-[13px] sm:h-[13px]'} />
                   </button>
 
                   {/* Image wrapper */}
@@ -150,32 +150,32 @@ export default function CollectionPage() {
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                     />
                     <div className="absolute inset-0 bg-[#0A0A0A]/0 group-hover:bg-[#0A0A0A]/70 transition-all duration-300 flex items-center justify-center">
-                      <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4 py-2 border border-[#C9A84C] bg-[#0A0A0A] text-[#C9A84C] font-accent text-[9px] uppercase tracking-widest font-bold">
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3 py-1.5 border border-[#C9A84C] bg-[#0A0A0A] text-[#C9A84C] font-accent text-[8px] sm:text-[9px] uppercase tracking-widest font-bold">
                         Quick View
                       </span>
                     </div>
                   </NextLink>
 
                   {/* Info details */}
-                  <div className="p-4 flex flex-col flex-grow gap-2 border-t border-[#C9A84C]/10">
-                    <h3 className="font-display text-[15px] text-[#F5F0E8] line-clamp-1 group-hover:text-[#C9A84C] transition-colors">
+                  <div className="p-3 sm:p-4 flex flex-col flex-grow gap-1 sm:gap-2 border-t border-[#C9A84C]/10">
+                    <h3 className="font-display text-xs sm:text-[15px] text-[#F5F0E8] line-clamp-1 group-hover:text-[#C9A84C] transition-colors font-bold">
                       {p.name}
                     </h3>
                     
                     {/* Rating */}
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5 text-[7px] sm:text-[10px] text-[#C9A84C]">
                       {Array.from({ length: 5 }).map((_, starIdx) => (
-                        <span key={starIdx} className="text-[#C9A84C] text-[10px]">★</span>
+                        <span key={starIdx}>★</span>
                       ))}
-                      <span className="text-[#9A8F7E] text-[9px] ml-1">({p.review_count})</span>
+                      <span className="text-[#9A8F7E] text-[6px] sm:text-[9px] ml-1">({p.review_count})</span>
                     </div>
 
-                    <div className="flex items-center justify-between mt-auto pt-2 border-t border-[#C9A84C]/5">
-                      <span className="font-body text-[#C9A84C] font-bold text-sm">
+                    <div className="flex items-center justify-between mt-auto pt-1.5 sm:pt-2 border-t border-[#C9A84C]/5">
+                      <span className="font-body text-[#C9A84C] font-bold text-xs sm:text-sm">
                         ₹{p.price.toLocaleString()}
                       </span>
                       {p.original_price && (
-                        <span className="font-body text-[#9A8F7E]/50 line-through text-xs">
+                        <span className="font-body text-[#9A8F7E]/50 line-through text-[9px] sm:text-xs">
                           ₹{p.original_price.toLocaleString()}
                         </span>
                       )}
@@ -183,7 +183,7 @@ export default function CollectionPage() {
                     
                     <button 
                       onClick={() => addItem(user?.id || 'guest', p.id, 1)}
-                      className="w-full bg-[#111111] border border-[#C9A84C]/30 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0A0A0A] py-2 mt-2 text-[9px] font-accent uppercase tracking-widest font-bold transition-all duration-300 cursor-pointer"
+                      className="w-full bg-[#111111] border border-[#C9A84C]/30 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-[#0A0A0A] py-1.5 sm:py-2 mt-2 text-[8px] sm:text-[9px] font-accent uppercase tracking-widest font-bold transition-all duration-300 cursor-pointer"
                     >
                       Add To Cart
                     </button>
