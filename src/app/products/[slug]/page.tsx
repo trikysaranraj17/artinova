@@ -190,7 +190,7 @@ export default function ProductDetailPage() {
   const saveAmt = product.original_price ? product.original_price - product.price : 0;
 
   return (
-    <div className="min-h-screen pt-8 md:pt-16 pb-24 px-6 bg-[#0A0A0A] text-[#F5F0E8] font-body relative">
+    <div className="min-h-screen pt-8 md:pt-16 pb-24 px-4 sm:px-6 bg-[#0A0A0A] text-[#F5F0E8] font-body relative">
       <div className="max-w-7xl mx-auto">
         
         {/* Back Link */}

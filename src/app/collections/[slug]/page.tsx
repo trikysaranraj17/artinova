@@ -103,7 +103,7 @@ export default function CollectionPage() {
       </section>
 
       {/* Main Grid Content */}
-      <section className="max-w-7xl mx-auto px-6 mt-16">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 mt-16">
         
         {products.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-20 gap-4">

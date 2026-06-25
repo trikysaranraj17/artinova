@@ -432,6 +432,12 @@ input:focus, textarea:focus, select:focus {
   padding-left: 24px;
   padding-right: 24px;
 }
+@media (max-width: 767px) {
+  .sec-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
 
 /* Section heading alignment */
 .sec-header {
